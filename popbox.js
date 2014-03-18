@@ -6,9 +6,8 @@
 			transition:false,
 			width:0,
 			height:0,
-			html:false,
-			contentid:false,
-			closeText:'X',
+			content:'',
+			close:'X',
 			onShow:false,
             onClose:false,
             onStart:false,
@@ -20,7 +19,44 @@
 		popboxStart(this,settings);
 	};
 	
-	function centerInClient(othis,a){var b={forceAbsolute:false,container:window,completeHandler:null,animate:true};$.extend(b,a);return othis.each(function(a){var c=$(othis);var d=$(b.container);var e=b.container==window;if(b.forceAbsolute){if(e)c.remove().appendTo("body");else c.remove().appendTo(d.get(0))}c.css("position","absolute");var f=e?2:1.8;var g=(e?d.width():d.outerWidth(false))/2-c.outerWidth(false)/2;var h=(e?d.height():d.outerHeight(false))/f-c.outerHeight(false)/2;if(b.animate===true){c.stop(true,true).animate({"left":g+d.scrollLeft(),"top":h+d.scrollTop()},500);}else{c.stop(true,true).css({"left":g+d.scrollLeft(),"top":h+d.scrollTop()});}if(b.completeHandler)b.completeHandler(othis)})};
+	function centerInClient(othis,a){
+		var b={
+            forceAbsolute:false,
+            container:window,
+            completeHandler:null,
+            animate:true
+        };
+        $.extend(b,a);
+        return othis.each(function(a){
+            var c=$(othis);
+            var d=$(b.container);
+            var e=b.container==window;
+            if (b.forceAbsolute)
+            {
+                if(e)c.remove().appendTo("body");
+                else c.remove().appendTo(d.get(0))
+            }
+            c.css("position","absolute");
+            var f=e?2:1.8;
+            var g=(e?d.width():d.outerWidth(false))/2-c.outerWidth(false)/2;
+            var h=(e?d.height():d.outerHeight(false))/f-c.outerHeight(false)/2;
+            if (b.animate===true)
+            {
+                c.stop(true,true).animate({
+                    "left":g+d.scrollLeft(),
+                    "top":h+d.scrollTop()
+                },500);
+            }
+            else
+            {
+                c.stop(true,true).css({
+                    "left":g+d.scrollLeft(),
+                    "top":h+d.scrollTop()
+                });
+            }
+            if (b.completeHandler) b.completeHandler(othis);
+        });
+	}
 	
 	function outerHTML(object) {
 		return $('<div />').append($(object).eq(0).clone()).html();
@@ -37,8 +73,8 @@
 		var setHeight = '';
 		var setStyle = '';
 		
-		var closeText = 'X';
-		var htmlcontent = '';
+		var close = 'X';
+		var content = '';
 
 		$(linkobject).click(function(e){
 
@@ -51,21 +87,21 @@
 			setHeight = (typeof(settings.height) === "number" && settings.height > 0) ? 'height:'+settings.height+'px;' : '';
 			setStyle = (setWidth != '' || setHeight != '') ? setWidth+' '+setHeight : '';
 			
-			closeText = (typeof(settings.closeText) === "string") ? settings.closeText : closeText;
-			var wrapfirst = '<div class="popbox-cast" style="display:none;height:100%; width: 100%; position:fixed; left: 0; top:0; background-color: rgba(0,0,0,0.4); z-index: 9990;"></div><div class="popbox-popup" style="position:absolute; z-index:9991; visibility:hidden;'+setStyle+'"><a class="popbox-close">'+closeText+'</a>';
+			close = (typeof(settings.close) === "string") ? settings.close : close;
+			var wrapfirst = '<div class="popbox-cast" style="display:none;height:100%; width: 100%; position:fixed; left: 0; top:0; background-color: rgba(0,0,0,0.4); z-index: 9990;"></div><div class="popbox-popup" style="position:absolute; z-index:9991; visibility:hidden;'+setStyle+'"><a class="popbox-close">'+close+'</a>';
 			var wraplast = '</div>';
-			
-			htmlcontent = (settings.html != null && settings.html != false && settings.html != '' && typeof(settings.html) === "string") ? settings.html : htmlcontent;
+
+            content = (settings.content != null && settings.content != false && settings.content != '' && typeof(settings.content) === "string") ? settings.content : content;
 			
 			var grabobject = false;
-			if (settings.contentid != false && typeof(settings.contentid) === "string" && htmlcontent === '')
+			if (settings.contentid != false && typeof(settings.contentid) === "string" && content === '')
 			{
 				grabobject = $('#'+settings.contentid);
-				htmlcontent = (grabobject.length > 0) ? outerHTML(grabobject) : htmlcontent;
+                content = (grabobject.length > 0) ? outerHTML(grabobject) : content;
 				grabobject.remove();
 			}
 			
-			$("body").append(wrapfirst+htmlcontent+wraplast);
+			$("body").append(wrapfirst+content+wraplast);
 			var popup = $(".popbox-popup");
 			var popcast = $(".popbox-cast");
             var closing = false;
