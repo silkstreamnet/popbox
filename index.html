@@ -22,22 +22,10 @@
 <script type="text/javascript" src="popbox.js"></script>
 <script type="text/javascript">
     $(function(){
-        /*$('.popbox').PopBox({
-							content:'<h1>TEXT!!!</h1>',
-							width:300,
-							height:200,
-							closeText:'X'
-		});*/
-		$('.popbox').PopBox({
-							content:$('#popinfo').html(),
-							width:300,
-							height:200,
-							closeText:'X',
-							onShow:function(e){
-								/*Do Something*/
-                                e.closeText = 'iXi';
-							}
-		});
+        var _popbox = new PopBox();
+        _popbox.open();
+        setTimeout(function(){_popbox.close();},4000);
+        console.log(_popbox);
     });
 
 </script>

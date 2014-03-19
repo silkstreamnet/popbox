@@ -1,26 +1,11 @@
 (function($){
 
-	$.fn.PopBox = function(options)
-	{
-		var defaults = {
-			transition:false,
-			width:0,
-			height:0,
-			content:'',
-			close:'X',
-			onShow:false,
-            onClose:false,
-            onStart:false,
-            onClick:false
-		};
-		var settings = $.extend({},defaults,options);
-        settings.popbox = false;
+    var popboxes = [];
 
-		popboxStart(this,settings);
-	};
-	
-	function centerInClient(othis,a){
-		var b={
+    function adjustToClient(othis,a)
+    {
+        //set container to overflow: scroll-y if popup has higher height than available.
+        var b={
             forceAbsolute:false,
             container:window,
             completeHandler:null,
@@ -56,131 +41,189 @@
             }
             if (b.completeHandler) b.completeHandler(othis);
         });
-	}
-	
-	function outerHTML(object) {
-		return $('<div />').append($(object).eq(0).clone()).html();
-	}
-	
-	function isNumber(o)
-	{
-		return ! isNaN (o-0) && o != null && o != "";
-	}
-	
-	function popboxStart(linkobject,settings)
-	{
-		var setWidth = '';
-		var setHeight = '';
-		var setStyle = '';
-		
-		var close = 'X';
-		var content = '';
+    }
 
-		$(linkobject).click(function(e){
+    function isNumber(o,required)
+    {
+        required = required || false;
+        return ! isNaN (o-0) && o != null && o != "" && (!required || o > 0);
+    }
 
-            if (typeof(settings.onClick) === "function")
+    function isString(o,required)
+    {
+        required = required || false;
+        return typeof(o) === "string" && o != null && (!required || o != '');
+    }
+
+	var PopBox = function(options)
+	{
+		this.settings = $.extend({},this.defaultSettings,options);
+        this.popbox = false;
+        this.container = false;
+        this.shadow = false;
+        this.properties = {
+            animating: false,
+            isopen: false
+        };
+	};
+
+    PopBox.prototype.defaultSettings = {
+        transition:false,
+        width:0,
+        height:0,
+        content:'',
+        close:'X',
+        onOpen:false,
+        onClose:false,
+        beforeOpen:false,
+        beforeClose:false,
+        fadeInSpeed: 400,
+        fadeOutSpeed: 400
+    };
+
+    function popboxAnimateComplete(popbox,method)
+    {
+        if (popbox.properties.animating)
+        {
+            popbox.properties.animating = false;
+
+            switch (method)
             {
-                settings.onClick(settings);
+                case 'close':
+                    if (popbox.properties.isopen)
+                    {
+                        popbox.popup.remove();
+                        popbox.properties.isopen = false;
+                        popbox.container = false;
+                        popbox.popup = false;
+                        popbox.shadow = false;
+                    }
+                    break;
+                case 'open':
+                    if (!popbox.properties.isopen)
+                    {
+                        popbox.properties.isopen = true;
+                    }
+                    break;
+            }
+        }
+    }
+
+    PopBox.prototype.close = function()
+    {
+        var _class = this;
+        if (!_class.properties.animating && _class.properties.isopen)
+        {
+            if (typeof(_class.settings.beforeClose) === "function")
+            {
+                _class.settings.beforeClose();
             }
 
-			setWidth = (typeof(settings.width) === "number" && settings.width > 0) ? 'width:'+settings.width+'px;' : '';
-			setHeight = (typeof(settings.height) === "number" && settings.height > 0) ? 'height:'+settings.height+'px;' : '';
-			setStyle = (setWidth != '' || setHeight != '') ? setWidth+' '+setHeight : '';
-			
-			close = (typeof(settings.close) === "string") ? settings.close : close;
-			var wrapfirst = '<div class="popbox-cast" style="display:none;height:100%; width: 100%; position:fixed; left: 0; top:0; background-color: rgba(0,0,0,0.4); z-index: 9990;"></div><div class="popbox-popup" style="position:absolute; z-index:9991; visibility:hidden;'+setStyle+'"><a class="popbox-close">'+close+'</a>';
-			var wraplast = '</div>';
+            _class.properties.animating = true;
 
-            content = (settings.content != null && settings.content != false && settings.content != '' && typeof(settings.content) === "string") ? settings.content : content;
-			
-			var grabobject = false;
-			if (settings.contentid != false && typeof(settings.contentid) === "string" && content === '')
-			{
-				grabobject = $('#'+settings.contentid);
-                content = (grabobject.length > 0) ? outerHTML(grabobject) : content;
-				grabobject.remove();
-			}
-			
-			$("body").append(wrapfirst+content+wraplast);
-			var popup = $(".popbox-popup");
-			var popcast = $(".popbox-cast");
-            var closing = false;
+            _class.popup.fadeOut(_class.settings.fadeOutSpeed,function(){
+                popboxAnimateComplete(_class,'close');
+            });
+            _class.container.fadeOut(_class.settings.fadeOutSpeed,function(){
+                popboxAnimateComplete(_class,'close');
+            });
 
-            settings.close = function()
+            $('body').css('overflow','');
+
+            if (typeof(_class.settings.onClose) === "function")
             {
-                if (!closing)
-                {
-                    if (typeof(settings.onClose) === "function")
-                    {
-                        settings.onClose(settings);
-                    }
-                    settings.popbox = false;
-                    popup.fadeOut(500,function(){$(this).remove()});
-                    popcast.fadeOut(500,function(){$(this).remove()});
-                    closing = true;
-                }
-            };
-            settings.popbox = popup;
+                _class.settings.onClose();
+            }
+        }
+    };
 
-            if (typeof(settings.onStart) === "function")
+    PopBox.prototype.open = function()
+    {
+        var _class = this;
+        if (!_class.properties.animating && !_class.properties.isopen)
+        {
+            if (typeof(_class.settings.beforeOpen) === "function")
             {
-                settings.onStart(settings);
+                _class.settings.beforeOpen();
             }
 
-            popcast.fadeIn(300);
+            var setWidth = (isNumber(this.settings.width,true)) ? this.settings.width+'px' : '';
+            var setHeight = (isNumber(this.settings.height,true)) ? this.settings.height+'px' : '';
+            var close = (isString(this.settings.close,true)) ? this.settings.close : this.defaultSettings.close;
+            var content = (isString(this.settings.content,true)) ? this.settings.content : '';
 
-			if (settings.contentid != false)
-			{
-				popup.find('#'+settings.contentid);
-			}
-			
-			centerInClient(popup,{animate:false});
-            popup.css({'visibility':'','display':'none'}).fadeIn(300);
+            $("body").css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
 
-			function centerPopup()
-			{
-				centerInClient(popup);
-			}
-			
-			var resi = false;
-			$(window).resize(function(){
-				if (resi == false)
-				{
-					resi = true;
-					setTimeout(function(){centerPopup(); resi = false;},500);
-				}
-			});
-			var scro = false;
-			$(window).scroll(function(){
-				if (scro == false)
-				{
-					scro = true;
-					setTimeout(function(){centerPopup(); scro = false;},500);
-				}
-			});
+            this.container = $(".popbox-container");
+            this.popup = this.container.find(".popbox-popup");
+            this.shadow = this.container.find(".popbox-shadow");
 
+            this.container.css({
+                'display':'none',
+                'height':'100%',
+                'width':'100%',
+                'position':'fixed',
+                'left':'0px',
+                'top':'0px',
+                'z-index':'990'
+            });
+            this.popup.css({
+                'display':'block',
+                'visibility':'hidden',
+                'position':'absolute',
+                'top':'0px',
+                'left':'0px',
+                'height':setHeight,
+                'width':setWidth,
+                'z-index':'992'
+            });
+            this.shadow.css({
+                'display':'block',
+                'position':'absolute',
+                'left':'0px',
+                'top':'0px',
+                'width':'100%',
+                'height':'100%',
+                'z-index':'991',
+                'background-color': 'rgba(0,0,0,0.4)'
+            });
 
-			$(".popbox-cast,.popbox-close").click(function(e){
-                if (!closing)
+            _class.properties.animating = true;
+
+            adjustToClient(_class.popup,{animate:false,container:_class.container});
+
+            _class.popup.css({'visibility':'visible','display':'none'}).fadeIn(_class.settings.fadeInSpeed,function(){
+                popboxAnimateComplete(_class,'open');
+            });
+            _class.container.fadeIn(_class.settings.fadeInSpeed, function(){
+                popboxAnimateComplete(_class,'open');
+            });
+
+            var resi = false;
+            $(window).resize(function(){
+                if (resi == false)
                 {
-                    if (typeof(settings.onClose) === "function")
-                    {
-                        settings.onClose(settings);
-                    }
-                    settings.popbox = false;
-                    popup.fadeOut(500,function(){$(this).remove()});
-                    popcast.fadeOut(500,function(){$(this).remove()});
-                    closing = true;
+                    resi = true;
+                    setTimeout(function(){
+                        adjustToClient(_class.popup, {container:_class.container});
+                        resi = false;
+                    },500);
                 }
-				e.preventDefault();
-			});
-			
-			if (typeof(settings.onShow) === "function")
-			{
-				settings.onShow(settings);
-			}
-			e.preventDefault();
-		});
-	}
+            });
+
+            $(".popbox-shadow,.popbox-close").click(function(e){
+                _class.close();
+                e.preventDefault();
+            });
+
+            if (typeof(_class.settings.onOpen) === "function")
+            {
+                _class.settings.onOpen();
+            }
+        }
+    };
+
+
+    window.PopBox = PopBox;
 
 })(jQuery);
