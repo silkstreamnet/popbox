@@ -9,7 +9,8 @@
             animate:true,
             width:'auto',
             height:'auto',
-            maxwidth:'none'
+            maxwidth:'none',
+            maxheight:'none'
         };
 
         $.extend(b,a);
@@ -180,7 +181,7 @@
                 case 'close':
                     if (popbox.properties.isopen)
                     {
-                        popbox.popup.remove();
+                        popbox.container.remove();
                         popbox.properties.isopen = false;
                         popbox.container = false;
                         popbox.popup = false;
