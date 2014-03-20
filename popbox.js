@@ -1,45 +1,129 @@
 (function($){
 
-    var popboxes = [];
-
-    function adjustToClient(othis,a)
+    function adjustToClient(obj,a)
     {
-        //set container to overflow: scroll-y if popup has higher height than available.
         var b={
             forceAbsolute:false,
             container:window,
             completeHandler:null,
-            animate:true
+            animate:true,
+            width:'auto',
+            height:'auto',
+            maxwidth:'none'
         };
+
         $.extend(b,a);
-        return othis.each(function(a){
-            var c=$(othis);
+
+        obj.each(function(a){
+            var c=$(this);
             var d=$(b.container);
-            var e=b.container==window;
+            var e=b.container==window; //is window: true or false
+
             if (b.forceAbsolute)
             {
-                if(e)c.remove().appendTo("body");
+                if (e) c.remove().appendTo("body");
                 else c.remove().appendTo(d.get(0))
             }
-            c.css("position","absolute");
-            var f=e?2:1.8;
-            var g=(e?d.width():d.outerWidth(false))/2-c.outerWidth(false)/2;
-            var h=(e?d.height():d.outerHeight(false))/f-c.outerHeight(false)/2;
+
+            //set c and d to hidden and block
+            var c_orig = {
+                position: c.css('position'),
+                visibility: c.css('visibility'),
+                display: c.css('display')
+            };
+
+            var d_orig = {
+                visibility: d.css('visibility'),
+                display: d.css('display')
+            };
+
+            var c_temp = {
+                position: 'absolute',
+                visibility: 'hidden',
+                display: 'block'
+            };
+
+            var d_temp = {
+                visibility: 'hidden',
+                display: 'block'
+            };
+
+            c.css(c_temp);
+            if (!e) d.css(d_temp);
+
+            //if width is auto, find the 80% max of the container and match to fit.
+            var dMaxWidth = (e ? d.width() : d.outerWidth(false)) * 0.8;
+            var cWidthPadded = c.outerWidth(false) - c.width();
+            var newWidth = dMaxWidth-cWidthPadded;
+            if (isNumber(b.width))
+            {
+                c.width(b.width);
+            }
+            else
+            {
+                if (isNumber(b.maxwidth) && newWidth > b.maxwidth)
+                {
+                    c.width(b.maxwidth);
+                }
+                else
+                {
+                    c.width(newWidth);
+                }
+            }
+
+            //if height is auto, height is automatic, also check if height is greater than container height
+            if (isNumber(b.height))
+            {
+                c.height(b.height);
+            }
+            var dPush = (e ? d.height() : d.outerHeight(false)) * 0.1;
+            var dMaxHeight = (e ? d.height() : d.outerHeight(false)) * 0.8;
+            var cHeight = c.outerHeight(false);
+            var setY = false;
+            if (cHeight > dMaxHeight)
+            {
+                setY = dPush;
+                d.css('overflow','auto');
+                c.css('margin-bottom',dPush+'px');
+            }
+            else
+            {
+                d.css('overflow','');
+                c.css('margin-bottom','');
+            }
+
+            var g = ((e ? d.width() : d.outerWidth(false)) - c.outerWidth(false)) / 2;
+            var h = ((e ? d.height() : d.outerHeight(false)) - c.outerHeight(false)) / 2;
+
+            if (setY !== false)
+            {
+                h = setY;
+            }
+
+            if (e)
+            {
+                g += d.scrollLeft();
+                h += d.scrollTop();
+            }
+
+            c.css(c_orig);
+            if (!e) d.css(d_orig);
+
             if (b.animate===true)
             {
                 c.stop(true,true).animate({
-                    "left":g+d.scrollLeft(),
-                    "top":h+d.scrollTop()
+                    "left":g,
+                    "top":h
                 },500);
             }
             else
             {
                 c.stop(true,true).css({
-                    "left":g+d.scrollLeft(),
-                    "top":h+d.scrollTop()
+                    "left":g,
+                    "top":h
                 });
             }
-            if (b.completeHandler) b.completeHandler(othis);
+            if (b.completeHandler) b.completeHandler(obj);
         });
     }
 
@@ -63,14 +147,17 @@
         this.shadow = false;
         this.properties = {
             animating: false,
-            isopen: false
+            isopen: false,
+            resizepause: false
         };
 	};
 
     PopBox.prototype.defaultSettings = {
         transition:false,
-        width:0,
-        height:0,
+        width:'auto',
+        height:'auto',
+        maxwidth:'none',
+        maxheight:'none',
         content:'',
         close:'X',
         onOpen:false,
@@ -78,7 +165,8 @@
         beforeOpen:false,
         beforeClose:false,
         fadeInSpeed: 400,
-        fadeOutSpeed: 400
+        fadeOutSpeed: 400,
+        updatePositionDelay: 200
     };
 
     function popboxAnimateComplete(popbox,method)
@@ -109,6 +197,38 @@
         }
     }
 
+    PopBox.prototype.adjust = function(animate)
+    {
+        animate = animate || false;
+        var _class = this;
+        if (_class.properties.resizepause == false)
+        {
+            _class.properties.resizepause = true;
+            setTimeout(function(){
+                adjustToClient(_class.popup, {
+                    animate: animate,
+                    container:_class.container,
+                    width:_class.settings.width,
+                    height:_class.settings.height,
+                    maxwidth:_class.settings.maxwidth,
+                    maxheight:_class.settings.maxheight
+                });
+
+                _class.shadow.css({
+                    'width':'100%',
+                    'position':'absolute'
+                });
+                var shadowwidth = _class.shadow.width();
+                _class.shadow.css({
+                    'width':shadowwidth+'px',
+                    'position':'fixed'
+                });
+
+                _class.properties.resizepause = false;
+            },_class.properties.updatePositionDelay);
+        }
+    };
+
     PopBox.prototype.close = function()
     {
         var _class = this;
@@ -121,14 +241,12 @@
 
             _class.properties.animating = true;
 
-            _class.popup.fadeOut(_class.settings.fadeOutSpeed,function(){
-                popboxAnimateComplete(_class,'close');
-            });
             _class.container.fadeOut(_class.settings.fadeOutSpeed,function(){
                 popboxAnimateComplete(_class,'close');
             });
 
             $('body').css('overflow','');
+            $(window).off("resize.popbox.adjust");
 
             if (typeof(_class.settings.onClose) === "function")
             {
@@ -139,6 +257,7 @@
 
     PopBox.prototype.open = function()
     {
+        //need to add a preload all images check when it is opened. add a listener if there are images to preload, when complete apply "adjust" function.
         var _class = this;
         if (!_class.properties.animating && !_class.properties.isopen)
         {
@@ -147,18 +266,18 @@
                 _class.settings.beforeOpen();
             }
 
-            var setWidth = (isNumber(this.settings.width,true)) ? this.settings.width+'px' : '';
-            var setHeight = (isNumber(this.settings.height,true)) ? this.settings.height+'px' : '';
-            var close = (isString(this.settings.close,true)) ? this.settings.close : this.defaultSettings.close;
-            var content = (isString(this.settings.content,true)) ? this.settings.content : '';
+            var setWidth = (isNumber(this.settings.width,true)) ? _class.settings.width+'px' : '';
+            var setHeight = (isNumber(this.settings.height,true)) ? _class.settings.height+'px' : '';
+            var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
+            var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
 
             $("body").css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
 
-            this.container = $(".popbox-container");
-            this.popup = this.container.find(".popbox-popup");
-            this.shadow = this.container.find(".popbox-shadow");
+            _class.container = $(".popbox-container");
+            _class.popup = _class.container.find(".popbox-popup");
+            _class.shadow = _class.container.find(".popbox-shadow");
 
-            this.container.css({
+            _class.container.css({
                 'display':'none',
                 'height':'100%',
                 'width':'100%',
@@ -167,9 +286,9 @@
                 'top':'0px',
                 'z-index':'990'
             });
-            this.popup.css({
+            _class.popup.css({
                 'display':'block',
-                'visibility':'hidden',
+                'visibility':'visible',
                 'position':'absolute',
                 'top':'0px',
                 'left':'0px',
@@ -177,9 +296,9 @@
                 'width':setWidth,
                 'z-index':'992'
             });
-            this.shadow.css({
+            _class.shadow.css({
                 'display':'block',
-                'position':'absolute',
+                'position':'fixed',
                 'left':'0px',
                 'top':'0px',
                 'width':'100%',
@@ -189,27 +308,13 @@
             });
 
             _class.properties.animating = true;
+            _class.adjust();
 
-            adjustToClient(_class.popup,{animate:false,container:_class.container});
-
-            _class.popup.css({'visibility':'visible','display':'none'}).fadeIn(_class.settings.fadeInSpeed,function(){
-                popboxAnimateComplete(_class,'open');
-            });
             _class.container.fadeIn(_class.settings.fadeInSpeed, function(){
                 popboxAnimateComplete(_class,'open');
             });
 
-            var resi = false;
-            $(window).resize(function(){
-                if (resi == false)
-                {
-                    resi = true;
-                    setTimeout(function(){
-                        adjustToClient(_class.popup, {container:_class.container});
-                        resi = false;
-                    },500);
-                }
-            });
+            $(window).on("resize.popbox.adjust",function(){_class.adjust(true);});
 
             $(".popbox-shadow,.popbox-close").click(function(e){
                 _class.close();
