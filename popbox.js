@@ -1,5 +1,84 @@
 (function($){
 
+    function param(parameter,_default)
+    {
+        return (typeof parameter !== 'undefined' ? parameter : _default);
+    }
+
+    function isNumber(o,required)
+    {
+        required = param(required,false);
+        return ! isNaN (o-0) && o != null && o != "" && (!required || o > 0);
+    }
+
+    function isString(o,required)
+    {
+        required = param(required,false);
+        return typeof(o) === "string" && o != null && (!required || o != '');
+    }
+
+    
+
+	var PopBox = function(settings)
+	{
+        settings = param(settings,{});
+
+		this.settings = $.extend({},this.defaultSettings,settings);
+        this.popbox = false;
+        this.container = false;
+        this.shadow = false;
+        this.properties = {
+            animating: false,
+            isopen: false,
+            resizepause: false
+        };
+	};
+
+    PopBox.prototype.defaultSettings = {
+        transition:false,
+        width:'auto',
+        height:'auto',
+        maxwidth:'none',
+        maxheight:'none',
+        content:'',
+        close:'X',
+        onOpen:false,
+        onClose:false,
+        beforeOpen:false,
+        beforeClose:false,
+        fadeInSpeed: 400,
+        fadeOutSpeed: 400,
+        updatePositionDelay: 200
+    };
+
+    function popboxAnimateComplete(popbox,method)
+    {
+        if (popbox.properties.animating)
+        {
+            popbox.properties.animating = false;
+
+            switch (method)
+            {
+                case 'close':
+                    if (popbox.properties.isopen)
+                    {
+                        popbox.container.remove();
+                        popbox.properties.isopen = false;
+                        popbox.container = false;
+                        popbox.popup = false;
+                        popbox.shadow = false;
+                    }
+                    break;
+                case 'open':
+                    if (!popbox.properties.isopen)
+                    {
+                        popbox.properties.isopen = true;
+                    }
+                    break;
+            }
+        }
+    }
+
     function adjustToClient(obj,a)
     {
         var b={
@@ -10,7 +89,9 @@
             width:'auto',
             height:'auto',
             maxwidth:'none',
-            maxheight:'none'
+            maxheight:'none',
+            push_obj: false,
+            shadow: false
         };
 
         $.extend(b,a);
@@ -77,20 +158,35 @@
             {
                 c.height(b.height);
             }
-            var dPush = (e ? d.height() : d.outerHeight(false)) * 0.1;
-            var dMaxHeight = (e ? d.height() : d.outerHeight(false)) * 0.8;
+            var dPush = (e ? d.height() : d.outerHeight(false)) * 0.05;
+            var dFullMaxHeight = e ? d.height() : d.outerHeight(false);
+            var dMaxHeight = dFullMaxHeight * 0.9; //account for any possible padding, e.g. x button.
             var cHeight = c.outerHeight(false);
             var setY = false;
             if (cHeight > dMaxHeight)
             {
                 setY = dPush;
                 d.css('overflow','auto');
-                c.css('margin-bottom',dPush+'px');
+                b.push_obj.css({
+                    'top':(dPush+cHeight)+'px',
+                    'height':dPush+'px',
+                    'width':'1px'
+                });
+                b.shadow.css({
+                    'height':((dPush*2)+cHeight)+'px'
+                });
             }
             else
             {
                 d.css('overflow','');
-                c.css('margin-bottom','');
+                b.push_obj.css({
+                    'top':'0px',
+                    'height':'0px',
+                    'width':'0px'
+                });
+                b.shadow.css({
+                    'height':'100%'
+                });
             }
 
             var g = ((e ? d.width() : d.outerWidth(false)) - c.outerWidth(false)) / 2;
@@ -128,79 +224,9 @@
         });
     }
 
-    function isNumber(o,required)
-    {
-        required = required || false;
-        return ! isNaN (o-0) && o != null && o != "" && (!required || o > 0);
-    }
-
-    function isString(o,required)
-    {
-        required = required || false;
-        return typeof(o) === "string" && o != null && (!required || o != '');
-    }
-
-	var PopBox = function(options)
-	{
-		this.settings = $.extend({},this.defaultSettings,options);
-        this.popbox = false;
-        this.container = false;
-        this.shadow = false;
-        this.properties = {
-            animating: false,
-            isopen: false,
-            resizepause: false
-        };
-	};
-
-    PopBox.prototype.defaultSettings = {
-        transition:false,
-        width:'auto',
-        height:'auto',
-        maxwidth:'none',
-        maxheight:'none',
-        content:'',
-        close:'X',
-        onOpen:false,
-        onClose:false,
-        beforeOpen:false,
-        beforeClose:false,
-        fadeInSpeed: 400,
-        fadeOutSpeed: 400,
-        updatePositionDelay: 200
-    };
-
-    function popboxAnimateComplete(popbox,method)
-    {
-        if (popbox.properties.animating)
-        {
-            popbox.properties.animating = false;
-
-            switch (method)
-            {
-                case 'close':
-                    if (popbox.properties.isopen)
-                    {
-                        popbox.container.remove();
-                        popbox.properties.isopen = false;
-                        popbox.container = false;
-                        popbox.popup = false;
-                        popbox.shadow = false;
-                    }
-                    break;
-                case 'open':
-                    if (!popbox.properties.isopen)
-                    {
-                        popbox.properties.isopen = true;
-                    }
-                    break;
-            }
-        }
-    }
-
     PopBox.prototype.adjust = function(animate)
     {
-        animate = animate || false;
+        animate = param(animate,false);
         var _class = this;
         if (_class.properties.resizepause == false)
         {
@@ -212,17 +238,9 @@
                     width:_class.settings.width,
                     height:_class.settings.height,
                     maxwidth:_class.settings.maxwidth,
-                    maxheight:_class.settings.maxheight
-                });
-
-                _class.shadow.css({
-                    'width':'100%',
-                    'position':'absolute'
-                });
-                var shadowwidth = _class.shadow.width();
-                _class.shadow.css({
-                    'width':shadowwidth+'px',
-                    'position':'fixed'
+                    maxheight:_class.settings.maxheight,
+                    push_obj:_class.bottom_push,
+                    shadow: _class.shadow
                 });
 
                 _class.properties.resizepause = false;
@@ -237,7 +255,7 @@
         {
             if (typeof(_class.settings.beforeClose) === "function")
             {
-                _class.settings.beforeClose();
+                _class.settings.beforeClose(_class);
             }
 
             _class.properties.animating = true;
@@ -251,7 +269,7 @@
 
             if (typeof(_class.settings.onClose) === "function")
             {
-                _class.settings.onClose();
+                _class.settings.onClose(_class);
             }
         }
     };
@@ -264,7 +282,7 @@
         {
             if (typeof(_class.settings.beforeOpen) === "function")
             {
-                _class.settings.beforeOpen();
+                _class.settings.beforeOpen(_class);
             }
 
             var setWidth = (isNumber(this.settings.width,true)) ? _class.settings.width+'px' : '';
@@ -272,11 +290,13 @@
             var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
             var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
 
-            $("body").css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
+            $("body").css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
             _class.shadow = _class.container.find(".popbox-shadow");
+            _class.bottom_push = _class.container.find(".popbox-bottom-push");
+            _class.close_button = _class.container.find(".popbox-close");
 
             _class.container.css({
                 'display':'none',
@@ -285,7 +305,17 @@
                 'position':'fixed',
                 'left':'0px',
                 'top':'0px',
-                'z-index':'990'
+                'z-index':'990',
+                'background-color': 'rgba(0,0,0,0.4)'
+            });
+            _class.bottom_push.css({
+                'display':'block',
+                'position':'absolute',
+                'left':'0px',
+                'top':'0px',
+                'height':'0px',
+                'width':'1px',
+                'z-index':'992'
             });
             _class.popup.css({
                 'display':'block',
@@ -295,17 +325,16 @@
                 'left':'0px',
                 'height':setHeight,
                 'width':setWidth,
-                'z-index':'992'
+                'z-index':'993'
             });
             _class.shadow.css({
                 'display':'block',
-                'position':'fixed',
+                'position':'absolute',
                 'left':'0px',
                 'top':'0px',
                 'width':'100%',
                 'height':'100%',
-                'z-index':'991',
-                'background-color': 'rgba(0,0,0,0.4)'
+                'z-index':'991'
             });
 
             _class.properties.animating = true;
@@ -317,15 +346,50 @@
 
             $(window).on("resize.popbox.adjust",function(){_class.adjust(true);});
 
-            $(".popbox-shadow,.popbox-close").click(function(e){
+            _class.shadow.click(function(e){
+                _class.close();
+                e.preventDefault();
+            });
+            _class.close_button.click(function(e){
                 _class.close();
                 e.preventDefault();
             });
 
             if (typeof(_class.settings.onOpen) === "function")
             {
-                _class.settings.onOpen();
+                _class.settings.onOpen(_class);
             }
+        }
+    };
+
+    PopBox.prototype.setSettings = function(settings,adjust)
+    {
+        var _class = this;
+
+        settings = param(settings,{});
+        adjust = param(adjust,true);
+        _class.settings = $.extend({},_class.settings,settings);
+        
+        if (_class.properties.isopen && adjust) 
+        {
+            var setWidth = (isNumber(this.settings.width,true)) ? _class.settings.width+'px' : '';
+            var setHeight = (isNumber(this.settings.height,true)) ? _class.settings.height+'px' : '';
+            var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
+            var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
+
+            _class.popup.html('<a class="popbox-close">'+close+'</a>'+content).css({
+                'height':setHeight,
+                'width':setWidth
+            });
+
+            _class.close_button = _class.popup.find('.popbox-close');
+
+            _class.close_button.click(function(e){
+                _class.close();
+                e.preventDefault();
+            });
+
+            _class.adjust(true);
         }
     };
 
