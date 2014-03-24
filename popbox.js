@@ -24,7 +24,6 @@
         settings = param(settings,{});
 
 		this.settings = $.extend({},this.defaultSettings,settings);
-        this.popbox = false;
         this.container = false;
         this.shadow = false;
         this.properties = {
@@ -60,20 +59,14 @@
             switch (method)
             {
                 case 'close':
-                    if (popbox.properties.isopen)
-                    {
-                        popbox.container.remove();
-                        popbox.properties.isopen = false;
-                        popbox.container = false;
-                        popbox.popup = false;
-                        popbox.shadow = false;
-                    }
+                    popbox.container.remove();
+                    popbox.properties.isopen = false;
+                    popbox.container = false;
+                    popbox.popup = false;
+                    popbox.shadow = false;
                     break;
                 case 'open':
-                    if (!popbox.properties.isopen)
-                    {
-                        popbox.properties.isopen = true;
-                    }
+                    popbox.properties.isopen = true;
                     break;
             }
         }
@@ -228,7 +221,7 @@
     {
         animate = param(animate,false);
         var _class = this;
-        if (_class.properties.resizepause == false)
+        if (!_class.properties.resizepause && (!animate || _class.properties.isopen))
         {
             _class.properties.resizepause = true;
             setTimeout(function(){
@@ -266,6 +259,8 @@
 
             $('body').css('overflow','');
             $(window).off("resize.popbox.adjust");
+
+            _class.properties.isopen = false;
 
             if (typeof(_class.settings.onClose) === "function")
             {
@@ -355,6 +350,8 @@
                 e.preventDefault();
             });
 
+            _class.properties.isopen = true;
+
             if (typeof(_class.settings.onOpen) === "function")
             {
                 _class.settings.onOpen(_class);
@@ -393,6 +390,15 @@
         }
     };
 
+    PopBox.prototype.isOpen = function()
+    {
+        return this.properties.isopen == true;
+    };
+
+    PopBox.prototype.isClose = function()
+    {
+        return this.properties.isopen == false;
+    };
 
     window.PopBox = PopBox;
 
