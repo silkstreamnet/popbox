@@ -217,6 +217,71 @@
         });
     }
 
+    function checkAllImagesReady(pb,adjust) {
+        pb = pb || false;
+        adjust = adjust || false;
+
+        var images_ready = true;
+
+        if (pb && pb.popup)
+        {
+            var images = pb.popup.find('img');
+
+            if (images.length > 0)
+            {
+                // Hook up each image individually
+                images.each(function(index, element) {
+                    if (!element.complete) 
+                    {
+                        images_ready = false;
+                    }
+                });
+            }
+        }
+
+        if (adjust && images_ready)
+        {
+            pb.adjust(true);
+        }
+
+        return images_ready;
+    }
+
+    function adjustOnImagesLoad(pb)
+    {
+        pb = pb || false;
+
+        if (pb && pb.popup)
+        {
+            var images = pb.popup.find('img');
+
+            if (images.length > 0)
+            {
+                var images_ready = 0;
+
+                // Hook up each image individually
+                images.each(function(index, element) {
+                    if (element.complete) {
+                        // Already loaded, fire the handler (asynchronously)
+                        images_ready++;
+                    }
+                    else 
+                    {
+                        // Hook up the handler
+                        $(element).load(function(){
+                            checkAllImagesReady(pb,true);
+                        });
+                    }
+                });
+            }
+
+            if (images.length == images_ready)
+            {
+                pb.adjust(true);
+            }
+        }
+    }
+
     PopBox.prototype.adjust = function(animate)
     {
         animate = param(animate,false);
@@ -238,6 +303,11 @@
 
                 _class.properties.resizepause = false;
             },_class.properties.updatePositionDelay);
+
+            if (checkAllImagesReady(_class))
+            {
+                adjustOnImagesLoad(_class);
+            }
         }
     };
 
