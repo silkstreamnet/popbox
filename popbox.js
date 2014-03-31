@@ -334,9 +334,12 @@
 
             _class.container.fadeOut(_class.settings.fadeOutSpeed,function(){
                 popboxAnimateComplete(_class,'close');
+                $('body').css({
+                    'overflow':'',
+                    'margin-right':''
+                });
             });
 
-            $('body').css('overflow','');
             $(window).off("resize.popbox.adjust");
 
             _class.properties.isopen = false;
@@ -366,7 +369,17 @@
             var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
             var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
 
-            $("body").css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
+            var _body = $("body");
+            var old_body_width = _body.width();
+
+            _body.css('overflow','hidden').append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
+
+            var new_body_width = _body.width();
+
+            if (new_body_width > old_body_width)
+            {
+                _body.css('margin-right',(new_body_width-old_body_width)+'px');
+            }
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
