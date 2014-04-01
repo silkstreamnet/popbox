@@ -38,9 +38,23 @@ _popbox has the following methods:
 	_popbox.adjust(animate={boolean});                            === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
+
+@@@@@@@@@@@@@
+Things to Add
+@@@@@@@@@@@@@
+
+- ability to only have the minimum functional css. (turn off display styling)
+
+
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-02 (stable) ===
+- made some tweaks to better support/stabilise functionality on old IE.
+
+=== v2-01 (stable) ===
+- width of the page will not change if the page has a scroll bar. (small visual tweak)
 
 === v2-00 (stable) ===
 - completely rewritten popbox as a class.

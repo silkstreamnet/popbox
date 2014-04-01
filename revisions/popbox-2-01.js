@@ -318,7 +318,7 @@
     PopBox.prototype.checkImages = function()
     {
         this.properties.loaded_content = -1;
-    };
+    }
 
     PopBox.prototype.close = function()
     {
@@ -364,23 +364,23 @@
 
             _class.properties.animating = true;
 
+            var setWidth = (isNumber(this.settings.width,true)) ? _class.settings.width+'px' : '';
+            var setHeight = (isNumber(this.settings.height,true)) ? _class.settings.height+'px' : '';
             var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
             var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
 
             var _body = $("body");
-
+            
             var old_body_width = _body.width();
             _body.css('overflow','hidden');
             var new_body_width = _body.width();
 
             if (new_body_width > old_body_width)
             {
-                var old_margin_right = parseInt(_body.css('margin-right'));
-                var new_margin_right = old_margin_right+(new_body_width-old_body_width);
-                _body.css('margin-right',new_margin_right+'px');
+                _body.css('margin-right',(new_body_width-old_body_width)+'px');
             }
 
-            _body.append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
+            _body.append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><div class="popbox-shadow"></div><div class="popbox-popup"><a class="popbox-close">'+close+'</a>'+content+'</div></div>');
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
@@ -413,6 +413,8 @@
                 'position':'absolute',
                 'top':'0px',
                 'left':'0px',
+                'height':setHeight,
+                'width':setWidth,
                 'z-index':'993'
             });
             _class.shadow.css({
@@ -422,11 +424,7 @@
                 'top':'0px',
                 'width':'100%',
                 'height':'100%',
-                'z-index':'991',
-                'background':'#fff',
-                'opacity':'0',
-                'filter':'alpha(opacity=0)',
-                'cursor':'default'
+                'z-index':'991'
             });
 
             _class.adjust();
@@ -458,39 +456,31 @@
     PopBox.prototype.setSettings = function(settings,adjust)
     {
         var _class = this;
-        var newcontent = false;
 
         settings = param(settings,{});
         adjust = param(adjust,true);
-
-        if (param(settings.content,false) !== false && settings.content != _class.settings.content)
-        {
-            //there is new content
-            newcontent = true;
-        }
-
         _class.settings = $.extend({},_class.settings,settings);
         
-        if (_class.properties.isopen) 
+        if (_class.properties.isopen && adjust) 
         {
-            if (newcontent)
-            {
-                var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
-                var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
+            var setWidth = (isNumber(this.settings.width,true)) ? _class.settings.width+'px' : '';
+            var setHeight = (isNumber(this.settings.height,true)) ? _class.settings.height+'px' : '';
+            var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
+            var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
 
-                _class.popup.html('<a class="popbox-close">'+close+'</a>'+content);
-                _class.close_button = _class.popup.find('.popbox-close');
+            _class.popup.html('<a class="popbox-close">'+close+'</a>'+content).css({
+                'height':setHeight,
+                'width':setWidth
+            });
 
-                _class.close_button.click(function(e){
-                    _class.close();
-                    e.preventDefault();
-                });
-            }
+            _class.close_button = _class.popup.find('.popbox-close');
 
-            if (adjust)
-            {
-                _class.adjust(true);
-            }
+            _class.close_button.click(function(e){
+                _class.close();
+                e.preventDefault();
+            });
+
+            _class.adjust(true);
         }
     };
 
