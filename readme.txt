@@ -44,6 +44,7 @@ Things to Add
 @@@@@@@@@@@@@
 
 - ability to only have the minimum functional css. (turn off display styling)
+- possible fix for body still scrolling (visual): set body to position fixed (will have to get current scroll before hand and use that to reset as well).
 
 
 @@@@@@@
