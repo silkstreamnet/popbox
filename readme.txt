@@ -51,6 +51,10 @@ Things to Add
 Updates
 @@@@@@@
 
+=== v2-03b (beta) ===
+- added single image functionality (new setting called "fitImage"). Useful for galleries.
+- not fully bug tested as this is a beta release.
+
 === v2-02 (stable) ===
 - made some tweaks to better support/stabilise functionality on old IE.
 
