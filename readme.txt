@@ -20,6 +20,7 @@ Options:
 - 'fadeInSpeed' : 400 : {number}
 - 'fadeOutSpeed' : 400 : {number}
 - 'updatePositionDelay' : 200 : {number}     === Interval refresh rate for adjusting the popbox. (higher the number, the less intensive. lower the number, the more responsive and accurate.)
+- 'fitImage' : false : {boolean}  === Set to true for galleries.
 
 View index.html for example code.
 
@@ -50,6 +51,10 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-04 (stable) ===
+- fixed scaling for images smaller than screen.
+- fixed issue with padding on the popup container affecting scaling.
 
 === v2-03b (beta) ===
 - added single image functionality (new setting called "fitImage"). Useful for galleries.
