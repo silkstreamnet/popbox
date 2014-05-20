@@ -44,8 +44,8 @@ _popbox has the following methods:
 Things to Add
 @@@@@@@@@@@@@
 
-- ability to only have the minimum functional css. (turn off display styling)
 - possible fix for body still scrolling (visual): set body to position fixed (will have to get current scroll before hand and use that to reset as well).
+- add option to animate width and height (currently only animates top and left). can only do this with set widths and heights or auto scaling (image).
 
 
 @@@@@@@
