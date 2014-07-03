@@ -210,6 +210,8 @@
                 var _content = c.find('.popbox-content');
                 if (_content.length == 1)
                 {
+                    _content.css({'overflow-y':'','height':''});
+
                     var _content_OH = _content.outerHeight(false);
                     var _content_H = _content.height();
                     var c_H = c.height();
@@ -217,10 +219,6 @@
                     {
                         _content.css('overflow-y','scroll');
                         _content.height(c_H-(_content_OH-_content_H));
-                    }
-                    else
-                    {
-                        _content.css({'overflow-y':'','height':''});
                     }
                 }
 

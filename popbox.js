@@ -210,17 +210,30 @@
                 var _content = c.find('.popbox-content');
                 if (_content.length == 1)
                 {
-                    var _content_OH = _content.outerHeight(false);
-                    var _content_H = _content.height();
-                    var c_H = c.height();
-                    if (_content_OH > c_H)
+                    _content.css({'overflow-y':'','height':'','position':'absolute'});
+
+                    var co_h = _content.outerHeight(false);
+
+                    var mh_a = _content.offset().top - c.offset().top;
+                    var mh_b = c.height();
+                    var mh_c = c.outerHeight(false);
+                    var mh_d = mh_c-mh_a-mh_b; //bottom padding
+                    console.log("content-offset:"+mh_a);
+                    console.log("popup-height:"+mh_b);
+                    console.log("popup-outerheight"+mh_c);
+                    $('body').append('<div style="width:10px;height:10px;background:#f00;position:absolute;left:0;top:'+c.offset().top+'px"></div>');
+                    $('body').append('<div style="width:10px;height:10px;background:#000;position:absolute;left:0;top:'+_content.offset().top+'px"></div>');
+console.log(_content.position().top);
+                    var mh_e = mh_c-mh_b; //padding
+                    var mh_f = mh_d-(mh_e-mh_a); //bottom padding - (padding - offset)
+                    console.log("padding:"+mh_e);
+                    console.log("offset:"+mh_a);
+                    console.log("bottom-padding:"+mh_d);
+console.log(mh_f);
+                    if (co_h > mh_b)
                     {
                         _content.css('overflow-y','scroll');
-                        _content.height(c_H-(_content_OH-_content_H));
-                    }
-                    else
-                    {
-                        _content.css({'overflow-y':'','height':''});
+                        _content.height(mh_b-mh_f);
                     }
                 }
 
@@ -459,6 +472,7 @@
 
             var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
             var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
+            var title = (isString(this.settings.title,true)) ? _class.settings.title : '';
 
             var _body = $("body");
 
@@ -473,13 +487,14 @@
                 _body.css('margin-right',new_margin_right+'px');
             }
 
-            _body.append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup"><a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
+            _body.append('<div class="popbox-container" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup"><div class="popbox-title">'+title+'</div><a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
             _class.shadow = _class.container.find(".popbox-shadow");
             _class.bottom_push = _class.container.find(".popbox-bottom-push");
             _class.close_button = _class.container.find(".popbox-close");
+            _class.title_area = _class.container.find(".popbox-title");
             _class.content_area = _class.container.find(".popbox-content");
 
             _class.container.css({
@@ -571,9 +586,11 @@
             {
                 var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
                 var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
+                var title = (isString(this.settings.title,true)) ? _class.settings.title : '';
 
                 _class.close_button.html(close);
                 _class.content_area.html(content);
+                _class.title_area.html(title);
             }
 
             if (adjust)
@@ -601,6 +618,7 @@
         maxheight:'none',
         content:'',
         close:'X',
+        title:'',
         onOpen:false,
         onClose:false,
         beforeOpen:false,
