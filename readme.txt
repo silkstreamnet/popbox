@@ -10,7 +10,7 @@ Options:
 - 'width' : 'auto' : {number}, 'auto'
 - 'height' : 'auto' : {number}, 'auto'
 - 'maxwidth' : 'none' : {number}, 'none'
-- 'maxheight' : 'none' : {number}, 'none'    === This option is not currently used.
+- 'maxheight' : 'none' : {number}, 'none'
 - 'content' : '' : {string}
 - 'close' : 'X' : {string}
 - 'onOpen' : false : {false}, {function}
@@ -20,7 +20,7 @@ Options:
 - 'fadeInSpeed' : 400 : {number}
 - 'fadeOutSpeed' : 400 : {number}
 - 'updatePositionDelay' : 200 : {number}     === Interval refresh rate for adjusting the popbox. (higher the number, the less intensive. lower the number, the more responsive and accurate.)
-- 'fitImage' : false : {boolean}  === Set to true for galleries.
+- 'autoScale' : false : {boolean}  === Set to true for galleries/images/iframes.
 
 View index.html for example code.
 
@@ -33,7 +33,7 @@ _popbox has the following methods:
 	_popbox.isOpen();                                             === Returns: {boolean}. 
 	_popbox.isClose();                                            === Returns: {boolean}. 
 	_popbox.checkImages();                                        === Returns: {null}. Executes: Resets the image loader for the current popbox to re-adjust the popbox for any slow loading images.
-	_popbox.setSettings(settings={object}, animate={boolean});    === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
+	_popbox.update(settings={object}, animate={boolean});         === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
 	_popbox.open();                                               === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
 	_popbox.close();                                              === Returns: {null}. Executes: Closes the popbox and removes it from the body.
 	_popbox.adjust(animate={boolean});                            === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
@@ -46,11 +46,22 @@ Things to Add
 
 - possible fix for body still scrolling (visual): set body to position fixed (will have to get current scroll before hand and use that to reset as well).
 - add option to animate width and height (currently only animates top and left). can only do this with set widths and heights or auto scaling (image).
+- autoScale isn't taking maxheight or maxwidth settings into account.
+- add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
+- add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
 
 
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-05b (beta) ===
+- WARNING: This revision changes variable/method names and may require code updates
+- changed "fitImage" setting to "autoScale"
+- changed "setSettings" method to "update"
+- added new div with class "popbox-content" (main purpose is to handle maxheight)
+- maxheight setting functionality was added (only used when autoScale set to false, like maxwidth)
+- fixed support for iframes
 
 === v2-04 (stable) ===
 - fixed scaling for images smaller than screen.
