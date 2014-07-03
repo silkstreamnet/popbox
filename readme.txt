@@ -55,6 +55,12 @@ Things to Add
 Updates
 @@@@@@@
 
+=== v2-06 (stable) ===
+- added "innerOverflow" setting to specify whether to show a scroll bar inside the popup
+- various improvements/fixes to maxheight handling
+- added "class" setting to specify a custom class name for the popup (for user styling)
+- optimised "update" method. removed unneccessary code
+
 === v2-05b (beta) ===
 - WARNING: This revision changes variable/method names and may require code updates
 - changed "fitImage" setting to "autoScale"
