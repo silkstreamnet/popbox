@@ -21,6 +21,8 @@ Options:
 - 'fadeOutSpeed' : 400 : {number}
 - 'updatePositionDelay' : 200 : {number}     === Interval refresh rate for adjusting the popbox. (higher the number, the less intensive. lower the number, the more responsive and accurate.)
 - 'autoScale' : false : {boolean}  === Set to true for galleries/images/iframes.
+- 'innerOverflow' : false : {boolean} === Create scroll bar for overflow inside the popup when true
+- 'class' : '' : {string} === Custom string for container of popup
 
 View index.html for example code.
 
