@@ -57,6 +57,12 @@ Things to Add
 Updates
 @@@@@@@
 
+=== v2-07 (stable) ===
+- changed beforeOpen to onOpen (illogical name adjustment)
+- changed beforeClose to onClose (illogical name adjustment)
+- changed onOpen to afterOpen (illogical name adjustment)
+- changed onClose to afterClose (illogical name adjustment)
+
 === v2-06 (stable) ===
 - added "innerOverflow" setting to specify whether to show a scroll bar inside the popup
 - various improvements/fixes to maxheight handling

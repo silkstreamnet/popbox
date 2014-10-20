@@ -17,7 +17,7 @@
         return typeof(o) === "string" && o != null && (!required || o != '');
     }
 
-    
+
 
     var PopBox = function(settings)
     {
@@ -121,8 +121,8 @@
                     'width':''
                 });
 
-                dMaxWidth = (e ? d.width() : d.outerWidth(false)) * 0.8;
-                dMaxHeight = (e ? d.height() : d.outerHeight(false)) * 0.8;
+                dMaxWidth = (e ? d.width() * 0.8 : d.outerWidth(false)) * 0.8;
+                dMaxHeight = (e ? d.height() * 0.8 : d.outerHeight(false)) * 0.8;
 
                 var cFullWidth = c.outerWidth(false);
                 var cFullHeight = c.outerHeight(false);
@@ -176,8 +176,8 @@
             {
 
                 //if width is auto, find the 80% max of the container and match to fit.
-                dMaxWidth = (e ? d.width() : d.outerWidth(false)) * 0.8;
-                dMaxHeight = (e ? d.height() : d.outerHeight(false)) * 0.8;
+                dMaxWidth = (e ? d.width() * 0.8 : d.outerWidth(false)) * 0.8;
+                dMaxHeight = (e ? d.height() * 0.8 : d.outerHeight(false)) * 0.8;
                 var cWidthPadded = c.outerWidth(false) - c.width();
                 var cHeightPadded = c.outerHeight(false) - c.height();
                 var newWidth = dMaxWidth-cWidthPadded;
@@ -321,7 +321,7 @@
             {
                 // Hook up each image individually
                 images.each(function(index, element) {
-                    if (!element.complete) 
+                    if (!element.complete)
                     {
                         images_ready = false;
                     }
@@ -331,7 +331,7 @@
 
         if (adjust && images_ready)
         {
-            adjustPopBoxToClient(pb,true);
+            adjustPopBoxToClient(pb);
         }
 
         return images_ready;
@@ -355,7 +355,7 @@
                         // Already loaded, fire the handler (asynchronously)
                         images_ready++;
                     }
-                    else 
+                    else
                     {
                         // Hook up the handler
                         $(element).load(function(){
@@ -433,9 +433,9 @@
         var _class = this;
         if (!_class.properties.animating && _class.properties.isopen)
         {
-            if (typeof(_class.settings.beforeClose) === "function")
+            if (typeof(_class.settings.onClose) === "function")
             {
-                _class.settings.beforeClose(_class);
+                _class.settings.onClose(_class);
             }
 
             _class.properties.animating = true;
@@ -453,9 +453,9 @@
             _class.properties.isopen = false;
             _class.checkImages();
 
-            if (typeof(_class.settings.onClose) === "function")
+            if (typeof(_class.settings.afterClose) === "function")
             {
-                _class.settings.onClose(_class);
+                _class.settings.afterClose(_class);
             }
         }
     };
@@ -466,9 +466,9 @@
         var _class = this;
         if (!_class.properties.animating && !_class.properties.isopen)
         {
-            if (typeof(_class.settings.beforeOpen) === "function")
+            if (typeof(_class.settings.onOpen) === "function")
             {
-                _class.settings.beforeOpen(_class);
+                _class.settings.onOpen(_class);
             }
 
             _class.properties.animating = true;
@@ -561,9 +561,9 @@
 
             _class.properties.isopen = true;
 
-            if (typeof(_class.settings.onOpen) === "function")
+            if (typeof(_class.settings.afterOpen) === "function")
             {
-                _class.settings.onOpen(_class);
+                _class.settings.afterOpen(_class);
             }
         }
     };
@@ -576,10 +576,10 @@
         adjust = param(adjust,true);
 
         _class.settings = $.extend({},_class.settings,settings);
-        
-        if (_class.properties.isopen) 
+
+        if (_class.properties.isopen)
         {
-            var close = (isString(_class.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
+            var close = (isString(_class.settings.close,true)) ? _class.settings.close : _class.defaultSettings.close;
             var content = (isString(_class.settings.content,true)) ? _class.settings.content : '';
             var title = (isString(_class.settings.title,true)) ? _class.settings.title : '';
 
@@ -632,8 +632,8 @@
         title:'',
         onOpen:false,
         onClose:false,
-        beforeOpen:false,
-        beforeClose:false,
+        afterOpen:false,
+        afterClose:false,
         fadeInSpeed: 400,
         fadeOutSpeed: 400,
         updatePositionDelay: 200,

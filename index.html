@@ -22,7 +22,7 @@
     </style>
 </head>
 <body>
-<a href="#" class="popbox">Click To Pop!</a>
+<a href="images/test-image.jpg" class="popbox">Gallery Item 1</a> | <a href="images/test-image-2.jpg" class="popbox">Gallery Item 2</a> | <a href="images/test-image-3.jpg" class="popbox">Gallery Item 3</a>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p>
 <a href="#" class="popbox2">Click To Pop 2!</a>
 <a href="#" class="popbox3">Click To Pop 3!</a>
@@ -31,27 +31,23 @@
 <script type="text/javascript">
     $(function(){
         var _popbox = new PopBox({
-            autoScale:true,
-            //content:'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.<p>'
-            //content:'<img src="images/test-image.jpg" />'
-            onOpen:function(c){
-                setTimeout(function(){
-                    c.update({
-                        content:'<img src="images/test-image.jpg" />'
-                    });
-                },100);
+            autoScale:true, //for image galleries
+            afterClose:function(p){
+                p.update({content:''});
             }
         });
+
         $('.popbox').click(function(e){
             e.preventDefault();
+            var $this = $(this);
             _popbox.open();
-            /*setTimeout(function(){
-                _popbox.setSettings({
-                    content:'I have stolen the content that was once here!'
-                });
-            },4000);*/
+            setTimeout(function(){
+                _popbox.update({
+                    content:'<img src="'+$this.attr('href')+'">'
+                },false);
+                _popbox.adjust();
+            },100);
         });
-        //setTimeout(function(){_popbox.close();},4000);
 
         var _popbox2 = new PopBox({
             content:'',
