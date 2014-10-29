@@ -15,14 +15,14 @@ Options:
 - 'close' : 'X' : {string}
 - 'onOpen' : false : {false}, {function}
 - 'onClose' : false : {false}, {function}
-- 'beforeOpen' : false : {false}, {function}
-- 'beforeClose' : false : {false}, {function}
+- 'afterOpen' : false : {false}, {function}
+- 'afterClose' : false : {false}, {function}
 - 'fadeInSpeed' : 400 : {number}
 - 'fadeOutSpeed' : 400 : {number}
 - 'updatePositionDelay' : 200 : {number}     === Interval refresh rate for adjusting the popbox. (higher the number, the less intensive. lower the number, the more responsive and accurate.)
 - 'autoScale' : false : {boolean}  === Set to true for galleries/images/iframes.
 - 'innerOverflow' : false : {boolean} === Create scroll bar for overflow inside the popup when true
-- 'class' : '' : {string} === Custom string for container of popup
+- 'customClass' : '' : {string} === Custom string for container of popup
 
 View index.html for example code.
 
@@ -41,6 +41,7 @@ _popbox has the following methods:
 	_popbox.adjust(animate={boolean});                            === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
+RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/border.
 
 @@@@@@@@@@@@@
 Things to Add
@@ -57,11 +58,16 @@ Things to Add
 Updates
 @@@@@@@
 
-=== v2-07 (stable) ===
+=== v2-07b (beta) ===
 - changed beforeOpen to onOpen (illogical name adjustment)
 - changed beforeClose to onClose (illogical name adjustment)
 - changed onOpen to afterOpen (illogical name adjustment)
 - changed onClose to afterClose (illogical name adjustment)
+- updated the autoScale functionality to be more robust when scaling down in real time
+- changed the way scaling is generated
+- height and width are now animated like top and left (should add option to turn off animation in next revision)
+- turned off animation on load
+- changed property setting "class" to "customClass" due to problem with compiler
 
 === v2-06 (stable) ===
 - added "innerOverflow" setting to specify whether to show a scroll bar inside the popup
