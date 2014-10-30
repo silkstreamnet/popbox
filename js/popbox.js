@@ -23,12 +23,15 @@
 
         this.settings = $.extend({},this.defaultSettings,settings);
         this.container = false;
+        this.popup = false;
         this.shadow = false;
         this.properties = {
             animating: false,
             isopen: false,
             resizepause: false,
-            loaded_content: -1
+            loaded_content: -1,
+            bodyMarginRight:'',
+            bodyOverflow:''
         };
     };
 
@@ -46,6 +49,11 @@
                     popbox.container = false;
                     popbox.popup = false;
                     popbox.shadow = false;
+                    $('body').css({
+                        'overflow':popbox.properties.bodyOverflow,
+                        'margin-right':popbox.properties.bodyMarginRight
+                    });
+                    $(document).off('scroll.popbox touchmove.popbox mousewheel.popbox');
                     break;
                 case 'open':
                     popbox.properties.isopen = true;
@@ -109,7 +117,7 @@
                 display: 'block'
             };
 
-            c.css(c_temp);
+            c.css(c_temp).stop(true,false);
             if (!e) d.css(d_temp);
 
             var newWidth = 0, newHeight = 0, newWidthFull = 0, newHeightFull = 0, dMaxWidth, dMaxHeight, cWidth, cHeight, cWidthPadding, cHeightPadding, cWidthFull, cHeightFull, setY = false, dPush;
@@ -175,6 +183,11 @@
                     'max-width':'100%'
                 });
 
+                c.animate({
+                    "width":newWidth,
+                    "height":newHeight
+                });
+
             }
             else
             {
@@ -234,12 +247,21 @@
                         }
                     }
                 }
+                else
+                {
+                    newHeight = 'auto';
+                }
+
+                c.css({
+                    "width":newWidth,
+                    "height":newHeight
+                });
 
                 //create a push for the bottom when height is greater than container height
                 dPush = (e ? d.height() : d.outerHeight(false)) * 0.05;
                 var dFullMaxHeight = e ? d.height() : d.outerHeight(false);
                 dMaxHeight = dFullMaxHeight * 0.9; //account for any possible padding, e.g. x button.
-                newHeightFull = newHeight+cHeightPadding;
+                newHeightFull = c.height()+cHeightPadding;
                 if (newHeightFull > dMaxHeight)
                 {
                     setY = dPush;
@@ -290,20 +312,16 @@
 
             if (b.animate===true)
             {
-                c.stop(true,false).animate({
+                c.animate({
                     "left":g,
-                    "top":h,
-                    "width":newWidth,
-                    "height":newHeight
+                    "top":h
                 },500).css('overflow','');
             }
             else
             {
-                c.stop(true,false).css({
+                c.css({
                     "left":g,
-                    "top":h,
-                    "width":newWidth,
-                    "height":newHeight
+                    "top":h
                 });
             }
             if (b.completeHandler) b.completeHandler(obj);
@@ -445,10 +463,6 @@
 
             _class.container.fadeOut(_class.settings.fadeOutSpeed,function(){
                 popboxAnimateComplete(_class,'close');
-                $('body').css({
-                    'overflow':'',
-                    'margin-right':''
-                });
             });
 
             $(window).off("resize.popbox.adjust");
@@ -481,7 +495,9 @@
             var title = (isString(this.settings.title,true)) ? '<div class="popbox-title">'+_class.settings.title+'</div>' : '';
             var pclass = (isString(this.settings.customClass,true)) ? ' '+_class.settings.customClass : '';
 
-            var _body = $("body");
+            var _body = $('body');
+
+            _class.properties.bodyOverflow = _body.css('overflow');
 
             var old_body_width = _body.width();
             _body.css('overflow','hidden');
@@ -489,10 +505,17 @@
 
             if (new_body_width > old_body_width)
             {
-                var old_margin_right = parseInt(_body.css('margin-right'));
+                _class.properties.bodyMarginRight = _body.css('margin-right');
+                var old_margin_right = parseInt(_class.properties.bodyMarginRight);
                 var new_margin_right = old_margin_right+(new_body_width-old_body_width);
                 _body.css('margin-right',new_margin_right+'px');
             }
+
+            $(document).on('scroll.popbox touchmove.popbox mousewheel.popbox',function(e){
+                var $target = $(e.target);
+                var $popboxcontent = $target.closest('.popbox-content');
+                if (!$popboxcontent.length) e.preventDefault();
+            });
 
             _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
@@ -543,6 +566,10 @@
                 'opacity':'0',
                 'filter':'alpha(opacity=0)',
                 'cursor':'default'
+            });
+            _class.content_area.css({
+                'overflow':'hidden',
+                'height':'100%'
             });
 
             _class.adjust();
