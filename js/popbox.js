@@ -21,6 +21,8 @@
     {
         settings = param(settings,{});
 
+        if (settings.mode == 'gallery' && settings.autoScale == null) settings.autoScale = true;
+
         this.settings = $.extend({},this.defaultSettings,settings);
         this.container = false;
         this.popup = false;
@@ -45,8 +47,8 @@
             {
                 case 'close':
                     popbox.container.remove();
-                    popbox.properties.isopen = false;
                     popbox.container = false;
+                    popbox.properties.isopen = false;
                     popbox.popup = false;
                     popbox.shadow = false;
                     $('body').css({
@@ -60,272 +62,6 @@
                     break;
             }
         }
-    }
-
-    function adjustToClient(obj,a)
-    {
-        var b={
-            forceAbsolute:false,
-            container:window,
-            completeHandler:null,
-            animate:true,
-            width:'auto',
-            height:'auto',
-            maxwidth:'none',
-            maxheight:'none',
-            push_obj: false,
-            shadow: false,
-            autoScale:false,
-            innerOverflow:false
-        };
-
-        $.extend(b,a);
-
-        obj.each(function(a){
-            var c=$(this);
-            var d=$(b.container);
-            var e=b.container==window; //is window: true or false
-
-            var $body = $('body');
-
-            if (b.forceAbsolute)
-            {
-                if (e) c.remove().appendTo($body);
-                else c.remove().appendTo(d.get(0))
-            }
-
-            //set c and d to hidden and block
-            var c_orig = {
-                position: c.css('position'),
-                visibility: c.css('visibility'),
-                display: c.css('display')
-            };
-
-            var d_orig = {
-                visibility: d.css('visibility'),
-                display: d.css('display')
-            };
-
-            var c_temp = {
-                position: 'absolute',
-                visibility: 'hidden',
-                display: 'block'
-            };
-
-            var d_temp = {
-                visibility: 'hidden',
-                display: 'block'
-            };
-
-            c.css(c_temp).stop(true,false);
-            if (!e) d.css(d_temp);
-
-            var newWidth = 0, newHeight = 0, newWidthFull = 0, newHeightFull = 0, dMaxWidth, dMaxHeight, cWidth, cHeight, cWidthPadding, cHeightPadding, cWidthFull, cHeightFull, setY = false, dPush;
-
-            if (b.autoScale)
-            {
-                var cloneref = 'rsc-clone-'+(Math.floor(Math.random()*9000) + 1000);
-                var pre_c_clone = c.clone().addClass(cloneref).css({'height':'auto','width':'auto','top':'auto','left':'auto','position':'absolute','display':'block','visibility':'hidden'});
-
-                pre_c_clone.find('img').css({'max-width':'none','height':'auto','display':'block'});
-                pre_c_clone.find('iframe').css({'max-height':'none','max-width':'none'}).attr('src','');
-                pre_c_clone.appendTo($body);
-
-                var c_clone = $body.find('.'+cloneref).wrap('<div style="height:0;width:0;position:absolute;left:0;top:0;"></div>');
-
-                cWidth = c_clone.width();
-                cHeight = c_clone.height();
-                cWidthPadding = c_clone.outerWidth(false) - cWidth;
-                cHeightPadding = c_clone.outerHeight(false) - cHeight;
-
-                c_clone.parent().remove();
-
-                dMaxWidth = ((e ? d.width() : d.outerWidth(false)) * 0.8) - (cWidthPadding);
-                dMaxHeight = ((e ? d.height() : d.outerHeight(false)) * 0.8) - (cHeightPadding);
-
-                if (cHeight > dMaxHeight || cWidth > dMaxWidth)
-                {
-                    var dRatio = dMaxHeight / dMaxWidth;
-                    var cRatio = cHeight / cWidth;
-                    var difperc = 1;
-
-                    if (cRatio > dRatio)
-                    {
-                        //go by the height
-                        difperc = dMaxHeight / cHeight;
-                        newHeight = dMaxHeight;
-                        newWidth = (cWidth) * difperc;
-                    }
-                    else
-                    {
-                        difperc = dMaxWidth / cWidth;
-                        newWidth = dMaxWidth;
-                        newHeight = (cHeight) * difperc;
-                    }
-                }
-                else
-                {
-                    newWidth = cWidth;
-                    newHeight = cHeight;
-                }
-
-                //c.width(newWidth);
-                //c.height(newHeight);
-
-                c.find('img').css({
-                    'max-width':'100%',
-                    'height':'auto',
-                    'display':'block'
-                });
-
-                c.find('iframe').css({
-                    'max-height':'100%',
-                    'max-width':'100%'
-                });
-
-                c.animate({
-                    "width":newWidth,
-                    "height":newHeight
-                });
-
-            }
-            else
-            {
-
-                //if width is auto, find the 80% max of the container and match to fit.
-                dMaxWidth = (e ? d.width() : d.outerWidth(false)) * 0.8;
-                dMaxHeight = (e ? d.height() : d.outerHeight(false)) * 0.8;
-                cWidthPadding = c.outerWidth(false) - c.width();
-                cHeightPadding = c.outerHeight(false) - c.height();
-                newWidth = dMaxWidth-cWidthPadding;
-                newHeight = dMaxHeight-cHeightPadding;
-
-                if (isNumber(b.width))
-                {
-                    newWidth = b.width;
-                }
-                else
-                {
-                    if (isNumber(b.maxwidth) && newWidth > b.maxwidth)
-                    {
-                        newWidth = b.maxwidth;
-                    }
-                }
-
-                //if height is auto, height is automatic, also check if height is greater than container height
-                if (isNumber(b.height))
-                {
-                    newHeight = b.height;
-                }
-                else if (b.innerOverflow || isNumber(b.maxheight))
-                {
-                    if (isNumber(b.maxheight) && newHeight > b.maxheight)
-                    {
-                        newHeight = b.maxheight;
-                    }
-
-                    //an insane person wrote this block
-                    var _content = c.find('.popbox-content');
-                    if (_content.length == 1)
-                    {
-                        _content.css({'overflow-y':'','height':'','position':'relative'});
-
-                        if (parseInt(_content.css('margin-top')) == 0)
-                        {
-                            _content.css({'margin-top':'-1px','top':'1px'});
-                        }
-
-                        var co_h = _content.outerHeight(true);
-                        var hi_p = co_h - _content.height();
-                        var mh_a = parseInt(c.css('padding-top'))+parseInt(c.css('border-top-width'))+parseInt(c.css('margin-top'));
-                        var mh_b = newHeight - (_content.position().top - mh_a);
-
-                        if (co_h > mh_b)
-                        {
-                            _content.css('overflow-y','scroll');
-                            _content.height(mh_b-hi_p);
-                        }
-                    }
-                }
-                else
-                {
-                    newHeight = 'auto';
-                }
-
-                c.css({
-                    "width":newWidth,
-                    "height":newHeight
-                });
-
-                //create a push for the bottom when height is greater than container height
-                dPush = (e ? d.height() : d.outerHeight(false)) * 0.05;
-                var dFullMaxHeight = e ? d.height() : d.outerHeight(false);
-                dMaxHeight = dFullMaxHeight * 0.9; //account for any possible padding, e.g. x button.
-                newHeightFull = c.height()+cHeightPadding;
-                if (newHeightFull > dMaxHeight)
-                {
-                    setY = dPush;
-                    d.css('overflow','auto');
-                    b.push_obj.css({
-                        'top':(dPush+newHeightFull)+'px',
-                        'height':dPush+'px',
-                        'width':'1px'
-                    });
-                    b.shadow.css({
-                        'height':((dPush*2)+newHeightFull)+'px'
-                    });
-                }
-                else
-                {
-                    d.css('overflow','');
-                    b.push_obj.css({
-                        'top':'0px',
-                        'height':'0px',
-                        'width':'0px'
-                    });
-                    b.shadow.css({
-                        'height':'100%'
-                    });
-                }
-
-            }
-
-            newWidthFull = newWidth+cWidthPadding;
-            newHeightFull = newHeight+cHeightPadding;
-
-            var g = ((e ? d.width() : d.outerWidth(false)) - newWidthFull) / 2;
-            var h = ((e ? d.height() : d.outerHeight(false)) - newHeightFull) / 2;
-
-            if (setY !== false)
-            {
-                h = setY;
-            }
-
-            if (e)
-            {
-                g += d.scrollLeft();
-                h += d.scrollTop();
-            }
-
-            c.css(c_orig);
-            if (!e) d.css(d_orig);
-
-            if (b.animate===true)
-            {
-                c.animate({
-                    "left":g,
-                    "top":h
-                },500).css('overflow','');
-            }
-            else
-            {
-                c.css({
-                    "left":g,
-                    "top":h
-                });
-            }
-            if (b.completeHandler) b.completeHandler(obj);
-        });
     }
 
     function checkAllImagesReady(pb,adjust) {
@@ -405,25 +141,225 @@
         }
     }
 
+    function clonePopbox(pb)
+    {
+        var $body = $('body');
+        var cloneref = 'popbox-rsc-clone';
+        var clone_container_tmp = pb.container.clone().stop(true,true).addClass(cloneref).css({'display':'block','visibility':'hidden','z-index':'-1','overflow':'hidden'});
+        clone_container_tmp.find('iframe').attr('src','');
+        clone_container_tmp.appendTo($body);
+        var clone_container = $body.find('.'+cloneref);
+
+        return {
+            container:clone_container,
+            popup:clone_container.find('.popbox-popup').eq(0),
+            content:clone_container.find('.popbox-content').eq(0)
+        }
+    }
+
+    function removeClonePopbox(clone)
+    {
+        if (clone && clone.container) clone.container.remove();
+    }
+
     function adjustPopBoxToClient(pb,animate)
     {
         animate = param(animate,false);
         pb = param(pb,false);
 
-        if (pb)
+        if (pb && pb.popup)
         {
-            adjustToClient(pb.popup, {
-                animate: animate,
-                container:pb.container,
-                width:pb.settings.width,
-                height:pb.settings.height,
-                maxwidth:pb.settings.maxwidth,
-                maxheight:pb.settings.maxheight,
-                push_obj:pb.bottom_push,
-                shadow: pb.shadow,
-                autoScale: pb.settings.autoScale,
-                innerOverflow: pb.settings.innerOverflow
-            });
+            var st = pb.settings;
+            var $popup = pb.popup;
+            var $container = pb.container;
+            var $content = pb.content_area;
+
+            $popup.stop(true,false);
+
+            var newWidth = 0, newHeight = 0, newOuterWidth = 0, newOuterHeight = 0,
+                cWidth = 0, cHeight = 0, cWidthPadding = 0, cHeightPadding = 0, cOuterWidth = 0, cOuterHeight = 0,
+                dOuterWidth = $container.outerWidth(false), dOuterHeight = $container.outerHeight(false), dMaxWidth = 0, dMaxHeight = 0, dPush = 0,
+                setY = false, clone = false;
+
+            if (st.autoScale)
+            {
+                clone = clonePopbox(pb);
+                clone.popup.css({'height':'auto','width':'auto','top':'auto','left':'auto'});
+                clone.content.attr('style','');
+                clone.content.find('img').css({'max-width':'none','height':'auto','display':'block'});
+                clone.content.find('iframe').css({'max-height':'none','max-width':'none'});
+
+                cWidth = clone.popup.width();
+                cHeight = clone.popup.height();
+                cWidthPadding = clone.popup.outerWidth(false) - cWidth;
+                cHeightPadding = clone.popup.outerHeight(false) - cHeight;
+
+                removeClonePopbox(clone);
+
+                dMaxWidth = (dOuterWidth * 0.8) - (cWidthPadding);
+                dMaxHeight = (dOuterHeight * 0.8) - (cHeightPadding);
+
+                if (cHeight > dMaxHeight || cWidth > dMaxWidth)
+                {
+                    var dRatio = dMaxHeight / dMaxWidth;
+                    var cRatio = cHeight / cWidth;
+                    var difperc = 1;
+
+                    if (cRatio > dRatio)
+                    {
+                        //go by the height
+                        difperc = dMaxHeight / cHeight;
+                        newHeight = dMaxHeight;
+                        newWidth = (cWidth) * difperc;
+                    }
+                    else
+                    {
+                        difperc = dMaxWidth / cWidth;
+                        newWidth = dMaxWidth;
+                        newHeight = (cHeight) * difperc;
+                    }
+                }
+                else
+                {
+                    newWidth = cWidth;
+                    newHeight = cHeight;
+                }
+
+                $popup.find('img').css({
+                    'max-width':'100%',
+                    'height':'auto',
+                    'display':'block'
+                });
+
+                $popup.find('iframe').css({
+                    'max-height':'100%',
+                    'max-width':'100%'
+                });
+
+            }
+            else
+            {
+
+                //if width is auto, find the 80% max of the container and match to fit.
+                dMaxWidth = dOuterWidth * 0.8;
+                dMaxHeight = dOuterHeight * 0.8;
+                cWidthPadding = $popup.outerWidth(false) - $popup.width();
+                cHeightPadding = $popup.outerHeight(false) - $popup.height();
+                newWidth = dMaxWidth-cWidthPadding;
+                newHeight = dMaxHeight-cHeightPadding;
+
+                if (isNumber(st.width))
+                {
+                    newWidth = st.width;
+                }
+                else
+                {
+                    if (isNumber(st.maxwidth) && newWidth > st.maxwidth)
+                    {
+                        newWidth = st.maxwidth;
+                    }
+                }
+
+                clone = clonePopbox(pb);
+                clone.popup.css({'height':'auto','width':newWidth,'top':'0','left':'0'});
+                clone.content.attr('style','');
+
+                //if height is auto, height is automatic, also check if height is greater than container height
+                if (isNumber(st.height))
+                {
+                    newHeight = st.height;
+                }
+                else if (isNumber(st.maxheight) && newHeight > st.maxheight)
+                {
+                    newHeight = st.maxheight;
+                }
+                else
+                {
+                    newHeight = clone.popup.height();
+                }
+
+                //an insane person wrote this block
+                if (parseInt(clone.content.css('margin-top')) == 0)
+                {
+                    clone.content.css({'margin-top':'-1px','top':'1px'});
+                }
+
+                var co_h = clone.content.outerHeight(true);
+                var hi_p = co_h - clone.content.height();
+                var mh_a = parseInt($popup.css('padding-top'))+parseInt($popup.css('border-top-width'))+parseInt($popup.css('margin-top'));
+                var mh_b = newHeight - (clone.content.position().top - mh_a);
+
+                if (animate===true) $content.stop(true,false).animate({'height':mh_b-hi_p},st.animateSpeed);
+                else $content.css({'height':mh_b-hi_p});
+
+                if (co_h > mh_b && st.innerOverflow)
+                {
+                    $content.css('overflow-y','scroll');
+                }
+
+                removeClonePopbox(clone);
+
+                //create a push for the bottom when height is greater than container height
+                dPush = dOuterHeight * 0.05;
+                dMaxHeight = dOuterHeight * 0.9; //account for any possible padding, e.g. x button.
+                newOuterHeight = newHeight+cHeightPadding;
+                if (newOuterHeight > dMaxHeight)
+                {
+                    setY = dPush;
+                    $container.css('overflow','auto');
+                    pb.bottom_push.css({
+                        'top':(dPush+newOuterHeight)+'px',
+                        'height':dPush+'px',
+                        'width':'1px'
+                    });
+                    pb.shadow.css({
+                        'height':((dPush*2)+newOuterHeight)+'px'
+                    });
+                }
+                else
+                {
+                    $container.css('overflow','');
+                    pb.bottom_push.css({
+                        'top':'0px',
+                        'height':'0px',
+                        'width':'0px'
+                    });
+                    pb.shadow.css({
+                        'height':'100%'
+                    });
+                }
+
+            }
+
+            newOuterWidth = newWidth+cWidthPadding;
+            newOuterHeight = newHeight+cHeightPadding;
+
+            var g = (dOuterWidth - newOuterWidth) / 2;
+            var h = (dOuterHeight - newOuterHeight) / 2;
+
+            if (setY !== false)
+            {
+                h = setY;
+            }
+
+            if (animate===true)
+            {
+                $popup.animate({
+                    "left":g,
+                    "top":h,
+                    "width":newWidth,
+                    "height":newHeight
+                },st.animateSpeed).css('overflow','');
+            }
+            else
+            {
+                $popup.css({
+                    "left":g,
+                    "top":h,
+                    "width":newWidth,
+                    "height":newHeight
+                });
+            }
         }
     }
 
@@ -511,11 +447,7 @@
                 _body.css('margin-right',new_margin_right+'px');
             }
 
-            $(document).on('scroll.popbox touchmove.popbox mousewheel.popbox',function(e){
-                var $target = $(e.target);
-                var $popboxcontent = $target.closest('.popbox-content');
-                if (!$popboxcontent.length) e.preventDefault();
-            });
+            $(document).on('scroll.popbox touchmove.popbox mousewheel.popbox',function(e){});
 
             _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
@@ -548,7 +480,6 @@
             });
             _class.popup.css({
                 'display':'block',
-                'visibility':'visible',
                 'position':'absolute',
                 'top':'0px',
                 'left':'0px',
@@ -668,7 +599,9 @@
         fadeOutSpeed: 400,
         updatePositionDelay: 200,
         autoScale:false,
-        customClass:''
+        customClass:'',
+        animateSpeed: 400,
+        mode:'normal'
     };
 
 
