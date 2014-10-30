@@ -252,12 +252,9 @@
                 {
                     newWidth = st.width;
                 }
-                else
+                else if (isNumber(st.maxwidth) && newWidth > st.maxwidth)
                 {
-                    if (isNumber(st.maxwidth) && newWidth > st.maxwidth)
-                    {
-                        newWidth = st.maxwidth;
-                    }
+                    newWidth = st.maxwidth;
                 }
 
                 clone = clonePopbox(pb);
@@ -273,7 +270,7 @@
                 {
                     newHeight = st.maxheight;
                 }
-                else
+                else if (!st.innerOverflow)
                 {
                     newHeight = clone.popup.height();
                 }
