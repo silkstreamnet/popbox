@@ -15,7 +15,7 @@
 		.popbox-close:hover {color:#aaa;}
 
         /* Popbox Extra Styles */
-        .popbox-title {padding:1rem; background:#ccc; font-weight:bold; text-transform: uppercase; margin:0 0 10px 0;}
+        .popbox-title {padding:1em; background:#ccc; font-weight:bold; text-transform: uppercase; margin:0 0 10px 0;}
         .popbox-content {z-index:5;}
         .popbox-content p {margin: 0 0 10px 0;}
 
@@ -32,7 +32,8 @@
 <script type="text/javascript">
     $(function(){
         var _popbox = new PopBox({
-            autoScale:true, //for image galleries
+            autoScale:true, //for image galleries - auto set when mode = gallery
+            mode:'gallery',
             afterClose:function(p){
                 p.update({content:''});
             }

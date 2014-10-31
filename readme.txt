@@ -58,6 +58,17 @@ Things to Add
 Updates
 @@@@@@@
 
+=== v2-08b (beta) ===
+- PopBox Now memorises body margin right and overflow.
+- Added fix for some browsers scrolling. (Odd fix was to apply an empty listener)
+- adjustToClient internal function completely removed. The adjustment functionality is now fully dedicated to PopBox.
+- Added new scale clone functionality to make scaling calculations smoother.
+- autoScale and not both can now animate the width, height, left, top.
+- Added 'gallery' setting with sub setting of 'loading'. Loading setting lets you specify "loading" text. (This is for the gallery mode)
+- Added 'mode' setting. Can set to 'normal' or 'gallery'.
+- Added 'animateSpeed' setting.
+- Fixed some issues with IE 7 and 8.
+
 === v2-07b (beta) ===
 - changed beforeOpen to onOpen (illogical name adjustment)
 - changed beforeClose to onClose (illogical name adjustment)

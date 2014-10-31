@@ -78,7 +78,7 @@
             {
                 // Hook up each image individually
                 images.each(function(index, element) {
-                    if (!element.complete)
+                    if (!element.complete && element.readyState !== 4 && element.readyState !== 'complete')
                     {
                         images_ready = false;
                     }
@@ -86,7 +86,21 @@
             }
         }
 
-        if (adjust && images_ready)
+        if (pb.settings.mode == 'gallery')
+        {
+            if (images_ready)
+            {
+                pb.content_area.css({'visibility':'','height':'','overflow':''});
+                if (pb.gallery_loading) pb.gallery_loading.hide();
+            }
+            else
+            {
+                pb.content_area.css({'visibility':'hidden','height':'0','overflow':'hidden'});
+                if (pb.gallery_loading) pb.gallery_loading.show();
+            }
+        }
+
+        if (images_ready && adjust)
         {
             adjustPopBoxToClient(pb);
         }
@@ -100,6 +114,7 @@
 
         if (pb && pb.popup)
         {
+
             var images = pb.popup.find('img');
 
             if (images.length > 0)
@@ -108,16 +123,26 @@
 
                 // Hook up each image individually
                 images.each(function(index, element) {
-                    if (element.complete) {
+                    if (element.complete || element.readyState === 4 || element.readyState === 'complete') {
                         // Already loaded, fire the handler (asynchronously)
                         images_ready++;
                     }
                     else
                     {
                         // Hook up the handler
-                        $(element).load(function(){
-                            checkAllImagesReady(pb,true);
-                        });
+                        if (typeof element.onload !== "undefined")
+                        {
+                            element.onload = function(){
+                                if (typeof element.readyState !== "undefined") setTimeout(function(){checkAllImagesReady(pb,true)},10);
+                                else checkAllImagesReady(pb,true);
+                            }
+                        }
+                        else if (typeof element.onreadystatechange !== "undefined")
+                        {
+                            element.onreadystatechange = function(){
+                                setTimeout(function(){checkAllImagesReady(pb,true)},10);
+                            }
+                        }
                     }
                 });
 
@@ -283,10 +308,16 @@
 
                 var co_h = clone.content.outerHeight(true);
                 var hi_p = co_h - clone.content.height();
-                var mh_a = parseInt($popup.css('padding-top'))+parseInt($popup.css('border-top-width'))+parseInt($popup.css('margin-top'));
+                var mh_a_padding = parseInt(clone.popup.css('padding-top'));
+                var mh_a_border = parseInt(clone.popup.css('border-top-width'));
+                var mh_a_margin = parseInt(clone.popup.css('margin-top'));
+                if (isNaN(mh_a_padding)) mh_a_padding = 0;
+                if (isNaN(mh_a_border)) mh_a_border = 0;
+                if (isNaN(mh_a_margin)) mh_a_margin = 0;
+                var mh_a = mh_a_padding+mh_a_border+mh_a_margin;
                 var mh_b = newHeight - (clone.content.position().top - mh_a);
 
-                if (animate===true) $content.stop(true,false).animate({'height':mh_b-hi_p},st.animateSpeed);
+                if (animate===true && st.animateSpeed > 0) $content.stop(true,false).height($content.height()).animate({'height':mh_b-hi_p},st.animateSpeed);
                 else $content.css({'height':mh_b-hi_p});
 
                 if (co_h > mh_b && st.innerOverflow)
@@ -339,7 +370,7 @@
                 h = setY;
             }
 
-            if (animate===true)
+            if (animate===true && st.animateSpeed > 0)
             {
                 $popup.animate({
                     "left":g,
@@ -423,7 +454,7 @@
 
             _class.properties.animating = true;
 
-            var close = (isString(this.settings.close,true)) ? _class.settings.close : this.defaultSettings.close;
+            var close = (isString(this.settings.close,true)) ? _class.settings.close : _class.defaultSettings.close;
             var content = (isString(this.settings.content,true)) ? _class.settings.content : '';
             var title = (isString(this.settings.title,true)) ? '<div class="popbox-title">'+_class.settings.title+'</div>' : '';
             var pclass = (isString(this.settings.customClass,true)) ? ' '+_class.settings.customClass : '';
@@ -455,6 +486,15 @@
             _class.close_button = _class.container.find(".popbox-close");
             _class.title_area = _class.container.find(".popbox-title");
             _class.content_area = _class.container.find(".popbox-content");
+
+            if (_class.settings.mode == 'gallery')
+            {
+                _class.content_area.css({'visibility':'hidden','height':'0'});
+
+                var loading = (isString(this.settings.gallery.loading,true)) ? _class.settings.gallery.loading : _class.defaultSettings.gallery.loading;
+                _class.content_area.after('<div class="popbox-gallery-loading">'+loading+'</div>');
+                _class.gallery_loading = _class.container.find(".popbox-gallery-loading");
+            }
 
             _class.container.css({
                 'display':'none',
@@ -492,7 +532,6 @@
                 'z-index':'991',
                 'background':'#fff',
                 'opacity':'0',
-                'filter':'alpha(opacity=0)',
                 'cursor':'default'
             });
             _class.content_area.css({
@@ -598,7 +637,10 @@
         autoScale:false,
         customClass:'',
         animateSpeed: 400,
-        mode:'normal'
+        mode:'normal',
+        gallery:{
+            loading:'Loading'
+        }
     };
 
 
