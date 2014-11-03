@@ -33,7 +33,10 @@
             resizepause: false,
             loaded_content: -1,
             bodyMarginRight:'',
-            bodyOverflow:''
+            bodyOverflow:'',
+            gallery:{
+                isloading:false
+            }
         };
     };
 
@@ -90,13 +93,17 @@
         {
             if (images_ready)
             {
-                pb.content_area.css({'visibility':'','height':'','overflow':''});
+                //pb.content_area.css({'visibility':'','height':'','overflow':''});
+                pb.content_area.show();
                 if (pb.gallery_loading) pb.gallery_loading.hide();
+                pb.properties.gallery.isloading = false;
             }
             else
             {
-                pb.content_area.css({'visibility':'hidden','height':'0','overflow':'hidden'});
+                //pb.content_area.css({'visibility':'hidden','height':'0','overflow':'hidden'});
+                pb.content_area.hide();
                 if (pb.gallery_loading) pb.gallery_loading.show();
+                pb.properties.gallery.isloading = true;
             }
         }
 
@@ -143,6 +150,20 @@
                                 setTimeout(function(){checkAllImagesReady(pb,true)},10);
                             }
                         }
+
+                        if (pb.settings.mode == 'gallery' && pb.gallery_loading)
+                        {
+                            if (typeof element.onerror !== "undefined")
+                            {
+                                element.onerror = function(){
+                                    var error = (isString(pb.settings.gallery.error,true)) ? pb.settings.gallery.error : pb.defaultSettings.gallery.error;
+                                    pb.gallery_loading.html(error);
+                                    pb.properties.gallery.isloading = true;
+                                    $(element).remove();
+                                    pb.adjust(false);
+                                }
+                            }
+                        }
                     }
                 });
 
@@ -178,7 +199,8 @@
         return {
             container:clone_container,
             popup:clone_container.find('.popbox-popup').eq(0),
-            content:clone_container.find('.popbox-content').eq(0)
+            content:clone_container.find('.popbox-content').eq(0),
+            gallery_loading:clone_container.find('.popbox-gallery-loading').eq(0)
         }
     }
 
@@ -198,6 +220,7 @@
             var $popup = pb.popup;
             var $container = pb.container;
             var $content = pb.content_area;
+            var $gallery_loading = pb.gallery_loading;
 
             $popup.stop(true,false);
 
@@ -206,8 +229,14 @@
                 dOuterWidth = $container.outerWidth(false), dOuterHeight = $container.outerHeight(false), dMaxWidth = 0, dMaxHeight = 0, dPush = 0,
                 setY = false, clone = false;
 
-            if (st.autoScale)
+            if (st.autoScale && !pb.properties.gallery.isloading)
             {
+                $content.css({
+                    'height':'100%',
+                    'width':'100%',
+                    'overflow':'hidden'
+                });
+
                 clone = clonePopbox(pb);
                 clone.popup.css({'height':'auto','width':'auto','top':'auto','left':'auto'});
                 clone.content.attr('style','');
@@ -223,6 +252,9 @@
 
                 dMaxWidth = (dOuterWidth * 0.8) - (cWidthPadding);
                 dMaxHeight = (dOuterHeight * 0.8) - (cHeightPadding);
+
+                if (dMaxWidth > st.maxwidth) dMaxWidth = st.maxwidth;
+                if (dMaxHeight > st.maxheight) dMaxHeight = st.maxheight;
 
                 if (cHeight > dMaxHeight || cWidth > dMaxWidth)
                 {
@@ -277,37 +309,58 @@
                 {
                     newWidth = st.width;
                 }
-                else if (isNumber(st.maxwidth) && newWidth > st.maxwidth)
+
+                if (isNumber(st.maxwidth) && newWidth > st.maxwidth)
                 {
                     newWidth = st.maxwidth;
                 }
 
                 clone = clonePopbox(pb);
                 clone.popup.css({'height':'auto','width':newWidth,'top':'0','left':'0'});
+
+                var $_content_ob = $content;
+                var clone_content_ob = clone.content;
+
                 clone.content.attr('style','');
+                clone.gallery_loading.attr('style','');
+
+                if (pb.properties.gallery.isloading)
+                {
+                    clone.content.css('display','none');
+                    clone.gallery_loading.css('display','block');
+
+                    $_content_ob = $gallery_loading;
+                    clone_content_ob = clone.gallery_loading;
+                }
+                else
+                {
+                    clone.content.css('display','block');
+                    clone.gallery_loading.css('display','none');
+                }
 
                 //if height is auto, height is automatic, also check if height is greater than container height
                 if (isNumber(st.height))
                 {
                     newHeight = st.height;
                 }
-                else if (isNumber(st.maxheight) && newHeight > st.maxheight)
-                {
-                    newHeight = st.maxheight;
-                }
                 else if (!st.innerOverflow)
                 {
                     newHeight = clone.popup.height();
                 }
 
-                //an insane person wrote this block
-                if (parseInt(clone.content.css('margin-top')) == 0)
+                if (isNumber(st.maxheight) && newHeight > st.maxheight)
                 {
-                    clone.content.css({'margin-top':'-1px','top':'1px'});
+                    newHeight = st.maxheight;
                 }
 
-                var co_h = clone.content.outerHeight(true);
-                var hi_p = co_h - clone.content.height();
+                //an insane person wrote this block
+                if (parseInt(clone_content_ob.css('margin-top')) == 0)
+                {
+                    clone_content_ob.css({'margin-top':'-1px','top':'1px'});
+                }
+
+                var co_h = clone_content_ob.outerHeight(true);
+                var hi_p = co_h - clone_content_ob.height();
                 var mh_a_padding = parseInt(clone.popup.css('padding-top'));
                 var mh_a_border = parseInt(clone.popup.css('border-top-width'));
                 var mh_a_margin = parseInt(clone.popup.css('margin-top'));
@@ -315,15 +368,12 @@
                 if (isNaN(mh_a_border)) mh_a_border = 0;
                 if (isNaN(mh_a_margin)) mh_a_margin = 0;
                 var mh_a = mh_a_padding+mh_a_border+mh_a_margin;
-                var mh_b = newHeight - (clone.content.position().top - mh_a);
+                var mh_b = newHeight - (clone_content_ob.position().top - mh_a);
 
-                if (animate===true && st.animateSpeed > 0) $content.stop(true,false).height($content.height()).animate({'height':mh_b-hi_p},st.animateSpeed);
-                else $content.css({'height':mh_b-hi_p});
+                if (animate===true && st.animateSpeed > 0) $_content_ob.stop(true,false).height($_content_ob.height()).animate({'height':mh_b-hi_p},st.animateSpeed);
+                else $_content_ob.css({'height':mh_b-hi_p});
 
-                if (co_h > mh_b && st.innerOverflow)
-                {
-                    $content.css('overflow-y','scroll');
-                }
+                if (co_h > mh_b && st.innerOverflow) $_content_ob.css('overflow-y','scroll');
 
                 removeClonePopbox(clone);
 
@@ -486,15 +536,7 @@
             _class.close_button = _class.container.find(".popbox-close");
             _class.title_area = _class.container.find(".popbox-title");
             _class.content_area = _class.container.find(".popbox-content");
-
-            if (_class.settings.mode == 'gallery')
-            {
-                _class.content_area.css({'visibility':'hidden','height':'0'});
-
-                var loading = (isString(this.settings.gallery.loading,true)) ? _class.settings.gallery.loading : _class.defaultSettings.gallery.loading;
-                _class.content_area.after('<div class="popbox-gallery-loading">'+loading+'</div>');
-                _class.gallery_loading = _class.container.find(".popbox-gallery-loading");
-            }
+            _class.gallery_loading = false;
 
             _class.container.css({
                 'display':'none',
@@ -536,8 +578,20 @@
             });
             _class.content_area.css({
                 'overflow':'hidden',
-                'height':'100%'
+                'height':'auto'
             });
+
+            if (_class.settings.mode == 'gallery')
+            {
+                _class.content_area.hide();
+                var loading = (isString(this.settings.gallery.loading,true)) ? _class.settings.gallery.loading : _class.defaultSettings.gallery.loading;
+                _class.content_area.after('<div class="popbox-gallery-loading">'+loading+'</div>');
+                _class.gallery_loading = _class.container.find(".popbox-gallery-loading");
+                _class.gallery_loading.css({
+                    'overflow':'hidden',
+                    'height':'auto'
+                });
+            }
 
             _class.adjust();
 
@@ -639,7 +693,8 @@
         animateSpeed: 400,
         mode:'normal',
         gallery:{
-            loading:'Loading'
+            loading:'Loading',
+            error:'Error'
         }
     };
 

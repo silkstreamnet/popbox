@@ -48,7 +48,6 @@ RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/borde
 Things to Add
 @@@@@@@@@@@@@
 
-- autoScale isn't taking maxheight or maxwidth settings into account.
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
 
