@@ -23,6 +23,7 @@ Options:
 - 'autoScale' : false : {boolean}  === Set to true for galleries/images/iframes.
 - 'innerOverflow' : false : {boolean} === Create scroll bar for overflow inside the popup when true
 - 'customClass' : '' : {string} === Custom string for container of popup
+- 'mode' : 'normal' : {string} === Set the mode. 'normal', 'gallery'
 
 View index.html for example code.
 
@@ -47,8 +48,6 @@ RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/borde
 Things to Add
 @@@@@@@@@@@@@
 
-- possible fix for body still scrolling (visual): set body to position fixed (will have to get current scroll before hand and use that to reset as well).
-- add option to animate width and height (currently only animates top and left). can only do this with set widths and heights or auto scaling (image).
 - autoScale isn't taking maxheight or maxwidth settings into account.
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)

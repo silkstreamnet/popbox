@@ -34,6 +34,8 @@
         var _popbox = new PopBox({
             autoScale:true, //for image galleries - auto set when mode = gallery
             mode:'gallery',
+            maxwidth:600,
+            maxheight:400,
             afterClose:function(p){
                 p.update({content:''});
             }
