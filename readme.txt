@@ -24,6 +24,14 @@ Options:
 - 'innerOverflow' : false : {boolean} === Create scroll bar for overflow inside the popup when true
 - 'customClass' : '' : {string} === Custom string for container of popup
 - 'mode' : 'normal' : {string} === Set the mode. 'normal', 'gallery'
+- 'gallery' : {} : {object} === Look at gallery settings for more information.
+
+
+Gallery Sub Options:
+   param : default value : all values
+
+- 'loading' : 'Loading' : {string} === Text to show when image is loading. Accepts HTML.
+- 'error' : 'Error' : {string} === Text to show when image has failed to load. Accepts HTML.
 
 View index.html for example code.
 
@@ -33,13 +41,13 @@ Define a new popbox:
 	---
 _popbox has the following methods:
 	---
-	_popbox.isOpen();                                             === Returns: {boolean}. 
-	_popbox.isClose();                                            === Returns: {boolean}. 
-	_popbox.checkImages();                                        === Returns: {null}. Executes: Resets the image loader for the current popbox to re-adjust the popbox for any slow loading images.
-	_popbox.update(settings={object}, adjust={boolean});          === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
-	_popbox.open();                                               === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
-	_popbox.close();                                              === Returns: {null}. Executes: Closes the popbox and removes it from the body.
-	_popbox.adjust(animate={boolean});                            === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
+	_popbox.isOpen();                                                                === Returns: {boolean}.
+	_popbox.isClose();                                                               === Returns: {boolean}.
+	_popbox.checkImages();                                                           === Returns: {null}. Executes: Resets the image loader for the current popbox to re-adjust the popbox for any slow loading images.
+	_popbox.update(settings={object}, adjust={boolean}, animate={boolean});          === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
+	_popbox.open();                                                                  === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
+	_popbox.close();                                                                 === Returns: {null}. Executes: Closes the popbox and removes it from the body.
+	_popbox.adjust(animate={boolean});                                               === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
 RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/border.
@@ -55,6 +63,12 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-09 (stable) ===
+- Added small width checking for popup.
+- Added image load failure error monitoring.
+- Added sub setting of 'error' to 'gallery'. Error setting lets you specify "error" text. (Only for gallery mode)
+- Added 'animate' parameter to 'update' method. Set whether the adjust transformation is animated.
 
 === v2-08b (beta) ===
 - PopBox Now memorises body margin right and overflow.

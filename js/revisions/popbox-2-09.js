@@ -95,14 +95,14 @@
             {
                 //pb.content_area.css({'visibility':'','height':'','overflow':''});
                 pb.content_area.show();
-                if (pb.gallery_loading_area) pb.gallery_loading_area.hide();
+                if (pb.gallery_loading) pb.gallery_loading.hide();
                 pb.properties.gallery.isloading = false;
             }
             else
             {
                 //pb.content_area.css({'visibility':'hidden','height':'0','overflow':'hidden'});
                 pb.content_area.hide();
-                if (pb.gallery_loading_area) pb.gallery_loading_area.show();
+                if (pb.gallery_loading) pb.gallery_loading.show();
                 pb.properties.gallery.isloading = true;
             }
         }
@@ -151,13 +151,13 @@
                             }
                         }
 
-                        if (pb.settings.mode == 'gallery' && pb.gallery_loading_area)
+                        if (pb.settings.mode == 'gallery' && pb.gallery_loading)
                         {
                             if (typeof element.onerror !== "undefined")
                             {
                                 element.onerror = function(){
                                     var error = (isString(pb.settings.gallery.error,true)) ? pb.settings.gallery.error : pb.defaultSettings.gallery.error;
-                                    pb.gallery_loading_area.html(error);
+                                    pb.gallery_loading.html(error);
                                     pb.properties.gallery.isloading = true;
                                     $(element).remove();
                                     pb.adjust(false);
@@ -200,7 +200,7 @@
             container:clone_container,
             popup:clone_container.find('.popbox-popup').eq(0),
             content:clone_container.find('.popbox-content').eq(0),
-            gallery_loading_area:clone_container.find('.popbox-gallery-loading').eq(0)
+            gallery_loading:clone_container.find('.popbox-gallery-loading').eq(0)
         }
     }
 
@@ -220,7 +220,7 @@
             var $popup = pb.popup;
             var $container = pb.container;
             var $content = pb.content_area;
-            var $gallery_loading_area = pb.gallery_loading_area;
+            var $gallery_loading = pb.gallery_loading;
 
             $popup.stop(true,false);
 
@@ -308,7 +308,7 @@
                 clone = clonePopbox(pb);
                 clone.popup.css({'height':'auto','width':'auto','top':'0','left':'0'});
                 clone.content.attr('style','');
-                clone.gallery_loading_area.attr('style','');
+                clone.gallery_loading.attr('style','');
 
                 var $_content_ob = $content;
                 var clone_content_ob = clone.content;
@@ -316,15 +316,15 @@
                 if (pb.properties.gallery.isloading)
                 {
                     clone.content.css('display','none');
-                    clone.gallery_loading_area.css('display','block');
+                    clone.gallery_loading.css('display','block');
 
-                    $_content_ob = $gallery_loading_area;
-                    clone_content_ob = clone.gallery_loading_area;
+                    $_content_ob = $gallery_loading;
+                    clone_content_ob = clone.gallery_loading;
                 }
                 else
                 {
                     clone.content.css('display','block');
-                    clone.gallery_loading_area.css('display','none');
+                    clone.gallery_loading.css('display','none');
                 }
 
 
@@ -542,7 +542,7 @@
             _class.close_button = _class.container.find(".popbox-close");
             _class.title_area = _class.container.find(".popbox-title");
             _class.content_area = _class.container.find(".popbox-content");
-            _class.gallery_loading_area = false;
+            _class.gallery_loading = false;
 
             _class.container.css({
                 'display':'none',
@@ -592,8 +592,8 @@
                 _class.content_area.hide();
                 var loading = (isString(this.settings.gallery.loading,true)) ? _class.settings.gallery.loading : _class.defaultSettings.gallery.loading;
                 _class.content_area.after('<div class="popbox-gallery-loading">'+loading+'</div>');
-                _class.gallery_loading_area = _class.container.find(".popbox-gallery-loading");
-                _class.gallery_loading_area.css({
+                _class.gallery_loading = _class.container.find(".popbox-gallery-loading");
+                _class.gallery_loading.css({
                     'overflow':'hidden',
                     'height':'auto'
                 });
