@@ -64,6 +64,10 @@ Things to Add
 Updates
 @@@@@@@
 
+=== v2-10 (stable) ===
+- Changed how html/body correction is reset.
+- Added fix for websites that have global box-sizing.
+
 === v2-09 (stable) ===
 - Added small width checking for popup.
 - Added image load failure error monitoring.
