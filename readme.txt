@@ -22,6 +22,7 @@ Options:
 - 'updatePositionDelay' : 200 : {number}     === Interval refresh rate for adjusting the popbox. (higher the number, the less intensive. lower the number, the more responsive and accurate.)
 - 'autoScale' : false : {boolean}  === Set to true for galleries/images/iframes.
 - 'innerOverflow' : false : {boolean} === Create scroll bar for overflow inside the popup when true
+- 'scaleToContent' : false : {boolean} === When autoScale is false, use this setting to attempt to scale the popbox to its contents based on width.
 - 'customClass' : '' : {string} === Custom string for container of popup
 - 'mode' : 'normal' : {string} === Set the mode. 'normal', 'gallery'
 - 'gallery' : {} : {object} === Look at gallery settings for more information.
@@ -63,6 +64,9 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-11 (stable) ===
+- Added new setting, scaleToContent.
 
 === v2-10 (stable) ===
 - Changed how html/body correction is reset.
