@@ -93,9 +93,8 @@
         }
     }
 
-    function checkAllImagesReady(pb,adjust) {
+    function checkAllImagesReady(pb) {
         pb = param(pb,false);
-        adjust = param(adjust,false);
 
         var images_ready = true;
 
@@ -119,14 +118,12 @@
         {
             if (images_ready)
             {
-                //pb.content_area.css({'visibility':'','height':'','overflow':''});
                 pb.content_area.show();
                 if (pb.gallery_loading_area) pb.gallery_loading_area.hide();
                 pb.properties.gallery.isloading = false;
             }
             else
             {
-                //pb.content_area.css({'visibility':'hidden','height':'0','overflow':'hidden'});
                 pb.content_area.hide();
                 if (pb.gallery_loading_area) pb.gallery_loading_area.show();
                 pb.properties.gallery.isloading = true;
@@ -135,7 +132,8 @@
 
         if (images_ready)
         {
-            if (adjust) adjustPopBoxToClient(pb);
+            adjustPopBoxToClient(pb);
+            pb.properties.newopen = false;
         }
 
         return images_ready;
@@ -166,14 +164,14 @@
                         if (typeof element.onload !== "undefined")
                         {
                             element.onload = function(){
-                                if (typeof element.readyState !== "undefined") setTimeout(function(){checkAllImagesReady(pb,true)},10);
-                                else checkAllImagesReady(pb,true);
+                                if (typeof element.readyState !== "undefined") setTimeout(function(){checkAllImagesReady(pb)},10);
+                                else checkAllImagesReady(pb);
                             }
                         }
                         else if (typeof element.onreadystatechange !== "undefined")
                         {
                             element.onreadystatechange = function(){
-                                setTimeout(function(){checkAllImagesReady(pb,true)},10);
+                                setTimeout(function(){checkAllImagesReady(pb)},10);
                             }
                         }
 
@@ -195,7 +193,7 @@
 
                 if (images.length == images_ready)
                 {
-                    checkAllImagesReady(pb,true);
+                    checkAllImagesReady(pb);
                 }
             }
         }
@@ -205,6 +203,7 @@
     {
         if (pb.properties.loaded_content !== pb.settings.content)
         {
+            //checkAllImagesReady will verify the popbox is ready for animated resizing
             if (!checkAllImagesReady(pb))
             {
                 addImageLoadListeners(pb);
@@ -473,15 +472,6 @@
                     "width":newWidth,
                     "height":newHeight
                 });
-            }
-
-            if (pb.properties.newopen == true && pb.properties.loaded_content === pb.settings.content)
-            {
-                var curtime = new Date().getTime();
-                if (curtime - pb.properties.newopentime > 500)
-                {
-                    pb.properties.newopen = false;
-                }
             }
         }
     }
