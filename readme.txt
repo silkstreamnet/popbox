@@ -45,10 +45,10 @@ _popbox has the following methods:
 	_popbox.isOpen();                                                                === Returns: {boolean}.
 	_popbox.isClose();                                                               === Returns: {boolean}.
 	_popbox.checkImages();                                                           === Returns: {null}. Executes: Resets the image loader for the current popbox to re-adjust the popbox for any slow loading images.
-	_popbox.update(settings={object}, adjust={boolean}, animate={boolean});          === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
+	_popbox.update(settings={object}, adjust={boolean});                             === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
 	_popbox.open();                                                                  === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
 	_popbox.close();                                                                 === Returns: {null}. Executes: Closes the popbox and removes it from the body.
-	_popbox.adjust(animate={boolean});                                               === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
+	_popbox.adjust();                                                                === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
 RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/border.
@@ -64,6 +64,10 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-12 (stable) ===
+- Removed all instances of animate parameter (update and adjust functions no longer have animate parameters)
+- Created new way of managing whether to animate popbox on open.
 
 === v2-11 (stable) ===
 - Added new setting, scaleToContent.
