@@ -513,7 +513,7 @@
                 popboxAnimateComplete(_class,'close');
             });
 
-            $(window).off("resize.popbox.adjust,scroll.popbox.adjust");
+            $(window).off("resize.popbox.adjust scroll.popbox.adjust");
 
             _class.properties.isopen = false;
             _class.checkImages();
@@ -647,7 +647,7 @@
                 e.preventDefault();
             });
 
-            $(window).on("resize.popbox.adjust,scroll.popbox.adjust",function(){_class.adjust();});
+            $(window).on("resize.popbox.adjust scroll.popbox.adjust",function(){_class.adjust();});
 
             _class.properties.isopen = true;
             _class.properties.newopen = true;
