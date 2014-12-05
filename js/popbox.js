@@ -58,8 +58,14 @@
             newopentime: 0,
             resizepause: false,
             loaded_content: -1,
-            bodyMarginRight:'',
-            bodyOverflow:'',
+            stored_styles: {
+                windowScrollTop: 0,
+                htmlOverflow:'',
+                htmlHeight:'',
+                bodyPosition:'',
+                bodyMinWidth:'',
+                bodyTop:''
+            },
             gallery:{
                 isloading:false
             }
@@ -81,10 +87,17 @@
                     popbox.popup = false;
                     popbox.shadow = false;
                     $('html').css({
-                        'overflow':popbox.properties.bodyOverflow,
-                        'margin-right':popbox.properties.bodyMarginRight
+                        'overflow':popbox.properties.stored_styles.htmlOverflow,
+                        'height':popbox.properties.stored_styles.htmlHeight
                     });
-                    $(document).off('scroll.popbox touchmove.popbox mousewheel.popbox');
+                    $('body').css({
+                        'position':popbox.properties.stored_styles.bodyPosition,
+                        'min-width':popbox.properties.stored_styles.bodyMinWidth,
+                        'top':popbox.properties.stored_styles.bodyTop
+                    });
+                    $(window).scrollTop(popbox.properties.stored_styles.windowScrollTop);
+                    popbox.properties.stored_styles.windowScrollTop = 0;
+                    //$(document).off('scroll.popbox touchmove.popbox mousewheel.popbox');
                     break;
                 case 'open':
                     popbox.properties.isopen = true;
@@ -513,7 +526,7 @@
                 popboxAnimateComplete(_class,'close');
             });
 
-            $(window).off("resize.popbox.adjust scroll.popbox.adjust");
+            $(window).off("resize.popbox.adjust");
 
             _class.properties.isopen = false;
             _class.checkImages();
@@ -546,22 +559,20 @@
             var _html = $('html');
             var _body = $('body');
 
-            _class.properties.bodyOverflow = getInlineStyle(_html,'overflow');
+            _class.properties.stored_styles.windowScrollTop = $(window).scrollTop();
+            _class.properties.stored_styles.htmlOverflow = getInlineStyle(_html,'overflow');
+            _class.properties.stored_styles.htmlHeight = getInlineStyle(_html,'height');
+            _class.properties.stored_styles.bodyPosition = getInlineStyle(_body,'position');
+            _class.properties.stored_styles.bodyTop = getInlineStyle(_body,'top');
+            _class.properties.stored_styles.bodyMinWidth = getInlineStyle(_body,'min-width');
 
-            var old_body_width = _html.width();
-            _html.css('overflow','hidden');
-            var new_body_width = _html.width();
+            _html.css({'overflow':'hidden','height':'100%'});
 
-            if (new_body_width > old_body_width)
-            {
-                var margin_right = _html.css('margin-right');
-                _class.properties.bodyMarginRight = getInlineStyle(_html,'margin-right');
-                var old_margin_right = parseInt(margin_right);
-                var new_margin_right = old_margin_right+(new_body_width-old_body_width);
-                _html.css('margin-right',new_margin_right+'px');
-            }
-
-            $(document).on('scroll.popbox touchmove.popbox mousewheel.popbox',function(e){});
+            _body.css({
+                'position':'fixed',
+                'top':(($(window).scrollTop()-(_body.outerHeight(true)-_body.height()))*-1)+'px',
+                'min-width':'100%'
+            });
 
             _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
@@ -647,7 +658,7 @@
                 e.preventDefault();
             });
 
-            $(window).on("resize.popbox.adjust scroll.popbox.adjust",function(){_class.adjust();});
+            $(window).on("resize.popbox.adjust",function(){_class.adjust();});
 
             _class.properties.isopen = true;
             _class.properties.newopen = true;
