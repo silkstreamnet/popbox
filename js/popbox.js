@@ -171,28 +171,28 @@
                         // Already loaded, fire the handler (asynchronously)
                         images_ready++;
                     }
-                    else
+                    else if (element.src)
                     {
                         // Hook up the handler
-                        if (typeof element.onload !== "undefined")
+                        var fimage = new Image();
+                        if (typeof fimage.onload !== "undefined")
                         {
-                            element.onload = function(){
-                                if (typeof element.readyState !== "undefined") setTimeout(function(){checkAllImagesReady(pb)},10);
-                                else checkAllImagesReady(pb);
-                            }
-                        }
-                        else if (typeof element.onreadystatechange !== "undefined")
-                        {
-                            element.onreadystatechange = function(){
+                            fimage.onload = function(){
                                 setTimeout(function(){checkAllImagesReady(pb)},10);
-                            }
+                            };
+                        }
+                        else if (typeof fimage.onreadystatechange !== "undefined")
+                        {
+                            fimage.onreadystatechange = function(){
+                                setTimeout(function(){checkAllImagesReady(pb)},10);
+                            };
                         }
 
                         if (pb.settings.mode == 'gallery' && pb.gallery_loading_area)
                         {
-                            if (typeof element.onerror !== "undefined")
+                            if (typeof fimage.onerror !== "undefined")
                             {
-                                element.onerror = function(){
+                                fimage.onerror = function(){
                                     var error = (isString(pb.settings.gallery.error,true)) ? pb.settings.gallery.error : pb.defaultSettings.gallery.error;
                                     pb.gallery_loading_area.html(error);
                                     pb.properties.gallery.isloading = true;
@@ -201,6 +201,8 @@
                                 }
                             }
                         }
+
+                        fimage.src = element.src;
                     }
                 });
 
@@ -570,7 +572,7 @@
 
             _body.css({
                 'position':'fixed',
-                'top':(($(window).scrollTop()-(_body.outerHeight(true)-_body.height()))*-1)+'px',
+                'top':(($(window).scrollTop())*-1)+'px',
                 'min-width':'100%'
             });
 
