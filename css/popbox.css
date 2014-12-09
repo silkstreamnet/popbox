@@ -1,0 +1,63 @@
+/*
+ * 	Core Popbox CSS File
+ *	v2.12
+ */
+
+.popbox-container {
+    z-index:9990;
+    background:url(../images/blackout.png) !important;
+}
+.popbox-popup {
+    background:#fff;
+    z-index:9991;
+    position:absolute;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+    padding:15px;
+}
+.popbox-title {
+    z-index: 9992;
+    padding: 0 15px;
+    height:50px;
+    background: #7CABC8;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: -15px -15px 10px;
+    line-height: 50px;
+    font-size: 18px;
+    color: #fff;
+}
+.popbox-content {
+    z-index:9992;
+}
+.popbox-close {
+    right:-50px;
+    top: 0;
+    width:50px;
+    height:50px;
+    z-index:9995;
+    position:absolute;
+    background:#7CABC8;
+    color: #4E7B98;
+    padding:0;
+	text-align: center;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:24px;
+    line-height:50px;
+    text-decoration:none;
+    transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -o-transition: all 0.5s;
+}
+.popbox-close:hover {
+    background:#4E7B98;
+    color: #7CABC8;
+}
+
+@media screen and (max-width: 768px) {
+    .popbox-close {
+        left: auto;
+        right: 0;
+    }
+}
