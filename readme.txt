@@ -59,6 +59,9 @@ Things to Add
 
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
+- add in rel gallery functionality with arrows
+- test all views in all browsers
+- make error and loading text have a fit box
 
 
 @@@@@@@
@@ -94,6 +97,7 @@ Updates
 - Fixed some issues with IE 7 and 8.
 
 === v2-07b (beta) ===
+- WARNING: This revision changes variable/method names and may require code updates
 - changed beforeOpen to onOpen (illogical name adjustment)
 - changed beforeClose to onClose (illogical name adjustment)
 - changed onOpen to afterOpen (illogical name adjustment)

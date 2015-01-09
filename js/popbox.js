@@ -59,12 +59,9 @@
             resizepause: false,
             loaded_content: -1,
             stored_styles: {
-                windowScrollTop: 0,
                 htmlOverflow:'',
                 htmlHeight:'',
-                bodyPosition:'',
-                bodyMinWidth:'',
-                bodyTop:''
+                htmlPaddingRight:''
             },
             gallery:{
                 isloading:false
@@ -72,7 +69,7 @@
         };
     };
 
-    function popboxAnimateComplete(popbox,method)
+    function popboxAnimateStateComplete(popbox,method)
     {
         if (popbox.properties.animating)
         {
@@ -86,17 +83,13 @@
                     popbox.properties.isopen = false;
                     popbox.popup = false;
                     popbox.shadow = false;
+
                     $('html').css({
                         'overflow':popbox.properties.stored_styles.htmlOverflow,
-                        'height':popbox.properties.stored_styles.htmlHeight
+                        'height':popbox.properties.stored_styles.htmlHeight,
+                        'padding-right':popbox.properties.stored_styles.htmlPaddingRight
                     });
-                    $('body').css({
-                        'position':popbox.properties.stored_styles.bodyPosition,
-                        'min-width':popbox.properties.stored_styles.bodyMinWidth,
-                        'top':popbox.properties.stored_styles.bodyTop
-                    });
-                    $(window).scrollTop(popbox.properties.stored_styles.windowScrollTop);
-                    popbox.properties.stored_styles.windowScrollTop = 0;
+
                     break;
                 case 'open':
                     popbox.properties.isopen = true;
@@ -268,6 +261,7 @@
 
         if (pb && pb.popup)
         {
+            var _body = $('body');
             var st = pb.settings;
             var $popup = pb.popup;
             var $container = pb.container;
@@ -282,6 +276,13 @@
                 setY = false, clone = false;
 
             fixScalableElements(pb);
+
+            var newBodyHeight = _body.height();
+            if (newBodyHeight != pb.properties.stored_styles.bodyHeight)
+            {
+                _body.css('top','+='+(newBodyHeight-pb.properties.stored_styles.bodyHeight));
+                pb.properties.stored_styles.bodyHeight = newBodyHeight;
+            }
 
             if (st.autoScale && !pb.properties.gallery.isloading)
             {
@@ -433,7 +434,7 @@
                 if (newOuterHeight > dMaxHeight)
                 {
                     setY = dPush;
-                    $container.css('overflow','auto');
+                    $container.css('overflow-y','scroll');
                     pb.bottom_push.css({
                         'top':(dPush+newOuterHeight)+'px',
                         'height':dPush+'px',
@@ -445,7 +446,7 @@
                 }
                 else
                 {
-                    $container.css('overflow','');
+                    $container.css('overflow','hidden');
                     pb.bottom_push.css({
                         'top':'0px',
                         'height':'0px',
@@ -524,7 +525,7 @@
             _class.properties.animating = true;
 
             _class.container.fadeOut(_class.settings.fadeOutSpeed,function(){
-                popboxAnimateComplete(_class,'close');
+                popboxAnimateStateComplete(_class,'close');
             });
 
             $(window).off('resize.popbox.adjust');
@@ -561,20 +562,15 @@
             var _html = $('html');
             var _body = $('body');
 
-            _class.properties.stored_styles.windowScrollTop = $(window).scrollTop();
             _class.properties.stored_styles.htmlOverflow = getInlineStyle(_html,'overflow');
             _class.properties.stored_styles.htmlHeight = getInlineStyle(_html,'height');
-            _class.properties.stored_styles.bodyPosition = getInlineStyle(_body,'position');
-            _class.properties.stored_styles.bodyTop = getInlineStyle(_body,'top');
-            _class.properties.stored_styles.bodyMinWidth = getInlineStyle(_body,'min-width');
+            _class.properties.stored_styles.htmlPaddingRight = getInlineStyle(_html,'padding-right');
 
+            var old_body_width = _body.width();
             _html.css({'overflow':'hidden','height':'100%'});
+            var new_body_width = _body.width();
 
-            _body.css({
-                'position':'relative',
-                'top':(($(window).scrollTop())*-1)+'px',
-                'min-width':'100%'
-            });
+            if (new_body_width > old_body_width) _html.css({'padding-right':(new_body_width-old_body_width)+'px'});
 
             _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
@@ -648,7 +644,7 @@
 
 
             _class.container.fadeIn(_class.settings.fadeInSpeed, function(){
-                popboxAnimateComplete(_class,'open');
+                popboxAnimateStateComplete(_class,'open');
             });
 
             _class.shadow.click(function(e){
@@ -661,7 +657,7 @@
             });
 
             $(window).on('resize.popbox.adjust',function(){_class.adjust();});
-            $(document).on('touchstart.popbox',function(){_body.css('position','fixed');}).on('touchend.popbox',function(){_body.css('position','relative');});
+            //$(document).on('touchstart.popbox',function(){_body.css('position','fixed');}).on('touchend.popbox',function(){_body.css('position','relative');});
 
             _class.properties.isopen = true;
             _class.properties.newopen = true;
