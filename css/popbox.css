@@ -1,6 +1,6 @@
 /*
  * 	Core Popbox CSS File
- *	v2.12
+ *	v2.13
  */
 
 .popbox-container {
@@ -18,13 +18,13 @@
     z-index: 9992;
     padding: 0 15px;
     height:50px;
-    background: #7CABC8;
+    background: #FFF;
     font-weight: bold;
     text-transform: uppercase;
     margin: -15px -15px 10px;
     line-height: 50px;
     font-size: 18px;
-    color: #fff;
+    color: #333;
 }
 .popbox-content {
     z-index:9992;
@@ -36,8 +36,8 @@
     height:50px;
     z-index:9995;
     position:absolute;
-    background:#7CABC8;
-    color: #4E7B98;
+    background:#FFF;
+    color: #999;
     padding:0;
 	text-align: center;
     cursor:pointer;
@@ -51,8 +51,11 @@
     -o-transition: all 0.5s;
 }
 .popbox-close:hover {
-    background:#4E7B98;
-    color: #7CABC8;
+    color:#222;
+}
+
+.popbox-gallery-loading {
+    max-width:200px;
 }
 
 @media screen and (max-width: 768px) {

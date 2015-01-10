@@ -59,14 +59,17 @@ Things to Add
 
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
-- add in rel gallery functionality with arrows
-- test all views in all browsers
-- make error and loading text have a fit box
-
+- add in rel gallery functionality with arrows +++
+- test all views in all browsers including mobile
+- iframe doesn't work in IE7
+- add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
 
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-13 ===
+
 
 === v2-12 (stable) ===
 - Removed all instances of animate parameter (update and adjust functions no longer have animate parameters)

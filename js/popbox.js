@@ -58,10 +58,11 @@
             newopentime: 0,
             resizepause: false,
             loaded_content: -1,
+            loaded_images:[],
             stored_styles: {
                 htmlOverflow:'',
                 htmlHeight:'',
-                htmlPaddingRight:''
+                htmlMarginRight:''
             },
             gallery:{
                 isloading:false
@@ -87,7 +88,7 @@
                     $('html').css({
                         'overflow':popbox.properties.stored_styles.htmlOverflow,
                         'height':popbox.properties.stored_styles.htmlHeight,
-                        'padding-right':popbox.properties.stored_styles.htmlPaddingRight
+                        'margin-right':popbox.properties.stored_styles.htmlMarginRight
                     });
 
                     break;
@@ -105,40 +106,39 @@
 
         if (pb && pb.popup)
         {
-            var images = pb.popup.find('img');
+            var images = pb.properties.loaded_images;
 
-            if (images.length > 0)
+            if (images.length)
             {
-                // Hook up each image individually
-                images.each(function(index, element) {
-                    if (!element.complete && element.readyState !== 4 && element.readyState !== 'complete')
+                for (var k=0; k<images.length; k++)
+                {
+                    var image = images[k];
+                    if (!image.complete && image.readyState !== 4 && image.readyState !== 'complete')
                     {
                         images_ready = false;
                     }
-                });
-            }
-        }
-
-        if (pb.settings.mode == 'gallery')
-        {
-            if (images_ready)
-            {
-                pb.content_area.show();
-                if (pb.gallery_loading_area) pb.gallery_loading_area.hide();
-                pb.properties.gallery.isloading = false;
+                }
             }
             else
             {
-                pb.content_area.hide();
-                if (pb.gallery_loading_area) pb.gallery_loading_area.show();
-                pb.properties.gallery.isloading = true;
+                images = pb.popup.find('img');
+
+                if (images.length > 0)
+                {
+                    // Hook up each image individually
+                    images.each(function(index, element) {
+                        if (!element.complete && element.readyState !== 4 && element.readyState !== 'complete')
+                        {
+                            images_ready = false;
+                        }
+                    });
+                }
             }
         }
 
         if (images_ready)
         {
-            adjustPopBoxToClient(pb);
-            pb.properties.newopen = false;
+            adjustNewPopboxToClient(pb);
         }
 
         return images_ready;
@@ -150,11 +150,18 @@
 
         if (pb && pb.popup)
         {
-
+            pb.properties.images_loaded = [];
             var images = pb.popup.find('img');
 
             if (images.length > 0)
             {
+                if (pb.settings.mode == 'gallery')
+                {
+                    pb.content_area.hide();
+                    if (pb.gallery_loading_area) pb.gallery_loading_area.show();
+                    pb.properties.gallery.isloading = true;
+                }
+
                 var images_ready = 0;
 
                 // Hook up each image individually
@@ -195,26 +202,42 @@
                         }
 
                         fimage.src = element.src;
+                        pb.properties.loaded_images.push(fimage);
                     }
                 });
 
                 if (images.length == images_ready)
                 {
-                    checkAllImagesReady(pb);
+                    adjustNewPopboxToClient(pb);
                 }
+            }
+            else
+            {
+                adjustNewPopboxToClient(pb);
             }
         }
     }
 
-    function delayedLoadAdjust(pb)
+    function adjustNewPopboxToClient(pb)
+    {
+        //images assumed ready
+        if (pb.settings.mode == 'gallery')
+        {
+            pb.content_area.show();
+            if (pb.gallery_loading_area) pb.gallery_loading_area.hide();
+            pb.properties.gallery.isloading = false;
+        }
+
+        adjustPopBoxToClient(pb);
+        pb.properties.newopen = false;
+    }
+
+    function loadAdjust(pb)
     {
         if (pb.properties.loaded_content !== pb.settings.content)
         {
             //checkAllImagesReady will verify the popbox is ready for animated resizing
-            if (!checkAllImagesReady(pb))
-            {
-                addImageLoadListeners(pb);
-            }
+            addImageLoadListeners(pb);
             pb.properties.loaded_content = pb.settings.content;
         }
     }
@@ -261,28 +284,22 @@
 
         if (pb && pb.popup)
         {
-            var _body = $('body');
             var st = pb.settings;
             var $popup = pb.popup;
             var $container = pb.container;
             var $content = pb.content_area;
+            var $shadow = pb.shadow;
             var $gallery_loading_area = pb.gallery_loading_area;
 
             $popup.stop(true,false);
-
-            var newWidth = 0, newHeight = 0, newOuterWidth = 0, newOuterHeight = 0,
-                cWidth = 0, cHeight = 0, cWidthPadding = 0, cHeightPadding = 0, cOuterWidth = 0, cOuterHeight = 0,
-                dOuterWidth = $container.outerWidth(false), dOuterHeight = $container.outerHeight(false), dMaxWidth = 0, dMaxHeight = 0, dPush = 0,
-                setY = false, clone = false;
+            $container.css('overflow-y','hidden');
 
             fixScalableElements(pb);
 
-            var newBodyHeight = _body.height();
-            if (newBodyHeight != pb.properties.stored_styles.bodyHeight)
-            {
-                _body.css('top','+='+(newBodyHeight-pb.properties.stored_styles.bodyHeight));
-                pb.properties.stored_styles.bodyHeight = newBodyHeight;
-            }
+            var newWidth = 0, newHeight = 0, newOuterWidth = 0, newOuterHeight = 0,
+                cWidth = 0, cHeight = 0, cWidthPadding = 0, cHeightPadding = 0,
+                dOuterWidth = $shadow.width(), dOuterHeight = $container.outerHeight(false), dMaxWidth = 0, dMaxHeight = 0, dPush = 0,
+                setY = false, clone = false;
 
             if (st.autoScale && !pb.properties.gallery.isloading)
             {
@@ -371,12 +388,11 @@
                     clone.gallery_loading_area.css('display','none');
                 }
 
-
                 if (isNumber(st.width))
                 {
                     newWidth = st.width;
                 }
-                else if (st.scaleToContent && clone.popup.width() < newWidth)
+                else if ((st.scaleToContent || pb.properties.gallery.isloading) && clone.popup.width() < newWidth)
                 {
                     newWidth = clone.popup.width();
                 }
@@ -446,7 +462,6 @@
                 }
                 else
                 {
-                    $container.css('overflow','hidden');
                     pb.bottom_push.css({
                         'top':'0px',
                         'height':'0px',
@@ -462,19 +477,20 @@
             newOuterWidth = newWidth+cWidthPadding;
             newOuterHeight = newHeight+cHeightPadding;
 
-            var g = (dOuterWidth - newOuterWidth) / 2;
-            var h = (dOuterHeight - newOuterHeight) / 2;
+            var newLeft = (dOuterWidth - newOuterWidth) / 2;
+            var newTop = (dOuterHeight - newOuterHeight) / 2;
 
             if (setY !== false)
             {
-                h = setY;
+                newTop = setY;
             }
+
 
             if (!pb.properties.newopen && st.animateSpeed > 0)
             {
                 $popup.animate({
-                    "left":g,
-                    "top":h,
+                    "left":newLeft,
+                    "top":newTop,
                     "width":newWidth,
                     "height":newHeight
                 },st.animateSpeed).css('overflow','');
@@ -482,8 +498,8 @@
             else
             {
                 $popup.css({
-                    "left":g,
-                    "top":h,
+                    "left":newLeft,
+                    "top":newTop,
                     "width":newWidth,
                     "height":newHeight
                 });
@@ -503,13 +519,14 @@
                 _class.properties.resizepause = false;
             },_class.properties.updatePositionDelay);
 
-            delayedLoadAdjust(_class);
+            loadAdjust(_class);
         }
     };
 
     PopBox.prototype.checkImages = function()
     {
         this.properties.loaded_content = -1;
+        this.properties.loaded_images = [];
     };
 
     PopBox.prototype.close = function()
@@ -564,13 +581,12 @@
 
             _class.properties.stored_styles.htmlOverflow = getInlineStyle(_html,'overflow');
             _class.properties.stored_styles.htmlHeight = getInlineStyle(_html,'height');
-            _class.properties.stored_styles.htmlPaddingRight = getInlineStyle(_html,'padding-right');
+            _class.properties.stored_styles.htmlMarginRight = getInlineStyle(_html,'margin-right');
 
             var old_body_width = _body.width();
             _html.css({'overflow':'hidden','height':'100%'});
             var new_body_width = _body.width();
-
-            if (new_body_width > old_body_width) _html.css({'padding-right':(new_body_width-old_body_width)+'px'});
+            if (new_body_width > old_body_width) _html.css({'margin-right':(new_body_width-old_body_width)+'px'});
 
             _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
 
@@ -591,7 +607,8 @@
                 'left':'0px',
                 'top':'0px',
                 'z-index':'990',
-                'background-color': 'rgba(0,0,0,0.4)'
+                'background-color': 'rgba(0,0,0,0.4)',
+                'overflow-x':'hidden'
             });
             _class.bottom_push.css({
                 'display':'block',
@@ -641,8 +658,6 @@
                 });
             }
 
-
-
             _class.container.fadeIn(_class.settings.fadeInSpeed, function(){
                 popboxAnimateStateComplete(_class,'open');
             });
@@ -657,7 +672,6 @@
             });
 
             $(window).on('resize.popbox.adjust',function(){_class.adjust();});
-            //$(document).on('touchstart.popbox',function(){_body.css('position','fixed');}).on('touchend.popbox',function(){_body.css('position','relative');});
 
             _class.properties.isopen = true;
             _class.properties.newopen = true;
@@ -750,8 +764,8 @@
         animateSpeed: 400,
         mode:'normal',
         gallery:{
-            loading:'Loading',
-            error:'Error'
+            loading:'<div style="padding:10px;">Loading...</div>',
+            error:'<div style="padding:10px;">Sorry, there was an error loading the image.</div>'
         }
     };
 
