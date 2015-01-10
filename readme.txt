@@ -69,7 +69,11 @@ Updates
 @@@@@@@
 
 === v2-13 ===
-
+- Updated popbox.css
+- Changed handling of body/html elements to remove scrollbar and stop scrolling.
+- Changed image loading system to better support the problems IE has with onload.
+- Loading/Error for galleries now fits popbox to content.
+- Small adjustments and bugfixes throughout.
 
 === v2-12 (stable) ===
 - Removed all instances of animate parameter (update and adjust functions no longer have animate parameters)
