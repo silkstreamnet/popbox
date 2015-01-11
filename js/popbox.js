@@ -26,6 +26,30 @@
         return attrval;
     }
 
+    function indexOf(value,array,strict)
+    {
+        strict = strict || false;
+
+        if (array instanceof Array)
+        {
+            for (var i=0; i<array.length; i++)
+            {
+                if (strict)
+                {
+                    if (array[i] === value)
+                    {
+                        return i;
+                    }
+                }
+                else if (array[i] == value)
+                {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     function getInlineStyle(obj,style)
     {
         var cstyle = getAttr(obj,'style');
@@ -47,7 +71,7 @@
 
         if (settings.mode == 'gallery' && settings.autoScale == null) settings.autoScale = true;
 
-        this.settings = $.extend({},this.defaultSettings,settings);
+        this.settings = $.extend(true,{},this.defaultSettings,settings);
         this.container = false;
         this.popup = false;
         this.shadow = false;
@@ -65,7 +89,9 @@
                 htmlMarginRight:''
             },
             gallery:{
-                isloading:false
+                isloading:false,
+                images:[],
+                position:0
             }
         };
     };
@@ -246,7 +272,8 @@
     {
         pb.popup.find('img').css({
             'max-width':'100%',
-            'height':'auto',
+            'height':'auto'
+        }).filter(':visible').css({
             'display':'block'
         });
 
@@ -254,6 +281,42 @@
             'max-height':'100%',
             'max-width':'100%'
         });
+    }
+
+    function updateGallery(pb)
+    {
+        if (pb && pb.popup)
+        {
+            pb.update({
+                content:'<img src="'+pb.properties.gallery.images[pb.properties.gallery.position]+'" style="display:none;" />'
+            });
+        }
+    }
+
+    function setGalleryArrows(pb)
+    {
+        if (pb && pb.popup)
+        {
+            pb.popup.append('<a href="#" class="popbox-gallery-next">'+pb.settings.gallery.next+'</a>');
+            pb.gallery_next = pb.popup.find('.popbox-gallery-next');
+
+            pb.popup.append('<a href="#" class="popbox-gallery-prev">'+pb.settings.gallery.prev+'</a>');
+            pb.gallery_prev = pb.popup.find('.popbox-gallery-prev');
+
+            pb.gallery_next.click(function(e){
+                e.preventDefault();
+                pb.properties.gallery.position++;
+                if (pb.properties.gallery.position >= pb.properties.gallery.images.length) pb.properties.gallery.position = 0;
+                updateGallery(pb);
+            });
+
+            pb.gallery_prev.click(function(e){
+                e.preventDefault();
+                pb.properties.gallery.position--;
+                if (pb.properties.gallery.position < 0) pb.properties.gallery.position = pb.properties.gallery.images.length-1;
+                updateGallery(pb);
+            });
+        }
     }
 
     function clonePopbox(pb)
@@ -493,7 +556,9 @@
                     "top":newTop,
                     "width":newWidth,
                     "height":newHeight
-                },st.animateSpeed).css('overflow','');
+                },st.animateSpeed,function(){
+                    if (pb.settings.mode == 'gallery' && !pb.properties.gallery.isloading) pb.content_area.find('img:hidden').fadeIn(300);
+                }).css('overflow','');
             }
             else
             {
@@ -503,6 +568,8 @@
                     "width":newWidth,
                     "height":newHeight
                 });
+
+                if (pb.settings.mode == 'gallery' && !pb.properties.gallery.isloading) pb.content_area.find('img:hidden').fadeIn(300);
             }
         }
     }
@@ -523,7 +590,7 @@
         }
     };
 
-    PopBox.prototype.checkImages = function()
+    PopBox.prototype.refresh = function()
     {
         this.properties.loaded_content = -1;
         this.properties.loaded_images = [];
@@ -549,7 +616,7 @@
             $(document).off('touchstart.popbox touchend.popbox');
 
             _class.properties.isopen = false;
-            _class.checkImages();
+            _class.refresh();
 
             if (typeof(_class.settings.afterClose) === "function")
             {
@@ -562,6 +629,8 @@
     {
         //need to add a preload all images check when it is opened. add a listener if there are images to preload, when complete apply "adjust" function.
         var _class = this;
+        _class.refresh();
+
         if (!_class.properties.animating && !_class.properties.isopen)
         {
             if (typeof(_class.settings.onOpen) === "function")
@@ -588,7 +657,7 @@
             var new_body_width = _body.width();
             if (new_body_width > old_body_width) _html.css({'margin-right':(new_body_width-old_body_width)+'px'});
 
-            _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<a class="popbox-close">'+close+'</a><div class="popbox-content">'+content+'</div></div></div>');
+            _body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<div class="popbox-content">'+content+'</div><a href="#" class="popbox-close">'+close+'</a></div></div>');
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
@@ -656,6 +725,45 @@
                     'overflow':'hidden',
                     'height':'auto'
                 });
+
+                if (_class.settings.gallery.class)
+                {
+                    var $gallery_images = $('.'+_class.settings.gallery.class);
+                    if ($gallery_images.length)
+                    {
+                        $gallery_images.each(function(){
+                            //can be either an image or an anchor link
+                            var $gallery_image = $(this);
+                            if ($gallery_image.closest('.popbox-container').length == 0)
+                            {
+                                var gi_src = getAttr($gallery_image,'src');
+                                var gi_href = getAttr($gallery_image,'href');
+
+                                var tsrc = (gi_src) ? gi_src : gi_href;
+
+                                if (tsrc && indexOf(tsrc,_class.properties.gallery.images) == -1) _class.properties.gallery.images.push(tsrc);
+                            }
+                        });
+
+                        if (_class.properties.gallery.images.length > 0)
+                        {
+                            //if the current image isn't in the list, add it
+                            var first_src = '';
+                            var $popup_image = _class.content_area.find('img:first');
+                            if ($popup_image.length) first_src = getAttr($popup_image.eq(0),'src');
+
+                            var first_src_key = indexOf(first_src,_class.properties.gallery.images);
+
+                            _class.properties.gallery.position = 0;
+
+                            if (first_src == '' || first_src_key == -1) _class.properties.gallery.images.unshift(first_src);
+                            else if (first_src_key > -1) _class.properties.gallery.position = first_src_key;
+
+                            //add arrows
+                            setGalleryArrows(_class);
+                        }
+                    }
+                }
             }
 
             _class.container.fadeIn(_class.settings.fadeInSpeed, function(){
@@ -765,7 +873,10 @@
         mode:'normal',
         gallery:{
             loading:'<div style="padding:10px;">Loading...</div>',
-            error:'<div style="padding:10px;">Sorry, there was an error loading the image.</div>'
+            error:'<div style="padding:10px;">Sorry, there was an error loading the image.</div>',
+            class:'',
+            next:'<span>&#x25B6</span>',
+            prev:'<span>&#x25C0</span>'
         }
     };
 

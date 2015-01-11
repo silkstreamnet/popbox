@@ -33,6 +33,9 @@ Gallery Sub Options:
 
 - 'loading' : 'Loading' : {string} === Text to show when image is loading. Accepts HTML.
 - 'error' : 'Error' : {string} === Text to show when image has failed to load. Accepts HTML.
+- 'class' : '' : {string} === Class to use to select all images in the gallery.
+- 'next' : '&#x25B6' : {string} === Text to show for the next button. Accepts HTML.
+- 'prev' : '&#x25C0' : {string} === Text to show for the prev button. Accepts HTML.
 
 View index.html for example code.
 
@@ -59,7 +62,9 @@ Things to Add
 
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
-- add in rel gallery functionality with arrows +++
+- make gallery next/prev image switch animated (remove old image and fade new one)
+- check if you can update settings like mode and gallery using .update and it still works
+- make gallery arrows only appear when hovering over left or right of image
 - test all views in all browsers including mobile
 - iframe doesn't work in IE7
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
@@ -74,6 +79,7 @@ Updates
 - Changed image loading system to better support the problems IE has with onload.
 - Loading/Error for galleries now fits popbox to content.
 - Small adjustments and bugfixes throughout.
+- Added full gallery functionality - new gallery settings.
 
 === v2-12 (stable) ===
 - Removed all instances of animate parameter (update and adjust functions no longer have animate parameters)
