@@ -893,8 +893,8 @@
             loading:'<div style="padding:10px;">Loading...</div>',
             error:'<div style="padding:10px;">Sorry, there was an error loading the image.</div>',
             name:'',
-            next:'<span>&#x25B6</span>',
-            prev:'<span>&#x25C0</span>'
+            next:'<span>&#x25B6;</span>',
+            prev:'<span>&#x25C0;</span>'
         }
     };
 
