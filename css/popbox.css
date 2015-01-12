@@ -65,9 +65,13 @@
     height:100%;
     width:25%;
     color:#555;
-    background:none;
+    background:transparent url(../images/px.gif);
     text-decoration: none;
     display:block;
+    opacity: 0;
+    -moz-transition:opacity 0.4s;
+    -webkit-transition:opacity 0.4s;
+    transition:opacity 0.4s;
 }
 
 .popbox-gallery-next span, .popbox-gallery-prev span {
@@ -81,10 +85,6 @@
     display:block;
     background:#fff;
     font-size:20px;
-    opacity:0;
-    -moz-transition:opacity 0.4s;
-    -webkit-transition:opacity 0.4s;
-    transition:opacity 0.4s;
 }
 
 .popbox-gallery-next {
@@ -103,7 +103,7 @@
     left:5%;
 }
 
-.popbox-gallery-next.popbox-btn-hover span, .popbox-gallery-prev.popbox-btn-hover span {
+.popbox-gallery-next.popbox-btn-hover, .popbox-gallery-prev.popbox-btn-hover {
     opacity:1;
 }
 

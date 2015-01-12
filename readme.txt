@@ -67,10 +67,11 @@ Things to Add
 - make gallery arrows only appear when hovering over left or right of image
 - test all views in all browsers including mobile
 - iframe doesn't work in IE7
-- gallery navigation containers hover doesn't work in IE10 and earlier
-- gallery gets stuck when there is an error
-- some funky movement on gallery navigation buttons in IE7
+- IE7 isn't perfect but is functional
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
+  @ position absolute by default (use function to switch)
+  @ on: touch start / mousewheel / scroll, position fixed
+  @ on: any form element focus, position absolute
 
 @@@@@@@
 Updates

@@ -176,7 +176,7 @@
 
         if (pb && pb.popup)
         {
-            pb.properties.images_loaded = [];
+            pb.properties.loaded_images = [];
             var images = pb.popup.find('img');
 
             if (images.length > 0)
@@ -222,7 +222,8 @@
                                     pb.gallery_loading_area.html(error);
                                     pb.properties.gallery.isloading = true;
                                     $(element).remove();
-                                    pb.adjust();
+                                    adjustPopBoxToClient(pb);
+                                    pb.properties.newopen = false;
                                 }
                             }
                         }
@@ -297,10 +298,10 @@
     {
         if (pb && pb.popup)
         {
-            pb.popup.append('<a href="#" class="popbox-gallery-next">'+pb.settings.gallery.next+'</a>');
+            pb.popup.append('<a href="#" class="popbox-gallery-next">&nbsp;'+pb.settings.gallery.next+'</a>');
             pb.gallery_next = pb.popup.find('.popbox-gallery-next');
 
-            pb.popup.append('<a href="#" class="popbox-gallery-prev">'+pb.settings.gallery.prev+'</a>');
+            pb.popup.append('<a href="#" class="popbox-gallery-prev">'+pb.settings.gallery.prev+'&nbsp;</a>');
             pb.gallery_prev = pb.popup.find('.popbox-gallery-prev');
 
             var mousemove_next = false;
@@ -828,6 +829,7 @@
 
             if (_class.close_button.length > 0) _class.close_button.html(close);
             if (_class.content_area.length > 0) _class.content_area.html(content);
+            //if (_class.gallery_loading_area && _class.gallery_loading_area.length > 0) _class.gallery_loading_area.hide();
             if (_class.title_area.length > 0)
             {
                 if (title != '')
