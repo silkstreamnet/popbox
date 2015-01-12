@@ -64,7 +64,7 @@
     top:0;
     height:100%;
     width:25%;
-    color:#333;
+    color:#555;
     background:none;
     text-decoration: none;
     display:block;
@@ -104,7 +104,7 @@
     left:5%;
 }
 
-.popbox-gallery-next:hover span, .popbox-gallery-prev:hover span {
+.popbox-gallery-next.popbox-btn-hover span, .popbox-gallery-prev.popbox-btn-hover span {
     opacity:1;
 }
 

@@ -33,7 +33,7 @@ Gallery Sub Options:
 
 - 'loading' : 'Loading' : {string} === Text to show when image is loading. Accepts HTML.
 - 'error' : 'Error' : {string} === Text to show when image has failed to load. Accepts HTML.
-- 'class' : '' : {string} === Class to use to select all images in the gallery.
+- 'name' : '' : {string} === Class to use to select all images in the gallery.
 - 'next' : '&#x25B6' : {string} === Text to show for the next button. Accepts HTML.
 - 'prev' : '&#x25C0' : {string} === Text to show for the prev button. Accepts HTML.
 
