@@ -62,9 +62,7 @@ Things to Add
 
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
-- make gallery next/prev image switch animated (remove old image and fade new one)
 - check if you can update settings like mode and gallery using .update and it still works
-- make gallery arrows only appear when hovering over left or right of image
 - test all views in all browsers including mobile
 - iframe doesn't work in IE7
 - IE7 isn't perfect but is functional
