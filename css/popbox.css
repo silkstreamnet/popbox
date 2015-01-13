@@ -65,7 +65,7 @@
     height:100%;
     width:25%;
     color:#555;
-    background:transparent url(../images/px.gif);
+    background:transparent url(../images/transparent.gif) repeat;
     text-decoration: none;
     display:block;
     opacity: 0;

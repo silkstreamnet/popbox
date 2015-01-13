@@ -66,6 +66,7 @@ Things to Add
 - test all views in all browsers including mobile
 - iframe doesn't work in IE7
 - IE7 isn't perfect but is functional
+- for gallery in IE, have a 20ms gap before checking to scale to loading, use a 10ms gap for onload and there should be no collisions
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
   @ position absolute by default (use function to switch)
   @ on: touch start / mousewheel / scroll, position fixed
@@ -75,7 +76,7 @@ Things to Add
 Updates
 @@@@@@@
 
-=== v2-13 ===
+=== v2-13 (stable) ===
 - Updated popbox.css
 - Changed handling of body/html elements to remove scrollbar and stop scrolling.
 - Changed image loading system to better support the problems IE has with onload.
