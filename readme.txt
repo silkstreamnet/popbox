@@ -72,6 +72,10 @@ Things to Add
   @ on: touch start / mousewheel / scroll, position fixed
   @ on: any form element focus, position absolute
 
+- CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
+- currently issues with the loading system getting mixed up and causing conflicts
+- e.g. if on loading image, click next onto an error image and adjust won't load correctly
+
 @@@@@@@
 Updates
 @@@@@@@

@@ -179,15 +179,15 @@
             pb.properties.loaded_images = [];
             var images = pb.popup.find('img');
 
+            if (pb.settings.mode == 'gallery')
+            {
+                pb.content_area.hide();
+                if (pb.gallery_loading_area) pb.gallery_loading_area.show();
+                pb.properties.gallery.isloading = true;
+            }
+
             if (images.length > 0)
             {
-                if (pb.settings.mode == 'gallery')
-                {
-                    pb.content_area.hide();
-                    if (pb.gallery_loading_area) pb.gallery_loading_area.show();
-                    pb.properties.gallery.isloading = true;
-                }
-
                 var images_ready = 0;
 
                 // Hook up each image individually
@@ -236,13 +236,16 @@
                 if (images.length == images_ready)
                 {
                     adjustNewPopboxToClient(pb);
+                    return true;
                 }
             }
             else
             {
                 adjustNewPopboxToClient(pb);
+                return true;
             }
         }
+        return false;
     }
 
     function adjustNewPopboxToClient(pb)
@@ -261,12 +264,15 @@
 
     function loadAdjust(pb)
     {
+        var adjusted = false;
+
         if (pb.properties.loaded_content !== pb.settings.content)
         {
             //checkAllImagesReady will verify the popbox is ready for animated resizing
-            addImageLoadListeners(pb);
+            adjusted = addImageLoadListeners(pb);
             pb.properties.loaded_content = pb.settings.content;
         }
+        return adjusted;
     }
 
     function fixScalableElements(pb)
@@ -376,6 +382,15 @@
     function adjustPopBoxToClient(pb)
     {
         pb = param(pb,false);
+
+        var newlogtime = new Date().getTime();
+
+        console.log("---");
+        console.log("current",newlogtime);
+        if (pb.properties.logtime) console.log("difference",(newlogtime-pb.properties.logtime));
+        console.log("---");
+
+        pb.properties.logtime = newlogtime;
 
         if (pb && pb.popup)
         {
@@ -583,12 +598,19 @@
 
             if (!pb.properties.newopen && st.animateSpeed > 0)
             {
+                console.log({
+                    "left":newLeft,
+                    "top":newTop,
+                    "width":newWidth,
+                    "height":newHeight
+                });
                 $popup.animate({
                     "left":newLeft,
                     "top":newTop,
                     "width":newWidth,
                     "height":newHeight
                 },st.animateSpeed,function(){
+                    console.log("ended");
                     adjustPopBoxEnd(pb);
                 }).css('overflow','');
             }
@@ -616,19 +638,34 @@
             if (immediate || !_class.properties.resizepause)
             {
                 var curDelay = 1;
+                var adjustType = '';
                 if (!_class.properties.newopen)
                 {
-                    if (_class.properties.gallery.isloading) curDelay = 100;
-                    else if (!immediate) curDelay = _class.settings.updatePositionDelay;
+                    if (_class.settings.mode == 'gallery' && _class.properties.gallery.isloading)
+                    {
+                        curDelay = 100;
+                        adjustType = 'loading';
+                    }
+                    else if (!immediate)
+                    {
+                        curDelay = _class.settings.updatePositionDelay;
+                    }
                 }
 
-                _class.properties.resizepause = true;
-                setTimeout(function(){
-                    adjustPopBoxToClient(_class);
-                    _class.properties.resizepause = false;
-                },curDelay);
-
-                loadAdjust(_class);
+                console.log("loadAdjust");
+                if (!loadAdjust(_class))
+                {
+                    _class.properties.resizepause = true;
+                    setTimeout(function(){
+                        //prevent double adjust due to loading message
+                        if (_class.settings.mode != 'gallery' || adjustType != 'loading' || _class.properties.gallery.isloading)
+                        {
+                            console.log("normalAdjust");
+                            adjustPopBoxToClient(_class);
+                            _class.properties.resizepause = false;
+                        }
+                    },curDelay);
+                }
             }
         }
     };
