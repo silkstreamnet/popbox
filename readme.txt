@@ -63,16 +63,14 @@ Things to Add
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
 - test all views in all browsers including mobile
-- iframe doesn't work in IE7
-- IE7 arrows aren't perfect but is functional
+- IE7 iframe doesnt work/scale
+- IE7 gallery isn't completely stable
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
   @ position absolute by default (use function to switch)
   @ on: touch start / mousewheel / scroll, position fixed
   @ on: any form element focus, position absolute
 
 - CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
-- currently issues with the loading system getting mixed up and causing conflicts
-- e.g. if on loading image, click next onto an error image and adjust won't load correctly
 
 1. set all jquery objects to have a $ prepended to them
 2. separate adjust functionality from image loading
