@@ -82,7 +82,11 @@ Things to Add
 Updates
 @@@@@@@
 
-=== v2-13 (stable) ===
+=== v2-14 (stable) ===
+- Fixed issues with adjust scaling stability with the gallery and onload.
+- Made some changes to naming conventions (tidy up in progress)
+
+=== v2-13 (unstable) ===
 - Updated popbox.css
 - Changed handling of body/html elements to remove scrollbar and stop scrolling.
 - Changed image loading system to better support the problems IE has with onload.
