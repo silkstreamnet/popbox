@@ -62,7 +62,6 @@ Things to Add
 
 - add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
-- test all views in all browsers including mobile
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
@@ -75,7 +74,6 @@ Things to Add
 1. set all jquery objects to have a $ prepended to them
 2. separate adjust functionality from image loading
 3. conventionalise variables for consistency
-4. loading and errors are handled only for galleries, make sure variables are named as such
 
 
 @@@@@@@
@@ -85,6 +83,7 @@ Updates
 === v2-14 (stable) ===
 - Fixed issues with adjust scaling stability with the gallery and onload.
 - Made some changes to naming conventions (tidy up in progress)
+- Switching modes using "update" should work correctly now.
 
 === v2-13 (unstable) ===
 - Updated popbox.css

@@ -69,8 +69,6 @@
     {
         settings = param(settings,{});
 
-        if (settings.mode == 'gallery' && settings.autoScale == null) settings.autoScale = true;
-
         this.$window = $(window);
         this.$html = $('html');
         this.$body = $('body');
@@ -156,11 +154,25 @@
         }
     }
 
-    function setGalleryArrows(pb)
+    function unsetGalleryArrows(pb)
     {
         pb = param(pb,false);
 
         if (pb && pb.popup)
+        {
+            if (pb.gallery_next) pb.gallery_next.remove();
+            if (pb.gallery_prev) pb.gallery_prev.remove();
+
+            pb.gallery_next = false;
+            pb.gallery_prev = false;
+        }
+    }
+
+    function setGalleryArrows(pb)
+    {
+        pb = param(pb,false);
+
+        if (pb && pb.popup && pb._properties.gallery.images.length > 1)
         {
             pb.popup.append('<a href="#" class="popbox-gallery-next">&nbsp;'+pb._settings.gallery.next+'</a>');
             pb.gallery_next = pb.popup.find('.popbox-gallery-next');
@@ -620,6 +632,63 @@
         if (pb._properties.resizetimer !== false) clearTimeout(pb._properties.resizetimer);
     }
 
+    function startGallery(pb)
+    {
+        stopGallery(pb);
+        console.dir(pb._settings);
+        if (pb._settings.mode == 'gallery') pb._settings.autoScale = true;
+
+        pb.content_area.find('img').hide();
+
+        if (pb._settings.gallery.name)
+        {
+            var $gallery_images = $('.'+pb._settings.gallery.name);
+            if ($gallery_images.length)
+            {
+                $gallery_images.each(function(){
+                    //can be either an image or an anchor link
+                    var $gallery_image = $(this);
+                    if ($gallery_image.closest('.popbox-container').length == 0)
+                    {
+                        var gi_src = getAttr($gallery_image,'src');
+                        var gi_href = getAttr($gallery_image,'href');
+
+                        var tsrc = (gi_src) ? gi_src : gi_href;
+
+                        if (tsrc && indexOf(tsrc,pb._properties.gallery.images) == -1) pb._properties.gallery.images.push(tsrc);
+                    }
+                });
+
+                if (pb._properties.gallery.images.length > 0)
+                {
+                    //if the current image isn't in the list, add it
+                    var first_src = '';
+                    var $popup_image = pb.content_area.find('img:first');
+                    if ($popup_image.length) first_src = getAttr($popup_image.eq(0),'src');
+
+                    var first_src_key = indexOf(first_src,pb._properties.gallery.images);
+
+                    pb._properties.gallery.position = 0;
+                    if (first_src == '' || first_src_key == -1) pb._properties.gallery.images.unshift(first_src);
+                    else if (first_src_key > -1) pb._properties.gallery.position = first_src_key;
+
+                    //add arrows
+                    setGalleryArrows(pb);
+                }
+            }
+        }
+    }
+
+    function stopGallery(pb)
+    {
+        pb.content_area.show();
+        pb.gallery_loading_area.hide();
+        pb._properties.gallery.status = 'ready';
+        pb._properties.gallery.images = [];
+        pb._properties.gallery.position = 0;
+        unsetGalleryArrows(pb);
+    }
+
     PopBox.prototype.adjust = function(immediate)
     {
         immediate = param(immediate,false);
@@ -715,6 +784,7 @@
             var content = (isString(this._settings.content,true)) ? _class._settings.content : '';
             var title = (isString(this._settings.title,true)) ? '<div class="popbox-title">'+_class._settings.title+'</div>' : '';
             var pclass = (isString(this._settings.customClass,true)) ? ' '+_class._settings.customClass : '';
+            var loading = (isString(this._settings.gallery.loading,true)) ? _class._settings.gallery.loading : _class._defaultSettings.gallery.loading;
 
             _class._properties.stored_styles.htmlOverflow = getInlineStyle(_class.$html,'overflow');
             _class._properties.stored_styles.htmlHeight = getInlineStyle(_class.$html,'height');
@@ -725,7 +795,7 @@
             var new_body_width = _class.$body.width();
             if (new_body_width > old_body_width) _class.$html.css({'margin-right':(new_body_width-old_body_width)+'px'});
 
-            _class.$body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<div class="popbox-content">'+content+'</div><a href="#" class="popbox-close">'+close+'</a></div></div>');
+            _class.$body.append('<div class="popbox-container'+pclass+'" style="display: none;"><div class="popbox-bottom-push"></div><a class="popbox-shadow" href="javascript:void(0);"></a><div class="popbox-popup">'+title+'<div class="popbox-content">'+content+'</div><div class="popbox-gallery-loading">'+loading+'</div><a href="#" class="popbox-close">'+close+'</a></div></div>');
 
             _class.container = $(".popbox-container");
             _class.popup = _class.container.find(".popbox-popup");
@@ -734,7 +804,7 @@
             _class.close_button = _class.container.find(".popbox-close");
             _class.title_area = _class.container.find(".popbox-title");
             _class.content_area = _class.container.find(".popbox-content");
-            _class.gallery_loading_area = false;
+            _class.gallery_loading_area = _class.container.find(".popbox-gallery-loading");
 
             _class.container.css({
                 'display':'none',
@@ -782,55 +852,14 @@
                 'overflow':'hidden',
                 'height':'auto'
             });
+            _class.gallery_loading_area.css({
+                'overflow':'hidden',
+                'height':'auto'
+            });
 
             if (_class._settings.mode == 'gallery')
             {
-                _class.content_area.hide().find('img').hide();
-                var loading = (isString(this._settings.gallery.loading,true)) ? _class._settings.gallery.loading : _class._defaultSettings.gallery.loading;
-                _class.content_area.after('<div class="popbox-gallery-loading">'+loading+'</div>');
-                _class.gallery_loading_area = _class.container.find(".popbox-gallery-loading");
-                _class.gallery_loading_area.css({
-                    'overflow':'hidden',
-                    'height':'auto'
-                });
-
-                if (_class._settings.gallery.name)
-                {
-                    var $gallery_images = $('.'+_class._settings.gallery.name);
-                    if ($gallery_images.length)
-                    {
-                        $gallery_images.each(function(){
-                            //can be either an image or an anchor link
-                            var $gallery_image = $(this);
-                            if ($gallery_image.closest('.popbox-container').length == 0)
-                            {
-                                var gi_src = getAttr($gallery_image,'src');
-                                var gi_href = getAttr($gallery_image,'href');
-
-                                var tsrc = (gi_src) ? gi_src : gi_href;
-
-                                if (tsrc && indexOf(tsrc,_class._properties.gallery.images) == -1) _class._properties.gallery.images.push(tsrc);
-                            }
-                        });
-
-                        if (_class._properties.gallery.images.length > 0)
-                        {
-                            //if the current image isn't in the list, add it
-                            var first_src = '';
-                            var $popup_image = _class.content_area.find('img:first');
-                            if ($popup_image.length) first_src = getAttr($popup_image.eq(0),'src');
-
-                            var first_src_key = indexOf(first_src,_class._properties.gallery.images);
-
-                            _class._properties.gallery.position = 0;
-                            if (first_src == '' || first_src_key == -1) _class._properties.gallery.images.unshift(first_src);
-                            else if (first_src_key > -1) _class._properties.gallery.position = first_src_key;
-
-                            //add arrows
-                            setGalleryArrows(_class);
-                        }
-                    }
-                }
+                startGallery(_class);
             }
 
             _class.container.fadeIn(_class._settings.fadeInSpeed, function(){
@@ -864,7 +893,7 @@
         settings = param(settings,{});
         adjust = param(adjust,true);
 
-        _class._settings = $.extend({},_class._settings,settings);
+        _class._settings = $.extend(true,{},_class._settings,settings);
 
         if (_class._properties.isopen)
         {
@@ -874,7 +903,7 @@
 
             if (_class.close_button.length > 0) _class.close_button.html(close);
             if (_class.content_area.length > 0) _class.content_area.html(content);
-            //if (_class.gallery_loading_area && _class.gallery_loading_area.length > 0) _class.gallery_loading_area.hide();
+
             if (_class.title_area.length > 0)
             {
                 if (title != '')
@@ -891,6 +920,15 @@
             {
                 _class.popup.prepend('<div class="popbox-title">'+title+'</div>');
                 _class.title_area = _class.popup.find('.popbox-title');
+            }
+
+            if (_class._settings.mode == 'gallery')
+            {
+                startGallery(_class);
+            }
+            else
+            {
+                stopGallery(_class);
             }
 
             if (adjust)

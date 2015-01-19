@@ -23,6 +23,7 @@
 <a href="#" class="popbox2">Click To Pop 2!</a>
 <a href="#" class="popbox3">Click To Pop 3!</a>
 <a href="#" class="popbox4">Click To Pop 4!</a>
+<a href="#" class="popbox5">Click To Pop 5!</a>
 <script type="text/javascript" src="js/jquery/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="js/popbox.js"></script>
 <script type="text/javascript">
@@ -93,6 +94,25 @@
             _popbox4.open();
         });
 
+        //normal to gallery
+        $('.popbox5').click(function(e){
+            e.preventDefault();
+            var _popbox5 = new PopBox({
+                content:'<p>Random content.</p>',
+                onOpen:function(pb){
+                    setTimeout(function(){
+                        pb.update({
+                            content:'<img src="images/test-image.jpg" />',
+                            mode:'gallery',
+                            gallery:{
+                                //name:'gallery'
+                            }
+                        });
+                    },2000);
+                }
+            });
+            _popbox5.open();
+        });
 
     });
 
