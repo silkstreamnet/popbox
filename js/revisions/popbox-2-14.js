@@ -635,7 +635,6 @@
     function startGallery(pb)
     {
         stopGallery(pb);
-        console.dir(pb._settings);
         if (pb._settings.mode == 'gallery') pb._settings.autoScale = true;
 
         pb.content_area.find('img').hide();

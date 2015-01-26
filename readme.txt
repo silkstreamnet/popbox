@@ -75,6 +75,10 @@ Things to Add
 2. separate adjust functionality from image loading
 3. conventionalise variables for consistency
 
+@ madness
+- on chrome, have console cache disabled, close console, open popbox with image, press f12 to bring up console as part of window... image no longer in cache so can't scale. cant fix without breaking IE?
+ = possibly check for height and width are 0 and complete === false, try for 1000ms then give up. (ONLY CHECK IMAGES THAT DONT HAVE AN ERROR IF POSSIBLE)
+ = have to also make sure this gets performed both types of popbox (autoscale and normal)
 
 @@@@@@@
 Updates
