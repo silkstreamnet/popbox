@@ -66,7 +66,7 @@ Things to Add
 - IE7 gallery isn't completely stable
 - add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
   @ position absolute by default (use function to switch)
-  @ on: touch start / mousewheel / scroll, position fixed
+  @ on: touch start / mousewheel / scroll / resize, position fixed
   @ on: any form element focus, position absolute
 
 - CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
@@ -79,6 +79,8 @@ Things to Add
 - on chrome, have console cache disabled, close console, open popbox with image, press f12 to bring up console as part of window... image no longer in cache so can't scale. cant fix without breaking IE?
  = possibly check for height and width are 0 and complete === false, try for 1000ms then give up. (ONLY CHECK IMAGES THAT DONT HAVE AN ERROR IF POSSIBLE)
  = have to also make sure this gets performed both types of popbox (autoscale and normal)
+
+- need to test images inside normal popbox (with content)
 
 @@@@@@@
 Updates

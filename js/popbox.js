@@ -82,6 +82,7 @@
             isopen: false,
             newopen: true,
             newopentime: 0,
+            retrytime:0,
             resizepause: false,
             loaded_content: -1,
             loaded_images:[],
@@ -217,6 +218,19 @@
         }
     }
 
+    function imagesLost(clone)
+    {
+        var lost = false;
+        clone.content.find('img').each(function(){
+            var $img = $(this);
+            if (($img.width() == 0 || $img.height() == 0) && this.complete === false)
+            {
+                lost = true;
+            }
+        });
+        return lost;
+    }
+
     function clonePopbox(pb)
     {
         var cloneref = 'popbox-rsc-clone';
@@ -253,6 +267,8 @@
     {
         pb = param(pb,false);
 
+        var success = true;
+
         if (pb && pb.popup)
         {
             var st = pb._settings;
@@ -272,7 +288,7 @@
                 dOuterWidth = $shadow.width(), dOuterHeight = $container.outerHeight(false), dMaxWidth = 0, dMaxHeight = 0, dPush = 0,
                 setY = false, clone = false;
 
-            if (st.autoScale && pb._properties.gallery.status == 'ready')
+            if (st.autoScale && (pb._settings.mode != 'gallery' || pb._properties.gallery.status == 'ready'))
             {
                 $content.css({
                     'height':'100%',
@@ -285,6 +301,9 @@
                 clone.content.attr('style','');
                 clone.content.find('img').css({'max-width':'none','height':'auto','display':'block'});
                 clone.content.find('iframe').css({'max-height':'none','max-width':'none'});
+
+                // workaround for removal from cache
+                if (imagesLost(clone)) return false;
 
                 cWidth = clone.popup.width();
                 cHeight = clone.popup.height();
@@ -345,16 +364,8 @@
                 var $_content_ob = $content;
                 var clone_content_ob = clone.content;
 
-                if (pb._properties.gallery.status == 'ready')
+                if (pb._settings.mode == 'gallery' && pb._properties.gallery.status != 'ready')
                 {
-                    clone.content.css('display','block');
-                    clone.gallery_loading_area.css('display','none');
-                }
-                else
-                {
-                    clone.content.css('display','none');
-                    clone.gallery_loading_area.css('display','block');
-
                     $_content_ob = $gallery_loading_area;
                     clone_content_ob = clone.gallery_loading_area;
                 }
@@ -395,6 +406,9 @@
                 {
                     clone_content_ob.css({'margin-top':'-1px','top':'1px'});
                 }
+
+                // workaround for removal from cache
+                if (imagesLost(clone)) success = false;
 
                 var co_h = clone_content_ob.outerHeight(true);
                 var hi_p = co_h - clone_content_ob.height();
@@ -480,6 +494,8 @@
                 adjustPopBoxEnd(pb);
             }
         }
+
+        return success;
     }
 
     function galleryReady(pb)
@@ -552,7 +568,7 @@
         if (pb && pb.popup)
         {
             pb._properties.loaded_images = [];
-            var images = pb.popup.find('img');
+            var images = pb.content_area.find('img');
 
             if (images.length > 0)
             {
@@ -576,21 +592,27 @@
                             if (typeof fimage.onload !== "undefined")
                             {
                                 fimage.onload = function(){
-                                    setTimeout(function(){if (checkAllImagesReady(pb)) pb.adjust(true)},10);
+                                    setTimeout(function(){
+                                        if (checkAllImagesReady(pb)) pb.adjust(true)
+                                    },10);
                                 };
                             }
                             else if (typeof fimage.onreadystatechange !== "undefined")
                             {
                                 fimage.onreadystatechange = function(){
-                                    setTimeout(function(){if (checkAllImagesReady(pb)) pb.adjust(true)},10);
+                                    setTimeout(function(){
+                                        if (checkAllImagesReady(pb)) pb.adjust(true)
+                                    },10);
                                 };
                             }
 
                             if (typeof fimage.onerror !== "undefined")
                             {
                                 fimage.onerror = function(){
-                                    $(element).remove();
-                                    galleryError(pb);
+                                    setTimeout(function(){
+                                        $(element).remove();
+                                        galleryError(pb);
+                                    },10);
                                 }
                             }
                         }
@@ -731,10 +753,24 @@
                     pb._properties.resizetimer = setTimeout(function(){
                         if (adjustType == 'normal' || (adjustType == 'loading' && pb._properties.gallery.status != 'error'))
                         {
-                            adjustPopBoxToClient(pb);
-                            pb._properties.resizepause = false;
-                            pb._properties.resizetimer = false;
+                            if (adjustPopBoxToClient(pb))
+                            {
+                                pb._properties.retrytime = 0;
+                            }
+                            else if (pb._properties.retrytime >= 1000)
+                            {
+                                pb._properties.retrytime = 0;
+                                galleryError(pb);
+                            }
+                            else
+                            {
+                                var retrydelay = 100;
+                                pb.adjust(retrydelay);
+                                pb._properties.retrytime += retrydelay;
+                            }
                         }
+                        pb._properties.resizepause = false;
+                        pb._properties.resizetimer = false;
                     },curDelay);
                 }
             }
