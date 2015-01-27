@@ -757,10 +757,9 @@
                             {
                                 pb._properties.retrytime = 0;
                             }
-                            else if (pb._properties.retrytime >= 1000)
+                            else if (pb._properties.retrytime >= 3000)
                             {
                                 pb._properties.retrytime = 0;
-                                galleryError(pb);
                             }
                             else
                             {
