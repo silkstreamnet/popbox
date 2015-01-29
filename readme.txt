@@ -51,7 +51,7 @@ _popbox has the following methods:
 	_popbox.update(settings={object}, adjust={boolean});                             === Returns: {null}. Executes: Can set new settings like changing the width, height, content. Pretty much anything you set when you initialise.
 	_popbox.open();                                                                  === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
 	_popbox.close();                                                                 === Returns: {null}. Executes: Closes the popbox and removes it from the body.
-	_popbox.adjust();                                                                === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
+	_popbox.adjust(immediate={bool|number});                                         === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
 RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/border.
@@ -85,6 +85,11 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-15 (stable) ===
+- Added last ditch fix for any potential problems with image loading.
+- Fixed a few setting update conversions e.g. scrollable content to gallery.
+- Added support for numbers in adjust method "immediate" parameter.
 
 === v2-14 (stable) ===
 - Fixed issues with adjust scaling stability with the gallery and onload.
