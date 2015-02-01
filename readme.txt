@@ -64,10 +64,6 @@ Things to Add
 - add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
-- add support to avoid problems with input fields in popbox on mobile devices (auto scroll and focus) +++
-  @ position absolute by default (use function to switch)
-  @ on: touch start / mousewheel / scroll / resize, position fixed
-  @ on: any form element focus, position absolute
 
 - CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
 
@@ -75,11 +71,12 @@ Things to Add
 2. separate adjust functionality from image loading
 3. conventionalise variables for consistency
 
-- need to test images inside normal popbox (with content)
-
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-16 ===
+- Added potential hack fix for mobile device (old android and iOS) input field focus bug
 
 === v2-15 (stable) ===
 - Added last ditch fix for any potential problems with image loading.

@@ -72,6 +72,7 @@
         this.$window = $(window);
         this.$html = $('html');
         this.$body = $('body');
+        this.$htmlbody = $('html,body');
 
         this._settings = $.extend(true,{},this._defaultSettings,settings);
         this.container = false;
@@ -253,6 +254,27 @@
         if (clone && clone.container) clone.container.remove();
     }
 
+    function convertPopBoxPosition(pb,mode)
+    {
+        mode = param(mode,'fixed');
+
+        switch (mode)
+        {
+            case 'fixed':
+                pb.container.css({
+                    'position':'fixed',
+                    'top':'0'
+                });
+                break;
+            case 'absolute':
+                pb.container.css({
+                    'position':'absolute',
+                    'top':pb.container.offset().top
+                });
+                break;
+        }
+    }
+
     function adjustPopBoxEnd(pb)
     {
         pb = param(pb,false);
@@ -261,6 +283,7 @@
         {
             if (pb._settings.mode == 'gallery' && pb._properties.gallery.status == 'ready') pb.content_area.find('img:hidden').fadeIn(300);
             pb.popup.find('.popbox-btn-hover').removeClass('popbox-btn-hover');
+            pb.$window.trigger('scroll.popbox');
         }
     }
 
@@ -803,7 +826,7 @@
                 popboxAnimateStateComplete(_class,'close');
             });
 
-            _class.$window.off('resize.popbox.adjust');
+            _class.$window.off('resize.popbox scroll.popbox');
 
             _class._properties.isopen = false;
             _class.refresh();
@@ -912,6 +935,8 @@
                 popboxAnimateStateComplete(_class,'open');
             });
 
+
+            // set events
             _class.shadow.click(function(e){
                 _class.close();
                 e.preventDefault();
@@ -920,12 +945,56 @@
                 _class.close();
                 e.preventDefault();
             });
+            var $focused = false;
+            var focusedresize = false;
+            var focusedtop = 0;
+            _class.$window.on('resize.popbox',function(){
+                convertPopBoxPosition(_class,'fixed');
+                if ($focused) focusedresize = true;
+                _class.adjust();
+            }).on('scroll.popbox',function(){
+                convertPopBoxPosition(_class,'fixed');
+                if ($focused)
+                {
+                    if (focusedresize)
+                    {
+                        focusedresize = false;
+                    }
+                    else
+                    {
+                        console.log('do actions');
+                        _class.$window.scrollTop(focusedtop);
+                        var newst = 0;
+                        //get focused position and scroll to it inside popbox
+                        if (_class.container.css('overflow-y') == 'scroll')
+                        {
+                            newst = _class.container.scrollTop()+Math.round($focused.offset().top-_class.container.offset().top);
+                            if (newst > 3) newst -= 3;
+                            _class.container.scrollTop(newst);
+                        }
+                        else
+                        {
+                            newst = _class.content_area.scrollTop()+Math.round($focused.offset().top-_class.content_area.offset().top);
+                            if (newst > 3) newst -= 3;
+                            _class.content_area.scrollTop(newst);
+                        }
+                        $focused = false;
+                    }
+                }
+            });
+            _class.container.on('focus.popbox','input,textarea,select',function(){
+                convertPopBoxPosition(_class,'absolute');
+                $focused = $(this);
+                focusedtop = _class.$window.scrollTop();
+                setTimeout(function(){$focused = false;},2000);
+            });
 
-            _class.$window.on('resize.popbox.adjust',function(){_class.adjust();});
-
+            // set last vars
             _class._properties.isopen = true;
             _class._properties.newopen = true;
             _class._properties.newopentime = new Date().getTime();
+
+            // initiate first adjustments
             _class.adjust();
 
             if (typeof(_class._settings.afterOpen) === "function") _class._settings.afterOpen(_class);
