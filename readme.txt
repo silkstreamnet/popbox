@@ -28,7 +28,7 @@ Options:
 - 'gallery' : {} : {object} === Look at gallery settings for more information.
 
 
-Gallery Sub Options:
+'gallery' Sub-options:
    param : default value : all values
 
 - 'loading' : 'Loading' : {string} === Text to show when image is loading. Accepts HTML.
@@ -37,7 +37,6 @@ Gallery Sub Options:
 - 'next' : '&#x25B6' : {string} === Text to show for the next button. Accepts HTML.
 - 'prev' : '&#x25C0' : {string} === Text to show for the prev button. Accepts HTML.
 
-View index.html for example code.
 
 Define a new popbox:
 	---
@@ -63,7 +62,7 @@ Applying data attributes:
 Example: <a href="#" class="popbox" data-content="This is the popbox content.">Click Me</a>
 
 Automatic PopBox:
-As of Version 2.16, PopBox can now automatically search for any elements with a class of 'popbox' and apply a click listener to them.
+As of Version 2.16, PopBox now automatically searches for any elements with a class of 'popbox' and applies a click listener to them.
 
 
 @@@@@@@@@@@@@
@@ -80,11 +79,12 @@ Things to Add
 2. separate adjust functionality from image loading
 3. conventionalise variables for consistency
 
+
 @@@@@@@
 Updates
 @@@@@@@
 
-=== v2-16 ===
+=== v2-16 (TESTING) ===
 - Added potential hack fix for mobile device (old android and iOS) input field focus bug
 - Added jQuery initiate support. e.g. $('.custom-popbox').PopBox();
 - Added support for data attributes on jQuery initiated PopBoxes.
