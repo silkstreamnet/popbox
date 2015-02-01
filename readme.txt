@@ -75,11 +75,6 @@ Things to Add
 2. separate adjust functionality from image loading
 3. conventionalise variables for consistency
 
-@ madness
-- on chrome, have console cache disabled, close console, open popbox with image, press f12 to bring up console as part of window... image no longer in cache so can't scale. cant fix without breaking IE?
- = possibly check for height and width are 0 and complete === false, try for 1000ms then give up. (ONLY CHECK IMAGES THAT DONT HAVE AN ERROR IF POSSIBLE)
- = have to also make sure this gets performed both types of popbox (autoscale and normal)
-
 - need to test images inside normal popbox (with content)
 
 @@@@@@@
@@ -90,6 +85,7 @@ Updates
 - Added last ditch fix for any potential problems with image loading.
 - Fixed a few setting update conversions e.g. scrollable content to gallery.
 - Added support for numbers in adjust method "immediate" parameter.
+- Fixed a bug with going from a scrolled content mode to gallery mode.
 
 === v2-14 (stable) ===
 - Fixed issues with adjust scaling stability with the gallery and onload.

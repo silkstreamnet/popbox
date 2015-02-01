@@ -2,12 +2,21 @@
 <html>
 <head>
     <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link href="css/popbox.css" type="text/css" rel="stylesheet" />
     <style type="text/css">
         html {overflow-x:hidden; height:100%;}
-        body {font-family:Arial, Helvetica, sans-serif; margin:10px 0; padding:0; background:url(images/test-image-2.jpg) no-repeat center center #333; color:#fff;}
-        a {color:#fff;}
+        body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0; background:url(images/test-image-2.jpg) no-repeat center center #333; color:#fff;}
+        a {color:#fff; font-size:120%;}
+        p {font-size:100%;}
         iframe, object, embed {max-width:100%;}
+
+        form {margin:2px;}
+        label {display:block; margin: 0 0 20px 0; font-size:24px;}
+        label:after {clear:both; content:""; line-height:0; display:table;}
+        label span {display:block; width:20%; float:left; padding:1% 0;}
+        label input {display:block; width:75%; margin: 0 0 0 2%; float:left; border:1px solid #ccc; padding:1%; font-size:24px;}
+        label button {display:block; margin: 0 0 0 22%; float:left; font-size:24px;}
 
         #popinfo {display:none;}
 
@@ -25,6 +34,7 @@
 <a href="#" class="popbox4">Click To Pop 4!</a>
 <a href="#" class="popbox5">Click To Pop 5!</a>
 <a href="#" class="popbox6">Click To Pop 6!</a>
+<a href="#" class="popbox7">Click To Pop 7 (form)!</a>
 <script type="text/javascript" src="js/jquery/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="js/popbox.js"></script>
 <script type="text/javascript">
@@ -131,6 +141,16 @@
                 }
             });
             _popbox6.open();
+        });
+
+        $('.popbox7').click(function(e){
+            e.preventDefault();
+            var _popbox = new PopBox({
+                content:'<form action=""><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><span>Chicken: </span><input type="text" /></label><label><button>Click here</button></label></form>',
+                maxwidth:900,
+                title:'Form'
+            });
+            _popbox.open();
         });
 
     });
