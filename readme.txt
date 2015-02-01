@@ -54,14 +54,23 @@ _popbox has the following methods:
 	_popbox.adjust(immediate={bool|number});                                         === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
-RECOMMENDED TO NOT set the popbox-popup to have a percentage based padding/border.
+Define a new popbox with jQuery:
+$('.custom-popbox').PopBox({
+	content:'test'
+});
+
+Applying data attributes:
+Example: <a href="#" class="popbox" data-content="This is the popbox content.">Click Me</a>
+
+Automatic PopBox:
+As of Version 2.16, PopBox can now automatically search for any elements with a class of 'popbox' and apply a click listener to them.
+
 
 @@@@@@@@@@@@@
 Things to Add
 @@@@@@@@@@@@@
 
-- add LINK support to make setting popbox on a link easy, allows you to reference an image or youtube/vimeo link and sets up automatically.
-- add jQuery selector method calls. (1 - bind to an anchor/link) (2 - initialise through jQuery)
+- add dynamic link support, look for href, get url and work out what it is and create the optimal settings popbox. (support images, youtube, vimeo)
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
 
@@ -77,6 +86,8 @@ Updates
 
 === v2-16 ===
 - Added potential hack fix for mobile device (old android and iOS) input field focus bug
+- Added jQuery initiate support. e.g. $('.custom-popbox').PopBox();
+- Added support for data attributes on jQuery initiated PopBoxes.
 
 === v2-15 (stable) ===
 - Added last ditch fix for any potential problems with image loading.

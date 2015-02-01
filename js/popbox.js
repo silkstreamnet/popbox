@@ -1,10 +1,13 @@
 (function($){
 
-    if (RegExp != null && RegExp.escape == null) RegExp.escape= function(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); };
-
     function param(parameter,_default)
     {
         return (typeof parameter !== 'undefined' ? parameter : _default);
+    }
+
+    function regEscape(string)
+    {
+        return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
     function isNumber(o,required)
@@ -24,6 +27,36 @@
         var attrval = obj.attr(attr);
         if (typeof attrval === 'undefined' || attrval === false || attrval === '') attrval = '';
         return attrval;
+    }
+
+    function applyDataSettings(object,defaults,settings,stage)
+    {
+        stage = param(stage,'');
+
+        for (var p in defaults)
+        {
+            if (defaults.hasOwnProperty(p))
+            {
+                if (typeof defaults[p] === 'object')
+                {
+                    settings[p] = {};
+                    applyDataSettings(object,defaults[p],settings[p],stage+p.toLowerCase()+'-');
+                }
+                else
+                {
+                    var data = object.data(stage+p.toLowerCase());
+                    if (typeof data !== 'undefined')
+                    {
+                        var datafloat = parseFloat(data);
+                        if (data == 'true') data = !0;
+                        else if (data == 'false') data = !1;
+                        else if (datafloat == data) data = datafloat;
+
+                        settings[p] = data;
+                    }
+                }
+            }
+        }
     }
 
     function indexOf(value,array,strict)
@@ -56,7 +89,7 @@
         if (style && cstyle)
         {
             //check for string begin or ; at the start
-            var r = new RegExp('(^|;)\\s*'+RegExp.escape(style)+'\\s*:');
+            var r = new RegExp('(^|;)\\s*'+regEscape(style)+'\\s*:');
             if (cstyle.match(r))
             {
                 return obj.css(style);
@@ -72,7 +105,6 @@
         this.$window = $(window);
         this.$html = $('html');
         this.$body = $('body');
-        this.$htmlbody = $('html,body');
 
         this._settings = $.extend(true,{},this._defaultSettings,settings);
         this.container = false;
@@ -962,7 +994,6 @@
                     }
                     else
                     {
-                        console.log('do actions');
                         _class.$window.scrollTop(focusedtop);
                         var newst = 0;
                         //get focused position and scroll to it inside popbox
@@ -1098,6 +1129,26 @@
         }
     };
 
+
+
+    $.fn.PopBox = function(settings)
+    {
+        var $this = $(this);
+
+        if ($this.length)
+        {
+            if (typeof settings !== 'object' || settings instanceof Array) settings = {};
+            applyDataSettings($this,PopBox.prototype._defaultSettings,settings);
+
+            var _popbox = new PopBox(settings);
+            $(this).click(function(e){
+                e.preventDefault();
+                _popbox.open();
+            });
+        }
+    };
+
+    $('.popbox').PopBox();
 
     window.PopBox = PopBox;
 
