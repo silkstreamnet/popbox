@@ -163,17 +163,27 @@
 
     function fixScalableElements(pb)
     {
-        pb.popup.find('img').css({
+        var $imgs = pb.popup.find('img');
+        var $iframes = pb.popup.find('iframe');
+
+        $imgs.css({
             'max-width':'100%',
             'height':'auto'
-        }).filter(':visible').css({
-            'display':'block'
         });
-
-        pb.popup.find('iframe').css({
+        $iframes.css({
             'max-height':'100%',
             'max-width':'100%'
         });
+
+        if (pb._settings.autoScale)
+        {
+            $imgs.filter(':visible').css({
+                'display':'block'
+            });
+            $iframes.css({
+                'display':'block'
+            });
+        }
     }
 
     function updateGallery(pb)

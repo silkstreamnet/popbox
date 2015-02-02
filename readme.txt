@@ -88,6 +88,7 @@ Updates
 - Added potential hack fix for mobile device (old android and iOS) input field focus bug
 - Added jQuery initiate support. e.g. $('.custom-popbox').PopBox();
 - Added support for data attributes on jQuery initiated PopBoxes.
+- Fixed bottom few pixels space below iframes with autoScale.
 
 === v2-15 (stable) ===
 - Added last ditch fix for any potential problems with image loading.
