@@ -53,6 +53,9 @@ _popbox has the following methods:
 	_popbox.adjust(immediate={bool|number});                                         === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
 	---
 
+
+[[[ As of Version 2.20 - BEGIN ]]]
+
 Define a new popbox with jQuery:
 $('.custom-popbox').PopBox({
 	content:'test'
@@ -63,13 +66,18 @@ Example: <a href="#" class="popbox" data-content="This is the popbox content.">C
 
 Automatic PopBox:
 As of Version 2.16, PopBox now automatically searches for any elements with a class of 'popbox' and applies a click listener to them.
+Example: <a href="http://www.vimeo.com/38013872" class="popbox">Vimeo</span>
+If the selected element has a href or data-href attribute, this will be analysed and a popbox will be automatically prepared.
+- Advice: If you have an element with a href but do not want automatic setup, apply data-autosetup="0" or data-autosetup="false" to the element.
+Example: <span data-href="http://www.vimeo.com/38013872" data-autosetup="false" class="popbox">Vimeo</span>
+
+[[[ As of Version 2.20 - END ]]]
 
 
 @@@@@@@@@@@@@
 Things to Add
 @@@@@@@@@@@@@
 
-- add dynamic link support, look for href, get url and work out what it is and create the optimal settings popbox. (support images, youtube, vimeo)
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
 
@@ -84,11 +92,13 @@ Things to Add
 Updates
 @@@@@@@
 
-=== v2-16 (TESTING) ===
+=== v2-20 (TESTING) ===
 - Added potential hack fix for mobile device (old android and iOS) input field focus bug
 - Added jQuery initiate support. e.g. $('.custom-popbox').PopBox();
 - Added support for data attributes on jQuery initiated PopBoxes.
 - Fixed bottom few pixels space below iframes with autoScale.
+- Fixed background scrolling hitch on webkit browsers with iframes.
+- Full support for automatic image (jpg|png|gif) opening and youtube|vimeo links.
 
 === v2-15 (stable) ===
 - Added last ditch fix for any potential problems with image loading.

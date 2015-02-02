@@ -720,11 +720,6 @@
         return ready;
     }
 
-    function clearTimedResize(pb)
-    {
-        if (pb._properties.resizetimer !== false) clearTimeout(pb._properties.resizetimer);
-    }
-
     function startGallery(pb)
     {
         stopGallery(pb);
@@ -868,7 +863,7 @@
                 popboxAnimateStateComplete(_class,'close');
             });
 
-            _class.$window.off('resize.popbox scroll.popbox');
+            _class.$window.off('resize.popbox scroll.popbox mousewheel.popbox');
 
             _class._properties.isopen = false;
             _class.refresh();
@@ -1022,6 +1017,8 @@
                         $focused = false;
                     }
                 }
+            }).on('mousewheel.popbox',function(e){
+                //hack fix for webkit iframe scroll glitch
             });
             _class.container.on('focus.popbox','input,textarea,select',function(){
                 convertPopBoxPosition(_class,'absolute');
@@ -1127,6 +1124,7 @@
         fadeOutSpeed: 400,
         updatePositionDelay: 200,
         autoScale:false,
+        autoSetup:true,
         customClass:'',
         animateSpeed: 400,
         mode:'normal',
@@ -1143,17 +1141,79 @@
 
     $.fn.PopBox = function(settings)
     {
-        var $this = $(this);
+        var $elements = $(this);
 
-        if ($this.length)
+        if ($elements.length)
         {
-            if (typeof settings !== 'object' || settings instanceof Array) settings = {};
-            applyDataSettings($this,PopBox.prototype._defaultSettings,settings);
+            $elements.each(function(){
+                var $element = $(this);
+                var csettings = settings;
+                if (typeof csettings !== 'object' || csettings instanceof Array) csettings = {};
 
-            var _popbox = new PopBox(settings);
-            $(this).click(function(e){
-                e.preventDefault();
-                _popbox.open();
+                //check for href
+                var href = getAttr($element,'href') || $element.data('href');
+                var auto = csettings.autoSetup || $element.data('autosetup');
+
+                if (href && (auto == null || auto === 1 || auto === true || auto === '1' || auto === 'true'))
+                {
+                    var matches = {
+                        youtube:[
+                            /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)/, //normalurl
+                            /^(?:http:|https:)?\/\/youtu.be\/([a-zA-Z0-9_\-]+)/, //shorturl
+                            /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_\-]+)/ //embedurl
+                        ],
+                        vimeo:[
+                            /^(?:http:|https:)?\/\/(?:www\.)?vimeo\.com\/([a-zA-Z0-9_\-]+)/, //normalurl
+                            /^(?:http:|https:)?\/\/player\.vimeo\.com\/video\/([a-zA-Z0-9_\-]+)/ //embedurl
+                        ],
+                        image:[
+                            /^(?:http:|https:)?\/\/[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/, //remote image
+                            /^[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/ //remote image
+                        ]
+                    };
+
+                    matchprocess:
+                        for (var matcher in matches)
+                        {
+                            if (matches.hasOwnProperty(matcher) && matches[matcher] instanceof Array)
+                            {
+                                for (var i=0; i<matches[matcher].length; i++)
+                                {
+                                    var matchresult = href.match(matches[matcher][i]);
+                                    if (matchresult)
+                                    {
+                                        //check if youtube, vimeo, image (jpg|png|gif)
+                                        switch (matcher)
+                                        {
+                                            case 'youtube':
+                                                csettings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+'" frameborder="0" allowfullscreen></iframe>';
+                                                csettings.autoScale = true;
+                                                break;
+                                            case 'vimeo':
+                                                csettings.content = '<iframe width="1280" height="720" src="//player.vimeo.com/video/'+matchresult[1]+'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+                                                csettings.autoScale = true;
+                                                break;
+                                            case 'image':
+                                                csettings.content = '<img src="'+matchresult[0]+'" alt="" />';
+                                                csettings.mode = 'gallery';
+                                                break;
+                                        }
+                                        break matchprocess;
+                                    }
+                                }
+                            }
+                        }
+                }
+
+                applyDataSettings($element,PopBox.prototype._defaultSettings,csettings);
+
+                var _popbox = false;
+
+                $element.click(function(e){
+                    e.preventDefault();
+                    _popbox = new PopBox(csettings);
+                    _popbox.open();
+                });
             });
         }
     };
