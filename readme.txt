@@ -63,6 +63,7 @@ $('.custom-popbox').PopBox({
 
 Applying data attributes:
 Example: <a href="#" class="popbox" data-content="This is the popbox content.">Click Me</a>
+- Advice: Data attributes are all lowercase versions of the settings, settings which go down multiple levels are separated by hyphens (-). e.g. data-gallery-name=""
 
 Automatic PopBox:
 As of Version 2.16, PopBox now automatically searches for any elements with a class of 'popbox' and applies a click listener to them.
