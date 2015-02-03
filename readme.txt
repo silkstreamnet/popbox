@@ -66,7 +66,7 @@ Example: <a href="#" class="popbox" data-content="This is the popbox content.">C
 - Advice: Data attributes are all lowercase versions of the settings, settings which go down multiple levels are separated by hyphens (-). e.g. data-gallery-name=""
 
 Automatic PopBox:
-As of Version 2.16, PopBox now automatically searches for any elements with a class of 'popbox' and applies a click listener to them.
+PopBox now automatically searches for any elements with a class of 'popbox' and applies a click listener to them.
 Example: <a href="http://www.vimeo.com/38013872" class="popbox">Vimeo</span>
 If the selected element has a href or data-href attribute, this will be analysed and a popbox will be automatically prepared.
 - Advice: If you have an element with a href but do not want automatic setup, apply data-autosetup="0" or data-autosetup="false" to the element.
