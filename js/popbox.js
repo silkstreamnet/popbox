@@ -1126,6 +1126,7 @@
         autoScale:false,
         autoSetup:true,
         customClass:'',
+        href:'',
         animateSpeed: 400,
         mode:'normal',
         gallery:{
@@ -1147,71 +1148,77 @@
         {
             $elements.each(function(){
                 var $element = $(this);
-                var csettings = settings;
-                if (typeof csettings !== 'object' || csettings instanceof Array) csettings = {};
-
-                //check for href
-                var href = getAttr($element,'href') || $element.data('href');
-                var auto = csettings.autoSetup || $element.data('autosetup');
-
-                if (href && (auto == null || auto === 1 || auto === true || auto === '1' || auto === 'true'))
-                {
-                    var matches = {
-                        youtube:[
-                            /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)/, //normalurl
-                            /^(?:http:|https:)?\/\/youtu.be\/([a-zA-Z0-9_\-]+)/, //shorturl
-                            /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_\-]+)/ //embedurl
-                        ],
-                        vimeo:[
-                            /^(?:http:|https:)?\/\/(?:www\.)?vimeo\.com\/([a-zA-Z0-9_\-]+)/, //normalurl
-                            /^(?:http:|https:)?\/\/player\.vimeo\.com\/video\/([a-zA-Z0-9_\-]+)/ //embedurl
-                        ],
-                        image:[
-                            /^(?:http:|https:)?\/\/[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/, //remote image
-                            /^[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/ //remote image
-                        ]
-                    };
-
-                    matchprocess:
-                        for (var matcher in matches)
-                        {
-                            if (matches.hasOwnProperty(matcher) && matches[matcher] instanceof Array)
-                            {
-                                for (var i=0; i<matches[matcher].length; i++)
-                                {
-                                    var matchresult = href.match(matches[matcher][i]);
-                                    if (matchresult)
-                                    {
-                                        //check if youtube, vimeo, image (jpg|png|gif)
-                                        switch (matcher)
-                                        {
-                                            case 'youtube':
-                                                csettings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+'" frameborder="0" allowfullscreen></iframe>';
-                                                csettings.autoScale = true;
-                                                break;
-                                            case 'vimeo':
-                                                csettings.content = '<iframe width="1280" height="720" src="//player.vimeo.com/video/'+matchresult[1]+'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
-                                                csettings.autoScale = true;
-                                                break;
-                                            case 'image':
-                                                csettings.content = '<img src="'+matchresult[0]+'" alt="" />';
-                                                csettings.mode = 'gallery';
-                                                break;
-                                        }
-                                        break matchprocess;
-                                    }
-                                }
-                            }
-                        }
-                }
-
-                applyDataSettings($element,PopBox.prototype._defaultSettings,csettings);
-
-                var _popbox = false;
+                var _popbox = new PopBox(settings);
 
                 $element.click(function(e){
                     e.preventDefault();
-                    _popbox = new PopBox(csettings);
+
+                    var newSettings = $.extend(true,{},settings);
+                    applyDataSettings($element,PopBox.prototype._defaultSettings,newSettings);
+
+                    var href = newSettings.href || getAttr($element,'href');
+                    var auto = newSettings.autoSetup;
+                    var autoSettings = {};
+                    var autoRun = false;
+
+                    if (href && (auto == null || auto === 1 || auto === true || auto === '1' || auto === 'true'))
+                    {
+                        var matches = {
+                            youtube:[
+                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)/, //normalurl
+                                /^(?:http:|https:)?\/\/youtu.be\/([a-zA-Z0-9_\-]+)/, //shorturl
+                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_\-]+)/ //embedurl
+                            ],
+                            vimeo:[
+                                /^(?:http:|https:)?\/\/(?:www\.)?vimeo\.com\/([a-zA-Z0-9_\-]+)/, //normalurl
+                                /^(?:http:|https:)?\/\/player\.vimeo\.com\/video\/([a-zA-Z0-9_\-]+)/ //embedurl
+                            ],
+                            image:[
+                                /^(?:http:|https:)?\/\/[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/, //remote image
+                                /^[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/ //remote image
+                            ]
+                        };
+
+                        matchprocess:
+                            for (var matcher in matches)
+                            {
+                                if (matches.hasOwnProperty(matcher) && matches[matcher] instanceof Array)
+                                {
+                                    for (var i=0; i<matches[matcher].length; i++)
+                                    {
+                                        var matchresult = href.match(matches[matcher][i]);
+                                        if (matchresult)
+                                        {
+                                            //check if youtube, vimeo, image (jpg|png|gif)
+                                            switch (matcher)
+                                            {
+                                                case 'youtube':
+                                                    autoSettings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+'" frameborder="0" allowfullscreen></iframe>';
+                                                    autoSettings.autoScale = true;
+                                                    break;
+                                                case 'vimeo':
+                                                    autoSettings.content = '<iframe width="1280" height="720" src="//player.vimeo.com/video/'+matchresult[1]+'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+                                                    autoSettings.autoScale = true;
+                                                    break;
+                                                case 'image':
+                                                    autoSettings.content = '<img src="'+matchresult[0]+'" alt="" />';
+                                                    autoSettings.mode = 'gallery';
+                                                    break;
+                                            }
+
+                                            $.extend(true,autoSettings,newSettings);
+                                            autoRun = true;
+
+                                            break matchprocess;
+                                        }
+                                    }
+                                }
+                            }
+                    }
+
+                    if (autoRun) _popbox = new PopBox(autoSettings);
+                    else _popbox = new PopBox(newSettings);
+
                     _popbox.open();
                 });
             });
