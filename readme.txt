@@ -51,6 +51,7 @@ _popbox has the following methods:
 	_popbox.open();                                                                  === Returns: {null}. Executes: Adds the popbox to the body, applies all the relevant formatting and adds the specified content. Then adjusts and fades in.
 	_popbox.close();                                                                 === Returns: {null}. Executes: Closes the popbox and removes it from the body.
 	_popbox.adjust(immediate={bool|number});                                         === Returns: {null}. Executes: Adjusts the popbox to account for any new changes to the popbox.
+	_popbox.applyDataSettings(jqueryelement={object})                                === Returns: {null}. Executes: Applies settings based on data attributes of the jQuery element provided.
 	---
 
 
@@ -93,7 +94,10 @@ Things to Add
 Updates
 @@@@@@@
 
-=== v2-20 (TESTING) ===
+=== v2-21 (stable) ===
+- Added applyDataSettings method.
+
+=== v2-20 (stable) ===
 - Added potential hack fix for mobile device (old android and iOS) input field focus bug
 - Added jQuery initiate support. e.g. $('.custom-popbox').PopBox();
 - Added support for data attributes on jQuery initiated PopBoxes.
