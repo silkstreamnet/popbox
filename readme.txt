@@ -82,6 +82,11 @@ Things to Add
 
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
+- Need to test image loading on iPhone
+- Need to test forms on iPhone
+
+- Support CSS3 transitions over javascript animation
+- When popup is resized, check all images are ready/loaded or have a listener (not sure whether this is important)
 
 - CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
 
@@ -93,6 +98,11 @@ Things to Add
 @@@@@@@
 Updates
 @@@@@@@
+
+=== v2-22 (stable) ===
+- Fix for iDevice image load problem (tested).
+- Moved autoScale style settings to be only set on images under the effects of autoScale.
+- Optimised imagesLost internal function which checks if an image has dropped out of the cache while being viewed.
 
 === v2-21 (stable) ===
 - Added applyDataSettings method.
