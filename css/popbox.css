@@ -55,8 +55,11 @@
 }
 
 .popbox-gallery-loading {
-    max-width:200px;
     padding:30px;
+}
+
+.popbox-gallery-loading img {
+    margin: 0 auto;
 }
 
 .popbox-gallery-next, .popbox-gallery-prev {

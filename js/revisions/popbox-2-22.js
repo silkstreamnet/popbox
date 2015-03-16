@@ -39,7 +39,7 @@
             {
                 if (typeof defaults[p] === 'object')
                 {
-                    settings[p] = {};
+                    if (typeof settings[p] !== 'object') settings[p] = {};
                     applyDataSettings(object,defaults[p],settings[p],stage+p.toLowerCase()+'-');
                 }
                 else
@@ -410,6 +410,7 @@
 
             $popup.stop(true,false);
             $container.css('overflow-y','hidden');
+            $gallery_loading_area.css('height','');
 
             fixScalableElements(pb);
 
@@ -703,7 +704,7 @@
         if (pb && pb.popup)
         {
             pb._properties.loaded_images = [];
-            var images = pb.content_area.find('img');
+            var images = pb.popup.find('img');
 
             if (images.length > 0)
             {
@@ -728,7 +729,8 @@
                             {
                                 fimage.onload = function(){
                                     setTimeout(function(){
-                                        if (checkAllImagesReady(pb)) pb.adjust(true)
+                                        checkAllImagesReady(pb);
+                                        pb.adjust(20);
                                     },10);
                                 };
                             }
@@ -736,7 +738,8 @@
                             {
                                 fimage.onreadystatechange = function(){
                                     setTimeout(function(){
-                                        if (checkAllImagesReady(pb)) pb.adjust(true)
+                                        checkAllImagesReady(pb);
+                                        pb.adjust(20);
                                     },10);
                                 };
                             }
@@ -987,7 +990,8 @@
                 'top':'0px',
                 'z-index':'990',
                 'background-color': 'rgba(0,0,0,0.4)',
-                'overflow-x':'hidden'
+                'overflow-x':'hidden',
+                'box-sizing':'content-box'
             });
             _class.bottom_push.css({
                 'display':'block',
@@ -1004,8 +1008,6 @@
                 'top':'0px',
                 'left':'0px',
                 'z-index':'993',
-                '-webkit-box-sizing':'content-box',
-                '-moz-box-sizing':'content-box',
                 'box-sizing':'content-box'
             });
             _class.shadow.css({
@@ -1023,12 +1025,14 @@
             _class.content_area.css({
                 'overflow':'hidden',
                 'height':'auto',
-                'display':'block'
+                'display':'block',
+                'box-sizing':'content-box'
             });
             _class.gallery_loading_area.css({
                 'overflow':'hidden',
                 'height':'auto',
-                'display':'none'
+                'display':'none',
+                'box-sizing':'content-box'
             });
 
             if (_class._settings.mode == 'gallery')
@@ -1303,6 +1307,6 @@
 
     $('.popbox').PopBox();
 
-    window.PopBox = PopBox;
+    $.PopBox = PopBox;
 
 })(jQuery);

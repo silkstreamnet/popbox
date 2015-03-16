@@ -103,6 +103,11 @@ Updates
 - Fix for iDevice image load problem (tested).
 - Moved autoScale style settings to be only set on images under the effects of autoScale.
 - Optimised imagesLost internal function which checks if an image has dropped out of the cache while being viewed.
+- Moved window.PopBox to $.PopBox as it is a jQuery plugin...
+- Fix on applyDataSettings, sub objects were being overwritten.
+- Cleanup of style for gallery loading.
+- Changed popbox to adjust every time a new image is loaded.
+- Added a few more box-sizing resets to some containers.
 
 === v2-21 (stable) ===
 - Added applyDataSettings method.
