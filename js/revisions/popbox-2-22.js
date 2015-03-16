@@ -1054,50 +1054,68 @@
                 _class.close();
                 e.preventDefault();
             });
+
+            var applyFormFix = navigator.userAgent.match(/(iPad|iPhone|iPod|Android)/g);
             var $focused = false;
             var focusedresize = false;
             var focusedtop = 0;
             _class.$window.on('resize.popbox',function(){
-                convertPopBoxPosition(_class,'fixed');
-                if ($focused) focusedresize = true;
+                if (applyFormFix)
+                {
+                    convertPopBoxPosition(_class,'fixed');
+                    if ($focused) focusedresize = true;
+                }
                 _class.adjust();
             }).on('scroll.popbox',function(){
-                convertPopBoxPosition(_class,'fixed');
-                if ($focused)
+                if (applyFormFix)
                 {
-                    if (focusedresize)
+                    convertPopBoxPosition(_class,'fixed');
+                    if ($focused)
                     {
-                        focusedresize = false;
-                    }
-                    else
-                    {
-                        _class.$window.scrollTop(focusedtop);
-                        var newst = 0;
-                        //get focused position and scroll to it inside popbox
-                        if (_class.container.css('overflow-y') == 'scroll')
+                        if (focusedresize)
                         {
-                            newst = _class.container.scrollTop()+Math.round($focused.offset().top-_class.container.offset().top);
-                            if (newst > 3) newst -= 3;
-                            _class.container.scrollTop(newst);
+                            focusedresize = false;
                         }
                         else
                         {
-                            newst = _class.content_area.scrollTop()+Math.round($focused.offset().top-_class.content_area.offset().top);
-                            if (newst > 3) newst -= 3;
-                            _class.content_area.scrollTop(newst);
+                            _class.$window.scrollTop(focusedtop);
+                            var newst = 0;
+                            //get focused position and scroll to it inside popbox
+                            if (_class.container.css('overflow-y') == 'scroll')
+                            {
+                                newst = _class.container.scrollTop()+Math.round($focused.offset().top-_class.container.offset().top);
+                                if (newst > 3) newst -= 3;
+                                _class.container.scrollTop(newst);
+                            }
+                            else
+                            {
+                                newst = _class.content_area.scrollTop()+Math.round($focused.offset().top-_class.content_area.offset().top);
+                                if (newst > 3) newst -= 3;
+                                _class.content_area.scrollTop(newst);
+                            }
+                            $focused = false;
                         }
-                        $focused = false;
                     }
                 }
             }).on('mousewheel.popbox',function(e){
                 //hack fix for webkit iframe scroll glitch
             });
-            _class.container.on('focus.popbox','input,textarea,select',function(){
-                convertPopBoxPosition(_class,'absolute');
-                $focused = $(this);
-                focusedtop = _class.$window.scrollTop();
-                setTimeout(function(){$focused = false;},2000);
-            });
+
+            if (applyFormFix)
+            {
+                _class.container.on('focus.popbox','input,textarea,select',function(){
+                    convertPopBoxPosition(_class,'absolute');
+                    $focused = $(this);
+                    focusedtop = _class.$window.scrollTop();
+                    setTimeout(function(){
+                        if (focusedtop == _class.$window.scrollTop())
+                        {
+                            convertPopBoxPosition(_class,'fixed');
+                            $focused = false;
+                        }
+                    },50);
+                });
+            }
 
             // set last vars
             _class._properties.isopen = true;
