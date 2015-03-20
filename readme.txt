@@ -109,6 +109,7 @@ Updates
 - Changed popbox to adjust every time a new image is loaded.
 - Added a few more box-sizing resets to some containers.
 - Changed the form fix to only apply for iOS and Android devices. (Need a more robust way to avoid fixed position issues on mobile devices.)
+- Hotfix for cache check code, returning from adjust too early causing infinite clones. NOOOO!
 
 === v2-21 (stable) ===
 - Added applyDataSettings method.
