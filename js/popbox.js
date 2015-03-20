@@ -433,13 +433,13 @@
                 clone.content.find('img').css({'max-width':'none','max-height':'none','width':'auto','height':'auto','display':'block'});
                 clone.content.find('iframe').css({'max-height':'none','max-width':'none'});
 
-                // workaround for removal from cache
-                if (imagesLost(pb,clone)) return false;
-
                 cWidth = clone.popup.width();
                 cHeight = clone.popup.height();
                 cWidthPadding = clone.popup.outerWidth(false) - cWidth;
                 cHeightPadding = clone.popup.outerHeight(false) - cHeight;
+
+                // workaround for removal from cache
+                if (imagesLost(pb,clone)) success = false;
 
                 removeClonePopbox(clone);
 
