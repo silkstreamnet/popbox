@@ -115,7 +115,7 @@
         title:'',
         href:'', //can be used for none-anchor elements to grab content
         mode:false, //normal, can be 'gallery'
-        gallery:{
+        gallery:{ // mode must be set to gallery for this to be used
             loading:'<div>Loading...</div>',
             error:'<div>There was an error loading the image.</div>',
             name:'',
