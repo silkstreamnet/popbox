@@ -80,19 +80,20 @@ Example: <span data-href="http://www.vimeo.com/38013872" data-autosetup="false" 
 Things to Add
 @@@@@@@@@@@@@
 
+VERSION BEYOND 2 PLANS
 - IE7 iframe doesnt work/scale
 - IE7 gallery isn't completely stable
-- Need to test image loading on iPhone
-- Need to test forms on iPhone
-
-- Support CSS3 transitions over javascript animation
 - When popup is resized, check all images are ready/loaded or have a listener (not sure whether this is important)
 
-- CODE NEEDS RE-ORGANISING @@@@@@@@@@@@@@
-
-1. set all jquery objects to have a $ prepended to them
-2. separate adjust functionality from image loading
-3. conventionalise variables for consistency
+VERSION 3 PLANS
+- Support CSS3 transitions over javascript animation.
+- Add extension support to the plugin. Separate gallery functionality and extensive future animations to their own extension scripts.
+- Change function definition convention for private functions to var function plus camelCase.
+- Change variables to underscore with jquery objects prepended with $.
+- Take out awkward clone calculation and rely strictly on naturalWidth and naturalHeight from loaded image. If not supported, don't expect miracles.
+- Add addEventListener method to popbox class.
+- Change name of class to Popbox, only first letter capitalised.
+- Change applyDataSettings method to applySettings
 
 
 @@@@@@@
