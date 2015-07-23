@@ -94,6 +94,7 @@ VERSION 3 PLANS
 - Add addEventListener method to popbox class.
 - Change name of class to Popbox, only first letter capitalised.
 - Change applyDataSettings method to applySettings
+- Target jQuery 1.7+
 
 
 @@@@@@@
