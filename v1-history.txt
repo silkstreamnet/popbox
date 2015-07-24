@@ -1,0 +1,3 @@
+=== v1-00 to v1-08 is undocumented  ===
+- version 1 popbox.js and subsequent revisions are possibly unstable.
+- possible fundamental changes throughout revisions.

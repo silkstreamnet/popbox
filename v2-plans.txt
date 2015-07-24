@@ -1,0 +1,4 @@
+VERSION 2 PLANS
+- IE7 iframe doesnt work/scale
+- IE7 gallery isn't completely stable
+- When popup is resized, check all images are ready/loaded or have a listener (not sure whether this is important)

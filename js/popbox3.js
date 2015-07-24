@@ -32,7 +32,7 @@
 
                 if (typeof defaults[property] === 'object') {
                     if (typeof settings[property] !== 'object') settings[p] = {};
-                    applyDataSettings($object,defaults[p],settings[p],data_property+'-');
+                    _static.applyDataToSettings($object,defaults[p],settings[p],data_property+'-');
                 }
                 else {
                     var data = $object.data(data_property);
@@ -77,13 +77,7 @@
         return '';
     };
 
-    // css
-    _private.animations = {
-        'fade':{
-            'open':'',
-            'close':''
-        }
-    };
+
 
     $window.on('resize.'+_event_namespace,function(){
         if (_instances.length) {
@@ -104,12 +98,19 @@
         };
     };
 
+    Popbox.prototype.version = '3.0.0';
+
     Popbox.prototype.default_settings = {
         width:false, //auto
         height:false, //auto
         max_width:false, //none
         max_height:false, //none
         container:false, //specify an alternate container to body
+        animation:'fade',
+        animation_duration:'',
+        switch_animation:'fade', // for when content is changed, can accept special 'replace'
+        open_animation:'fade',
+        close_animation:'fade',
         content:'',
         close:'',
         title:'',
@@ -122,10 +123,23 @@
             next:'<span>&#x25B6;</span>',
             prev:'<span>&#x25C0;</span>'
         },
-        onOpen:false,
-        afterOpen:false,
-        onClose:false,
-        afterClose:false
+        on_open:false,
+        after_open:false,
+        on_close:false,
+        after_close:false
+    };
+
+    Popbox.prototype.animations = {
+        'fade':{
+            'open':'',
+            'close':''
+        },
+        'fadeIn':{
+            'open':''
+        },
+        'fadeOut':{
+            'close':''
+        }
     };
 
     Popbox.prototype.update = function(settings){
@@ -160,7 +174,7 @@
                 var $element = $(this),
                     _popbox = new PopBox(settings);
 
-                $element.on('click.Popbox',function(e){
+                $element.on('click.'+_event_namespace,function(e){
                     e.preventDefault();
 
                     // update data settings
