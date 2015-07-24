@@ -4,7 +4,7 @@
         return;
     }
 
-    var extended_animations = {
+    var extend_animations = {
         'slide':{
             'open':'',
             'close':''
@@ -31,7 +31,6 @@
         }
     };
 
-    $.extend(true,$.Popbox.prototype.animations,extended_animations);
-    console.dir($.Popbox);
+    $.extend(true,$.Popbox.prototype.animations,extend_animations);
 
 })(jQuery);

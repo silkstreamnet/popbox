@@ -4,7 +4,6 @@
         $body = $('body'),
         _instances = [],
         _static = {},
-        _private = {},
         _event_namespace = 'Popbox'; // event namespace - evna
 
     _static.param = function(parameter,_default) {
@@ -13,11 +12,14 @@
     _static.regexEscape = function(string) {
         return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
+    _static.isSet = function(value) {
+        return typeof value !== "undefined";
+    };
     _static.isNumber = function(number,required) {
         return ! isNaN (number-0) && number != null && number != "" && (!_static.param(required,false) || number > 0);
     };
     _static.isString = function(string,required) {
-        return typeof(string) === "string" && string != null && (!_static.param(required,false) || string != '');
+        return typeof string === "string" && string != null && (!_static.param(required,false) || string != '');
     };
     _static.getAttributeString = function($object,attr) {
         var val = $object.attr(attr);
@@ -96,6 +98,14 @@
         _Popbox.properties = {
             is_open:false
         };
+
+        if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.prototype.modes[_Popbox.settings.mode])) {
+            for (var method in _Popbox.prototype.modes[_Popbox.settings.mode]) {
+                if (_Popbox.prototype.modes[_Popbox.settings.mode].hasOwnProperty(method)) {
+                    _Popbox[method] = _Popbox.prototype.modes[_Popbox.settings.mode][method];
+                }
+            }
+        }
     };
 
     Popbox.prototype.version = '3.0.0';
@@ -107,7 +117,7 @@
         max_height:false, //none
         container:false, //specify an alternate container to body
         animation:'fade',
-        animation_duration:'',
+        animation_duration:400,
         switch_animation:'fade', // for when content is changed, can accept special 'replace'
         open_animation:'fade',
         close_animation:'fade',
@@ -116,13 +126,6 @@
         title:'',
         href:'', //can be used for none-anchor elements to grab content
         mode:false, //normal, can be 'gallery'
-        gallery:{ // mode must be set to gallery for this to be used
-            loading:'<div>Loading...</div>',
-            error:'<div>There was an error loading the image.</div>',
-            name:'',
-            next:'<span>&#x25B6;</span>',
-            prev:'<span>&#x25C0;</span>'
-        },
         on_open:false,
         after_open:false,
         on_close:false,
@@ -141,6 +144,10 @@
             'close':''
         }
     };
+
+    Popbox.prototype.modes = {}; // override prototype functions
+
+    Popbox.prototype._private = {};
 
     Popbox.prototype.update = function(settings){
         var _Popbox = this;
