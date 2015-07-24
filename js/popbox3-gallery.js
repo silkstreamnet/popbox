@@ -14,7 +14,13 @@
         }
     };
 
-    $.Popbox.prototype.modes.gallery = {};
+    $.Popbox.prototype.modes.gallery = {
+        _private:{}
+    };
+
+    $.Popbox.prototype.modes.gallery._private.initiate = function(){
+
+    };
 
     $.Popbox.prototype.modes.gallery.adjust = function(){
 

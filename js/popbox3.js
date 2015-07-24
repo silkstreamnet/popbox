@@ -15,6 +15,9 @@
     _static.isSet = function(value) {
         return typeof value !== "undefined";
     };
+    _static.isFunction = function(func) {
+        return typeof func === "function";
+    };
     _static.isNumber = function(number,required) {
         return ! isNaN (number-0) && number != null && number != "" && (!_static.param(required,false) || number > 0);
     };
@@ -99,17 +102,10 @@
             is_open:false
         };
 
-        if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.prototype.modes[_Popbox.settings.mode])) {
-            for (var method in _Popbox.prototype.modes[_Popbox.settings.mode]) {
-                if (_Popbox.prototype.modes[_Popbox.settings.mode].hasOwnProperty(method)) {
-                    _Popbox[method] = _Popbox.prototype.modes[_Popbox.settings.mode][method];
-                }
-            }
-        }
+        _Popbox.modeOverride();
     };
 
     Popbox.prototype.version = '3.0.0';
-
     Popbox.prototype.default_settings = {
         width:false, //auto
         height:false, //auto
@@ -125,13 +121,14 @@
         close:'',
         title:'',
         href:'', //can be used for none-anchor elements to grab content
+        close_destroy:true,
         mode:false, //normal, can be 'gallery'
         on_open:false,
         after_open:false,
         on_close:false,
         after_close:false
     };
-
+    Popbox.prototype.modes = {}; // override prototype functions
     Popbox.prototype.animations = {
         'fade':{
             'open':'',
@@ -144,10 +141,43 @@
             'close':''
         }
     };
-
-    Popbox.prototype.modes = {}; // override prototype functions
-
     Popbox.prototype._private = {};
+
+    Popbox.prototype._private.modeOverride = function(){
+        var _Popbox = this;
+
+        // check if mode exists and has override methods
+        if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.prototype.modes[_Popbox.settings.mode])) {
+            var mode_data = _Popbox.prototype.modes[_Popbox.settings.mode],
+                method;
+
+            for (method in mode_data) {
+                if (mode_data.hasOwnProperty(method) && _static.isFunction(mode_data[method])) {
+                    _Popbox[method] = mode_data[method];
+                }
+            }
+
+            if (_static.isSet(mode_data._private)){
+                for (method in mode_data._private) {
+                    if (mode_data._private.hasOwnProperty(method) && _static.isFunction(mode_data._private[method])) {
+                        _Popbox._private[method] = mode_data._private[method];
+                    }
+                }
+
+                if (_static.isFunction(mode_data._private.initiate)) {
+                    mode_data._private.initiate();
+                }
+            }
+        }
+    };
+
+    Popbox.prototype.create = function(){
+
+    };
+
+    Popbox.prototype.destroy = function(){
+
+    };
 
     Popbox.prototype.update = function(settings){
         var _Popbox = this;
@@ -199,6 +229,6 @@
 
     $.Popbox = Popbox;
 
-    $('.popbox-auto').PopBox();
+    $('.create-popbox').PopBox();
 
 })(jQuery,window);
