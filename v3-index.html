@@ -3,11 +3,11 @@
 <head>
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <link href="css/popbox.css" type="text/css" rel="stylesheet" />
+    <link href="css/v3-popbox.css" type="text/css" rel="stylesheet" />
     <style type="text/css">
         html {overflow-x:hidden; height:100%;}
-        body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0; color:#fff;}
-        a {color:#fff; font-size:120%;}
+        body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0;}
+        a {}
         p {font-size:100%;}
         iframe, object, embed {max-width:100%;}
 
@@ -21,14 +21,27 @@
     </style>
 </head>
 <body>
-
+<a href="#" class="click-me-1">Test</a>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <script type="text/javascript" src="js/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="js/popbox3.js"></script>
 <script type="text/javascript" src="js/popbox3-animations.js"></script>
 <script type="text/javascript" src="js/popbox3-gallery.js"></script>
 <script type="text/javascript">
 
+    var p = new $.Popbox({
+        mode:'gallery',
+        content:'test',
+        title:'chicken'
+    });
 
+    $('.click-me-1').on('click',function(e){
+        e.preventDefault();
+        p.open();
+    });
+
+    //p.changeMode();
+    console.dir(p);
 
 </script>
 </body>

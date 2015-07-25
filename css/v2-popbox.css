@@ -3,7 +3,7 @@
  *	v2.22
  */
 
-.popbox-container {
+.popbox {
     z-index:9990;
     background:url(../images/blackout.png) !important;
 }

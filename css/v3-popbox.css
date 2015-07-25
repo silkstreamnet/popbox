@@ -1,0 +1,9 @@
+/*
+ * 	Core Popbox CSS File
+ *	v3.00
+ */
+
+.popbox-overlay {
+    cursor:default;
+    background:rgba(0,0,0,0.3);
+}
