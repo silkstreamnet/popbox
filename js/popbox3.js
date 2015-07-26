@@ -112,8 +112,9 @@
         open_animation:'fade',
         close_animation:'fade',
         content:'',
-        close:'X',
-        title:'',
+        close:'X', // TODO: if set to FALSE, set element to display none
+        title:'', // TODO: if set to FALSE, set element to display none
+        loading:'',
         href:'', //can be used for none-anchor elements to grab content
         cache:false,
         mode:false, //normal, can be 'gallery'
@@ -166,6 +167,9 @@
         _Popbox.elements = {
             $popbox:false,
             $popbox_overlay:false,
+            $popbox_loading:false,
+            $popbox_wrapper:false,
+            $popbox_container:false,
             $popbox_title:false,
             $popbox_close:false,
             $popbox_content:false
@@ -287,26 +291,39 @@
                 'left':'0',
                 'bottom':'auto',
                 'right':'auto',
-                'max-width':'100%',
-                'max-height':'100%'
+                'width':'auto',
+                'height':'auto',
+                'overflow':'hidden'
             }
         });
+
+        _Popbox.elements.$popbox_loading = $('<div/>',{
+            'class':'popbox-loading'
+        }).appendTo(_Popbox.elements.$popbox);
+
+        _Popbox.elements.$popbox_wrapper = $('<div/>',{
+            'class':'popbox-wrapper'
+        }).appendTo(_Popbox.elements.$popbox);
+
+        _Popbox.elements.$popbox_container = $('<div/>',{
+            'class':'popbox-container'
+        }).appendTo(_Popbox.elements.$popbox_wrapper);
 
         _Popbox.elements.$popbox_close = $('<a/>',{
             'class':'popbox-close',
             'href':'javascript:void(0);'
-        }).html(_Popbox.settings.close).appendTo(_Popbox.elements.$popbox);
+        }).html(_Popbox.settings.close).appendTo(_Popbox.elements.$popbox_container);
 
         _Popbox.elements.$popbox_title = $('<div/>',{
             'class':'popbox-title'
-        }).html(_Popbox.settings.title).appendTo(_Popbox.elements.$popbox);
+        }).html(_Popbox.settings.title).appendTo(_Popbox.elements.$popbox_container);
 
-        _Popbox.elements.$popbox_popup_content = $('<div/>',{
+        _Popbox.elements.$popbox_content = $('<div/>',{
             'class':'popbox-content',
             'css':{
-                
+
             }
-        }).html(_Popbox.settings.content).appendTo(_Popbox.elements.$popbox);
+        }).html(_Popbox.settings.content).appendTo(_Popbox.elements.$popbox_container);
 
         // events
         _Popbox.elements.$popbox_close.on('click.'+_event_namespace,function(e){
@@ -344,7 +361,25 @@
         // can't change mode in this function
         if (_static.isSet(settings.mode)) delete settings.mode;
 
+        var existing_settings = {
+            close:_Popbox.settings.close,
+            title:_Popbox.settings.title,
+            content:_Popbox.settings.content
+        };
+
         $.extend(true,_Popbox.settings,_static.param(settings,{}));
+
+        if (_Popbox.isCreated()) {
+            if (existing_settings.close !== _Popbox.settings.close) {
+                _Popbox.elements.$popbox_close.html(_Popbox.settings.close);
+            }
+            if (existing_settings.title !== _Popbox.settings.title) {
+                _Popbox.elements.$popbox_title.html(_Popbox.settings.title);
+            }
+            if (existing_settings.content !== _Popbox.settings.content) {
+                _Popbox.elements.$popbox_content.html(_Popbox.settings.content);
+            }
+        }
 
         // perform an adjust
         _Popbox.adjust();
@@ -404,13 +439,18 @@
         var _Popbox = this;
 
         if (_Popbox.isOpen()) {
-
+            // get max width
         }
     };
 
     Popbox.prototype.isOpen = function(){
         var _Popbox = this;
         return _Popbox.properties.is_open;
+    };
+
+    Popbox.prototype.isCreated = function(){
+        var _Popbox = this;
+        return _Popbox.elements.$popbox !== false;
     };
 
 

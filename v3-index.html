@@ -31,13 +31,18 @@
 
     var p = new $.Popbox({
         mode:'gallery',
-        content:'test masses of content',
+        content:'<p>test masses of content</p>',
         title:'chicken'
     });
 
     $('.click-me-1').on('click',function(e){
         e.preventDefault();
         p.open();
+        setTimeout(function(){
+            p.update({
+                content:'<p>Extra content to fill up even more space goes here.</p>'
+            });
+        },1000);
     });
 
     //p.changeMode();
