@@ -82,19 +82,30 @@
         }
         return '';
     };
+    _static.elementPadding = function($object,dimension,include_margin) {
+        dimension = _static.param(dimension,'');
+        include_margin = _static.param(include_margin,false);
+        if (dimension == 'width') {
+            return $object.outerWidth(include_margin)-$object.width();
+        }
+        else if (dimension == 'height') {
+            return $object.outerHeight(include_margin)-$object.height();
+        }
+        return 0;
+    };
 
     var Popbox = function(settings){
-        var _Popbox = this;
+        var self = this;
 
-        _Popbox._private._Popbox = _Popbox;
+        self._private.self = self;
 
-        _Popbox.settings = $.extend(true,{},_Popbox.default_settings,_static.param(settings,{}));
-        _Popbox.properties = {
+        self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
+        self.properties = {
             instance_id:_next_instance_id
         };
 
-        _Popbox._private.reset();
-        _Popbox._private.applyMode();
+        self._private.reset();
+        self._private.applyMode();
 
         _next_instance_id++;
     };
@@ -117,6 +128,8 @@
         loading:'',
         href:'', //can be used for none-anchor elements to grab content
         cache:false,
+        width_padding:0.1,
+        height_padding:0.1,
         mode:false, //normal, can be 'gallery'
         on_open:false,
         after_open:false,
@@ -139,32 +152,32 @@
     Popbox.prototype._private = {};
 
     Popbox.prototype._private.reset = function() {
-        var _Popbox = this._Popbox;
+        var self = this.self;
 
-        if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.modes[_Popbox.settings.mode])) {
-            var mode_data = _Popbox.modes[_Popbox.settings.mode],
+        if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
+            var mode_data = self.modes[self.settings.mode],
                 method;
 
             for (method in mode_data) {
-                if (mode_data.hasOwnProperty(method) && _static.isSet(_Popbox[method])) {
-                    delete _Popbox[method];
+                if (mode_data.hasOwnProperty(method) && _static.isSet(self[method])) {
+                    delete self[method];
                 }
             }
 
             if (_static.isSet(mode_data._private)){
                 for (method in mode_data._private) {
-                    if (mode_data._private.hasOwnProperty(method) && _static.isSet(_Popbox._private[method])) {
-                        delete _Popbox._private[method];
+                    if (mode_data._private.hasOwnProperty(method) && _static.isSet(self._private[method])) {
+                        delete self._private[method];
                     }
                 }
             }
         }
 
-        _Popbox.properties = {
+        self.properties = {
             is_open:false,
-            instance_id:_Popbox.properties.instance_id
+            instance_id:self.properties.instance_id
         };
-        _Popbox.elements = {
+        self.elements = {
             $popbox:false,
             $popbox_overlay:false,
             $popbox_loading:false,
@@ -177,23 +190,23 @@
     };
 
     Popbox.prototype._private.applyMode = function(){
-        var _Popbox = this._Popbox;
+        var self = this.self;
 
         // check if mode exists and has override methods
-        if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.modes[_Popbox.settings.mode])) {
-            var mode_data = _Popbox.modes[_Popbox.settings.mode],
+        if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
+            var mode_data = self.modes[self.settings.mode],
                 method;
 
             for (method in mode_data) {
                 if (mode_data.hasOwnProperty(method) && _static.isFunction(mode_data[method])) {
-                    _Popbox[method] = mode_data[method];
+                    self[method] = mode_data[method];
                 }
             }
 
             if (_static.isSet(mode_data._private)){
                 for (method in mode_data._private) {
                     if (mode_data._private.hasOwnProperty(method) && _static.isFunction(mode_data._private[method])) {
-                        _Popbox._private[method] = mode_data._private[method];
+                        self._private[method] = mode_data._private[method];
                     }
                 }
 
@@ -205,17 +218,17 @@
     };
 
     Popbox.prototype._private.createOverlay = function(){
-        var _Popbox = this._Popbox;
+        var self = this.self;
         // add close button to overlay?
 
-        var $container = (_Popbox.settings.container) ? $(_Popbox.settings.container) : $body,
+        var $container = (self.settings.container) ? $(self.settings.container) : $body,
             $existing_popbox_overlay = $container.children('.popbox-overlay');
 
         if ($existing_popbox_overlay.length) {
-            _Popbox.elements.$popbox_overlay = $existing_popbox_overlay;
+            self.elements.$popbox_overlay = $existing_popbox_overlay;
         }
         else {
-            _Popbox.elements.$popbox_overlay = $('<a/>',{
+            self.elements.$popbox_overlay = $('<a/>',{
                 'class':'popbox-overlay',
                 'href':'javascript:void(0);',
                 'css':{
@@ -229,7 +242,7 @@
             }).appendTo($container);
         }
 
-        _Popbox.elements.$popbox_overlay.on('click.'+_event_namespace,function(e){
+        self.elements.$popbox_overlay.on('click.'+_event_namespace,function(e){
             e.preventDefault();
             for (var i in _instances) {
                 if (_instances.hasOwnProperty(i)) {
@@ -243,46 +256,46 @@
     };
 
     Popbox.prototype._private.destroyOverlay = function(){
-        var _Popbox = this._Popbox;
+        var self = this.self;
 
-        if (_instances.length <= 0 && _Popbox.elements.$popbox_overlay) {
-            _Popbox.elements.$popbox_overlay.remove();
+        if (_instances.length <= 0 && self.elements.$popbox_overlay) {
+            self.elements.$popbox_overlay.remove();
         }
     };
 
     Popbox.prototype._private.showOverlay = function(){
-        var _Popbox = this._Popbox;
+        var self = this.self;
 
-        if (!_Popbox.isOpen()) {
-            if (!_Popbox.elements.$popbox_overlay) {
-                _Popbox._private.createOverlay();
+        if (!self.isOpen()) {
+            if (!self.elements.$popbox_overlay) {
+                self._private.createOverlay();
             }
 
-            _Popbox.elements.$popbox_overlay.css({
+            self.elements.$popbox_overlay.css({
                 'display':'block'
             });
         }
     };
 
     Popbox.prototype._private.hideOverlay = function(){
-        var _Popbox = this._Popbox;
+        var self = this.self;
 
-        if (_Popbox.isOpen() && _Popbox.elements.$popbox_overlay) {
-            _Popbox.elements.$popbox_overlay.css({
+        if (self.isOpen() && self.elements.$popbox_overlay) {
+            self.elements.$popbox_overlay.css({
                 'display':'none'
             });
         }
     };
 
     Popbox.prototype.create = function(){
-        var _Popbox = this;
+        var self = this;
 
-        _Popbox.destroy();
-        _Popbox._private.createOverlay();
+        self.destroy();
+        self._private.createOverlay();
 
-        var $container = (_Popbox.settings.container) ? $(_Popbox.settings.container) : $body;
+        var $container = (self.settings.container) ? $(self.settings.container) : $body;
 
-        _Popbox.elements.$popbox = $('<div/>',{
+        self.elements.$popbox = $('<div/>',{
             'class':'popbox',
             'css':{
                 'display':'none',
@@ -297,160 +310,216 @@
             }
         });
 
-        _Popbox.elements.$popbox_loading = $('<div/>',{
+        self.elements.$popbox_loading = $('<div/>',{
             'class':'popbox-loading'
-        }).appendTo(_Popbox.elements.$popbox);
+        }).appendTo(self.elements.$popbox);
 
-        _Popbox.elements.$popbox_wrapper = $('<div/>',{
+        self.elements.$popbox_wrapper = $('<div/>',{
             'class':'popbox-wrapper'
-        }).appendTo(_Popbox.elements.$popbox);
+        }).appendTo(self.elements.$popbox);
 
-        _Popbox.elements.$popbox_container = $('<div/>',{
+        self.elements.$popbox_container = $('<div/>',{
             'class':'popbox-container'
-        }).appendTo(_Popbox.elements.$popbox_wrapper);
+        }).appendTo(self.elements.$popbox_wrapper);
 
-        _Popbox.elements.$popbox_close = $('<a/>',{
+        self.elements.$popbox_close = $('<a/>',{
             'class':'popbox-close',
             'href':'javascript:void(0);'
-        }).html(_Popbox.settings.close).appendTo(_Popbox.elements.$popbox_container);
+        }).html(self.settings.close).appendTo(self.elements.$popbox_container);
 
-        _Popbox.elements.$popbox_title = $('<div/>',{
+        self.elements.$popbox_title = $('<div/>',{
             'class':'popbox-title'
-        }).html(_Popbox.settings.title).appendTo(_Popbox.elements.$popbox_container);
+        }).html(self.settings.title).appendTo(self.elements.$popbox_container);
 
-        _Popbox.elements.$popbox_content = $('<div/>',{
+        self.elements.$popbox_content = $('<div/>',{
             'class':'popbox-content',
             'css':{
 
             }
-        }).html(_Popbox.settings.content).appendTo(_Popbox.elements.$popbox_container);
+        }).html(self.settings.content).appendTo(self.elements.$popbox_container);
 
         // events
-        _Popbox.elements.$popbox_close.on('click.'+_event_namespace,function(e){
+        self.elements.$popbox_close.on('click.'+_event_namespace,function(e){
             e.preventDefault();
-            _Popbox.close();
+            self.close();
             return false;
         });
 
 
-        _Popbox.elements.$popbox.appendTo($container);
+        self.elements.$popbox.appendTo($container);
 
-        _instances[_Popbox.properties.instance_id] = _Popbox;
+        _instances[self.properties.instance_id] = self;
         _instances.length++;
     };
 
     Popbox.prototype.destroy = function(){
-        var _Popbox = this;
+        var self = this;
 
-        if (_Popbox.elements.$popbox) {
-            _Popbox.elements.$popbox.remove();
+        if (self.elements.$popbox) {
+            self.elements.$popbox.remove();
 
-            if (_static.isSet(_instances[_Popbox.properties.instance_id])) {
-                delete _instances[_Popbox.properties.instance_id];
+            if (_static.isSet(_instances[self.properties.instance_id])) {
+                delete _instances[self.properties.instance_id];
                 _instances.length--;
             }
 
-            _Popbox._private.destroyOverlay();
-            _Popbox._private.reset();
+            self._private.destroyOverlay();
+            self._private.reset();
+            self._private.applyMode();
         }
     };
 
     Popbox.prototype.update = function(settings){
-        var _Popbox = this;
+        var self = this;
 
         // can't change mode in this function
         if (_static.isSet(settings.mode)) delete settings.mode;
 
         var existing_settings = {
-            close:_Popbox.settings.close,
-            title:_Popbox.settings.title,
-            content:_Popbox.settings.content
+            close:self.settings.close,
+            title:self.settings.title,
+            content:self.settings.content
         };
 
-        $.extend(true,_Popbox.settings,_static.param(settings,{}));
+        $.extend(true,self.settings,_static.param(settings,{}));
 
-        if (_Popbox.isCreated()) {
-            if (existing_settings.close !== _Popbox.settings.close) {
-                _Popbox.elements.$popbox_close.html(_Popbox.settings.close);
+        if (self.isCreated()) {
+            if (existing_settings.close !== self.settings.close) {
+                self.elements.$popbox_close.html(self.settings.close);
             }
-            if (existing_settings.title !== _Popbox.settings.title) {
-                _Popbox.elements.$popbox_title.html(_Popbox.settings.title);
+            if (existing_settings.title !== self.settings.title) {
+                self.elements.$popbox_title.html(self.settings.title);
             }
-            if (existing_settings.content !== _Popbox.settings.content) {
-                _Popbox.elements.$popbox_content.html(_Popbox.settings.content);
+            if (existing_settings.content !== self.settings.content) {
+                self.elements.$popbox_content.html(self.settings.content);
             }
         }
 
         // perform an adjust
-        _Popbox.adjust();
+        self.adjust();
     };
 
     Popbox.prototype.changeMode = function(new_mode){
-        var _Popbox = this;
+        var self = this;
 
-        if (!_Popbox.isOpen()) {
+        if (!self.isOpen()) {
             // erase existing mode functions
-            _Popbox._private.reset();
-            _Popbox.settings.mode = new_mode || false;
-            _Popbox._private.applyMode();
+            self._private.reset();
+            self.settings.mode = new_mode || false;
+            self._private.applyMode();
         }
     };
 
     Popbox.prototype.open = function(){
-        var _Popbox = this;
+        var self = this;
 
-        if (!_Popbox.isOpen()) {
-            if (!_Popbox.elements.$popbox) {
-                _Popbox.create();
+        if (!self.isOpen()) {
+            if (!self.elements.$popbox) {
+                self.create();
             }
 
-            _Popbox._private.showOverlay();
+            self._private.showOverlay();
 
-            _Popbox.elements.$popbox.css({
-                'display':'block'
+            self.elements.$popbox_wrapper.css({
+                'visibility':'hidden'
             });
 
-            _Popbox.properties.is_open = true;
+            self.elements.$popbox.css({
+                'display':'block',
+                'opacity':'0'
+            });
 
-            _Popbox.adjust();
+            self.properties.is_open = true;
+
+            self.adjust();
+
+            self.elements.$popbox.css({
+                'opacity':'1'
+            });
+
+            self.elements.$popbox_wrapper.css({
+                'visibility':''
+            });
         }
     };
 
     Popbox.prototype.close = function(destroy){
-        var _Popbox = this;
+        var self = this;
 
-        if (_Popbox.isOpen()) {
+        if (self.isOpen()) {
 
-            _Popbox.elements.$popbox.css({
+            self.elements.$popbox.css({
                 'display':'none'
             });
 
-            _Popbox._private.hideOverlay();
+            self._private.hideOverlay();
 
-            if (destroy || !_Popbox.settings.cache) {
-                _Popbox.destroy();
+            if (destroy || !self.settings.cache) {
+                self.destroy();
             }
 
-            _Popbox.properties.is_open = false;
+            self.properties.is_open = false;
         }
     };
 
     Popbox.prototype.adjust = function(){
-        var _Popbox = this;
+        var self = this;
 
-        if (_Popbox.isOpen()) {
-            // get max width
+        if (self.isOpen()) {
+
+            var windowWidth = $window.width(),
+                windowHeight = $window.height(),
+                maxPopboxWidth = ((self.settings.width_padding > 0) ? windowWidth-(windowWidth*self.settings.width_padding) : windowWidth)-_static.elementPadding(self.elements.$popbox,'width'),
+                maxPopboxHeight = ((self.settings.height_padding > 0) ? windowHeight-(windowHeight*self.settings.height_padding) : windowHeight)-_static.elementPadding(self.elements.$popbox,'height'),
+                newPopboxWidth,
+                newPopboxHeight,
+                newPopboxTop,
+                newPopboxLeft;
+
+            self.elements.$popbox_wrapper.css({
+                'position':'absolute',
+                'top':'0px',
+                'left':'0px',
+                'width':maxPopboxWidth+'px',
+                'height':'auto'
+            });
+
+            self.elements.$popbox_container.css({
+                'position':'absolute',
+                'top':'0px',
+                'left':'0px',
+                'width':'auto',
+                'height':'auto'
+            });
+
+            newPopboxWidth = self.elements.$popbox_container.width()+1;
+            newPopboxHeight = self.elements.$popbox_container.height()+1;
+            newPopboxLeft = (windowWidth-newPopboxWidth)/2;
+            newPopboxTop = (windowHeight-newPopboxHeight)/2;
+
+            if (newPopboxHeight > maxPopboxHeight) {
+                newPopboxTop = (self.settings.height_padding > 0) ? windowHeight*self.settings.height_padding : 0;
+            }
+
+            self.elements.$popbox.css({
+                'width':newPopboxWidth+'px',
+                'top':newPopboxTop+'px',
+                'left':newPopboxLeft+'px'
+            });
+
+            self.elements.$popbox_wrapper.attr('style','');
+            self.elements.$popbox_container.attr('style','');
         }
     };
 
     Popbox.prototype.isOpen = function(){
-        var _Popbox = this;
-        return _Popbox.properties.is_open;
+        var self = this;
+        return self.properties.is_open;
     };
 
     Popbox.prototype.isCreated = function(){
-        var _Popbox = this;
-        return _Popbox.elements.$popbox !== false;
+        var self = this;
+        return self.elements.$popbox !== false;
     };
 
 
@@ -492,6 +561,8 @@
                 $element.data('Popbox',_popbox);
             });
         }
+
+        return this;
     };
 
     $.Popbox = Popbox;
