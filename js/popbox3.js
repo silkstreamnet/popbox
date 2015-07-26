@@ -466,11 +466,13 @@
         var self = this;
 
         if (self.isOpen()) {
-
+            //TODO popbox needs wrapper for example to work as fixed
             var windowWidth = $window.width(),
                 windowHeight = $window.height(),
-                maxPopboxWidth = ((self.settings.width_padding > 0) ? windowWidth-(windowWidth*self.settings.width_padding) : windowWidth)-_static.elementPadding(self.elements.$popbox,'width'),
-                maxPopboxHeight = ((self.settings.height_padding > 0) ? windowHeight-(windowHeight*self.settings.height_padding) : windowHeight)-_static.elementPadding(self.elements.$popbox,'height'),
+                popboxWidthPadding = _static.elementPadding(self.elements.$popbox,'width'),
+                popboxHeightPadding = _static.elementPadding(self.elements.$popbox,'height'),
+                maxPopboxWidth = ((self.settings.width_padding > 0) ? windowWidth-(windowWidth*self.settings.width_padding) : windowWidth)-popboxWidthPadding,
+                maxPopboxHeight = ((self.settings.height_padding > 0) ? windowHeight-(windowHeight*self.settings.height_padding) : windowHeight)-popboxHeightPadding,
                 newPopboxWidth,
                 newPopboxHeight,
                 newPopboxTop,
@@ -494,9 +496,9 @@
 
             newPopboxWidth = self.elements.$popbox_container.width()+1;
             newPopboxHeight = self.elements.$popbox_container.height()+1;
-            newPopboxLeft = (windowWidth-newPopboxWidth)/2;
-            newPopboxTop = (windowHeight-newPopboxHeight)/2;
-
+            newPopboxLeft = (windowWidth-(newPopboxWidth+popboxWidthPadding))/2;
+            newPopboxTop = (windowHeight-(newPopboxHeight+popboxHeightPadding))/2;
+            //TODO top and left should be calculated after width is applied
             if (newPopboxHeight > maxPopboxHeight) {
                 newPopboxTop = (self.settings.height_padding > 0) ? windowHeight*self.settings.height_padding : 0;
             }
