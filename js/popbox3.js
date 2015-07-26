@@ -93,7 +93,7 @@
             instance_id:_next_instance_id
         };
 
-        _Popbox._private.eraseMode();
+        _Popbox._private.reset();
         _Popbox._private.applyMode();
 
         _next_instance_id++;
@@ -137,7 +137,7 @@
     };
     Popbox.prototype._private = {};
 
-    Popbox.prototype._private.eraseMode = function() {
+    Popbox.prototype._private.reset = function() {
         var _Popbox = this._Popbox;
 
         if (_static.isString(_Popbox.settings.mode) && _static.isSet(_Popbox.modes[_Popbox.settings.mode])) {
@@ -282,9 +282,13 @@
             'class':'popbox',
             'css':{
                 'display':'none',
-                'position':'absolute',
+                'position':'fixed',
                 'top':'0',
-                'left':'0'
+                'left':'0',
+                'bottom':'auto',
+                'right':'auto',
+                'max-width':'100%',
+                'max-height':'100%'
             }
         });
 
@@ -298,7 +302,10 @@
         }).html(_Popbox.settings.title).appendTo(_Popbox.elements.$popbox);
 
         _Popbox.elements.$popbox_popup_content = $('<div/>',{
-            'class':'popbox-content'
+            'class':'popbox-content',
+            'css':{
+                
+            }
         }).html(_Popbox.settings.content).appendTo(_Popbox.elements.$popbox);
 
         // events
@@ -327,7 +334,7 @@
             }
 
             _Popbox._private.destroyOverlay();
-            _Popbox._private.eraseMode();
+            _Popbox._private.reset();
         }
     };
 
@@ -348,7 +355,7 @@
 
         if (!_Popbox.isOpen()) {
             // erase existing mode functions
-            _Popbox._private.eraseMode();
+            _Popbox._private.reset();
             _Popbox.settings.mode = new_mode || false;
             _Popbox._private.applyMode();
         }
@@ -369,6 +376,8 @@
             });
 
             _Popbox.properties.is_open = true;
+
+            _Popbox.adjust();
         }
     };
 
@@ -394,6 +403,9 @@
     Popbox.prototype.adjust = function(){
         var _Popbox = this;
 
+        if (_Popbox.isOpen()) {
+
+        }
     };
 
     Popbox.prototype.isOpen = function(){

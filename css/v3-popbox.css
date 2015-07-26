@@ -7,3 +7,25 @@
     cursor:default;
     background:rgba(0,0,0,0.3);
 }
+
+.popbox-overlay .popbox-close {
+
+}
+
+.popbox {
+    padding:1em;
+    background:#fff;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.popbox .popbox-close {
+
+}
+
+.popbox .popbox-title {
+
+}
+
+.popbox .popbox-content {
+
+}
