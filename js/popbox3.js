@@ -93,6 +93,25 @@
         }
         return 0;
     };
+    _static.animate = function(parameters){
+        parameters = _static.param(parameters,{});
+        /*
+        {
+            properties:{
+                
+            }
+        }
+         */
+    };
+    _static.onTransitionEnd = function($object,func) {
+        $object.off('.popbox_transitionend').on('transitionend.popbox_transitionend webkitTransitionEnd.popbox_transitionend oTransitionEnd.popbox_transitionend otransitionend.popbox_transitionend MSTransitionEnd.popbox_transitionend',function(){
+            if (_static.isFunction(func)) func();
+            $(this).off('.popbox_transitionend');
+        });
+    };
+    _static.offTransitionEnd = function($object) {
+        $object.off('.popbox_transitionend');
+    };
 
     var Popbox = function(settings){
         var self = this;
@@ -181,11 +200,13 @@
             $popbox:false,
             $popbox_overlay:false,
             $popbox_loading:false,
+            $popbox_popup:false,
             $popbox_wrapper:false,
             $popbox_container:false,
             $popbox_title:false,
             $popbox_close:false,
-            $popbox_content:false
+            $popbox_content:false,
+            $popbox_bottom_push:false
         };
     };
 
@@ -300,23 +321,48 @@
             'css':{
                 'display':'none',
                 'position':'fixed',
-                'top':'0',
-                'left':'0',
-                'bottom':'auto',
-                'right':'auto',
-                'width':'auto',
-                'height':'auto',
-                'overflow':'hidden'
+                'width':'100%',
+                'height':'100%',
+                'top':'0px',
+                'left':'0px',
+                'overflow-y':'auto',
+                'overflow-x':'hidden'
             }
         });
 
+        self.elements.$popbox_bottom_push = $('<div/>',{
+            'class':'popbox-bottom-push',
+            'css':{
+                'position':'absolute',
+                'top':'0px',
+                'left':'0px',
+                'height':'1px',
+                'width':'1px'
+            }
+        }).appendTo(self.elements.$popbox);
+
+        self.elements.$popbox_popup = $('<div/>',{
+            'class':'popbox-popup',
+            'css':{
+                'display':'none',
+                'position':'absolute',
+                'top':'50%',
+                'left':'50%',
+                'bottom':'auto',
+                'right':'auto',
+                'width':'0px',
+                'height':'0px',
+                'overflow':'hidden'
+            }
+        }).appendTo(self.elements.$popbox);
+
         self.elements.$popbox_loading = $('<div/>',{
             'class':'popbox-loading'
-        }).appendTo(self.elements.$popbox);
+        }).html(self.settings.loading).appendTo(self.elements.$popbox_popup);
 
         self.elements.$popbox_wrapper = $('<div/>',{
             'class':'popbox-wrapper'
-        }).appendTo(self.elements.$popbox);
+        }).appendTo(self.elements.$popbox_popup);
 
         self.elements.$popbox_container = $('<div/>',{
             'class':'popbox-container'
@@ -343,6 +389,14 @@
             e.preventDefault();
             self.close();
             return false;
+        });
+
+        self.elements.$popbox.on('click.'+_event_namespace,function(e){
+            if ($(e.target).closest('.popbox-popup').length === 0) {
+                e.preventDefault();
+                self.close();
+                return false;
+            }
         });
 
 
@@ -424,16 +478,20 @@
                 'visibility':'hidden'
             });
 
-            self.elements.$popbox.css({
+            self.elements.$popbox_popup.css({
                 'display':'block',
                 'opacity':'0'
             });
 
+            self.elements.$popbox.css({
+                'display':'block'
+            });
+
             self.properties.is_open = true;
 
-            self.adjust();
+            self.adjust(false);
 
-            self.elements.$popbox.css({
+            self.elements.$popbox_popup.css({
                 'opacity':'1'
             });
 
@@ -462,15 +520,17 @@
         }
     };
 
-    Popbox.prototype.adjust = function(){
+    Popbox.prototype.adjust = function(animate){
         var self = this;
+
+        animate = _static.param(animate,true);
 
         if (self.isOpen()) {
             //TODO popbox needs wrapper for example to work as fixed
             var windowWidth = $window.width(),
                 windowHeight = $window.height(),
-                popboxWidthPadding = _static.elementPadding(self.elements.$popbox,'width'),
-                popboxHeightPadding = _static.elementPadding(self.elements.$popbox,'height'),
+                popboxWidthPadding = _static.elementPadding(self.elements.$popbox_popup,'width'),
+                popboxHeightPadding = _static.elementPadding(self.elements.$popbox_popup,'height'),
                 maxPopboxWidth = ((self.settings.width_padding > 0) ? windowWidth-(windowWidth*self.settings.width_padding) : windowWidth)-popboxWidthPadding,
                 maxPopboxHeight = ((self.settings.height_padding > 0) ? windowHeight-(windowHeight*self.settings.height_padding) : windowHeight)-popboxHeightPadding,
                 newPopboxWidth,
@@ -498,19 +558,25 @@
             newPopboxHeight = self.elements.$popbox_container.height()+1;
             newPopboxLeft = (windowWidth-(newPopboxWidth+popboxWidthPadding))/2;
             newPopboxTop = (windowHeight-(newPopboxHeight+popboxHeightPadding))/2;
-            //TODO top and left should be calculated after width is applied
+            //TODO top and left should be calculated after width is applied?
             if (newPopboxHeight > maxPopboxHeight) {
                 newPopboxTop = (self.settings.height_padding > 0) ? windowHeight*self.settings.height_padding : 0;
             }
 
-            self.elements.$popbox.css({
+            self.elements.$popbox_popup.css({
                 'width':newPopboxWidth+'px',
+                'height':newPopboxHeight+'px',
                 'top':newPopboxTop+'px',
                 'left':newPopboxLeft+'px'
             });
 
             self.elements.$popbox_wrapper.attr('style','');
             self.elements.$popbox_container.attr('style','');
+
+            // TODO: when animating popbox popup, also set animation on bottom push top
+            self.elements.$popbox_bottom_push.css({
+                'top':(self.elements.$popbox_popup.outerHeight(false)+(newPopboxTop*2)-1)+'px'
+            });
         }
     };
 
