@@ -93,15 +93,32 @@
         }
         return 0;
     };
-    _static.animate = function(parameters){
-        parameters = _static.param(parameters,{});
-        /*
-        {
-            properties:{
+    _static.transition = function($object,properties,duration,easing,complete){
+        properties = _static.param(properties,{});
+        duration = _static.param(duration,400);
+        easing = _static.param(easing,'ease');
 
+        var property,
+            transitions = [];
+        //TODO: need to make sure at least one property is different value to existing. currently, the transitionend never gets called because it doesnt animate to complete
+        for (property in properties) {
+            if (properties.hasOwnProperty(property)) {
+                transitions.push(property+' '+duration+'ms '+easing);
             }
         }
-         */
+
+        if (transitions.length) {
+            $object.css('transition',transitions.join(','));
+            $object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint
+            $object.css(properties).addClass('popbox-animating');
+            $object.one('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd',function(){
+                $object.removeClass('popbox-animating').css('transition','');
+            });
+
+            if (_static.isFunction(complete)) {
+                _static.onTransitionEnd($object,complete);
+            }
+        }
     };
     _static.onTransitionEnd = function($object,func) {
         $object.off('.popbox_transitionend').on('transitionend.popbox_transitionend webkitTransitionEnd.popbox_transitionend oTransitionEnd.popbox_transitionend otransitionend.popbox_transitionend MSTransitionEnd.popbox_transitionend',function(){
@@ -168,6 +185,7 @@
             'close':''
         }
     };
+    Popbox.prototype._static = _static;
     Popbox.prototype._private = {};
 
     Popbox.prototype._private.reset = function() {
@@ -563,21 +581,55 @@
                 newPopboxTop = (self.settings.height_padding > 0) ? windowHeight*self.settings.height_padding : 0;
             }
 
-            self.elements.$popbox_popup.css({
-                'width':newPopboxWidth+'px',
-                'height':newPopboxHeight+'px',
-                'top':newPopboxTop+'px',
-                'left':newPopboxLeft+'px'
-            });
-
             self.elements.$popbox_wrapper.attr('style','');
             self.elements.$popbox_container.attr('style','');
 
-            // TODO: when animating popbox popup, also set animation on bottom push top
-            self.elements.$popbox_bottom_push.css({
+            if (animate) {
+                self.showLoading();
+
+                _static.transition(self.elements.$popbox_popup,{
+                    'width':newPopboxWidth+'px',
+                    'height':newPopboxHeight+'px',
+                    'top':newPopboxTop+'px',
+                    'left':newPopboxLeft+'px',
+                    'margin-bottom':newPopboxTop+'px'
+                },300,'ease',function(){
+                    self.showContent();
+                    console.log("moo");
+                });
+            }
+            else {
+                self.elements.$popbox_popup.css({
+                    'width':newPopboxWidth+'px',
+                    'height':newPopboxHeight+'px',
+                    'top':newPopboxTop+'px',
+                    'left':newPopboxLeft+'px',
+                    'margin-bottom':newPopboxTop+'px'
+                });
+            }
+
+            // old style push bottom (do still need or can remove element altogether?)
+            /*self.elements.$popbox_bottom_push.css({
                 'top':(self.elements.$popbox_popup.outerHeight(false)+(newPopboxTop*2)-1)+'px'
-            });
+            });*/
         }
+    };
+
+    Popbox.prototype.showLoading = function(){
+        var self = this;
+        self.elements.$popbox_loading.css('display','block');
+        self.elements.$popbox_wrapper.css('visibility','hidden');
+    };
+
+    Popbox.prototype.showContent = function(){
+        var self = this;
+        self.elements.$popbox_loading.css('display','none');
+        self.elements.$popbox_wrapper.css('visibility','visible');
+    };
+
+    Popbox.prototype.isLoading = function(){
+        var self = this;
+        return self.elements.$popbox_loading.is(':visible');
     };
 
     Popbox.prototype.isOpen = function(){
@@ -592,15 +644,21 @@
 
 
     // global events
+    var resize_timer = false;
     $window.on('resize.'+_event_namespace,function(){
-        if (_instances.length > 0) {
-            for (var i in _instances) {
-                if (_instances.hasOwnProperty(i)) {
-                    if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                        _instances[i].adjust();
+        if (resize_timer === false) {
+            resize_timer = setTimeout(function(){
+                if (_instances.length > 0) {
+                    for (var i in _instances) {
+                        if (_instances.hasOwnProperty(i)) {
+                            if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
+                                _instances[i].adjust();
+                            }
+                        }
                     }
                 }
-            }
+                resize_timer = false;
+            },100);
         }
     });
 
