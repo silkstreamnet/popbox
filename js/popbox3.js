@@ -533,11 +533,7 @@
             _static.transition(self.elements.$popbox_popup,{
                 'opacity':'1'
             },300,'ease');
-            /*
-            self.elements.$popbox_popup.css({
-                'opacity':'1'
-            });
-            */
+            
             self.elements.$popbox_wrapper.css({
                 'visibility':''
             });
@@ -684,24 +680,6 @@
             }
         }
     });
-    /*var resize_timer = false;
-    $window.on('resize.'+_event_namespace,function(){
-        if (resize_timer === false) {
-            resize_timer = setTimeout(function(){
-                if (_instances.length > 0) {
-                    for (var i in _instances) {
-                        if (_instances.hasOwnProperty(i)) {
-                            if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                                _instances[i].adjust(false);
-                            }
-                        }
-                    }
-                }
-                resize_timer = false;
-            },100);
-        }
-    });*/
-
 
     $.fn.PopBox = function(settings) {
 
