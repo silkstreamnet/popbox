@@ -533,7 +533,7 @@
             _static.transition(self.elements.$popbox_popup,{
                 'opacity':'1'
             },300,'ease');
-            
+
             self.elements.$popbox_wrapper.css({
                 'visibility':''
             });
