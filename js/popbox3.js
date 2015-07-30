@@ -99,17 +99,23 @@
         easing = _static.param(easing,'ease');
 
         var property,
-            transitions = [];
-        //TODO: need to make sure at least one property is different value to existing. currently, the transitionend never gets called because it doesnt animate to complete
+            transitions = [],
+            property_difference = false;
+
         for (property in properties) {
             if (properties.hasOwnProperty(property)) {
+                //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform
                 transitions.push(property+' '+duration+'ms '+easing);
+                if ($object.css(property) != properties[property]) {
+                    property_difference = true;
+                }
             }
         }
 
-        if (transitions.length) {
+        //TODO check that transitions are supported (if not, apply css and complete)
+        if (transitions.length && property_difference) {
             $object.css('transition',transitions.join(','));
-            $object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint
+            //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint
             $object.css(properties).addClass('popbox-animating');
             $object.one('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd',function(){
                 $object.removeClass('popbox-animating').css('transition','');
@@ -118,6 +124,10 @@
             if (_static.isFunction(complete)) {
                 _static.onTransitionEnd($object,complete);
             }
+        }
+        else if (_static.isFunction(complete)) {
+            $object.css(properties);
+            complete();
         }
     };
     _static.onTransitionEnd = function($object,func) {
@@ -311,8 +321,13 @@
             }
 
             self.elements.$popbox_overlay.css({
-                'display':'block'
+                'display':'block',
+                'opacity':'0'
             });
+
+            _static.transition(self.elements.$popbox_overlay,{
+                'opacity':'1'
+            },300,'ease');
         }
     };
 
@@ -320,8 +335,14 @@
         var self = this.self;
 
         if (self.isOpen() && self.elements.$popbox_overlay) {
-            self.elements.$popbox_overlay.css({
-                'display':'none'
+            _static.transition(self.elements.$popbox_overlay,{
+                'opacity':'0'
+            },300,'ease',function(){
+                if (self.elements.$popbox_overlay) {
+                    self.elements.$popbox_overlay.css({
+                        'display':'none'
+                    });
+                }
             });
         }
     };
@@ -509,10 +530,14 @@
 
             self.adjust(false);
 
+            _static.transition(self.elements.$popbox_popup,{
+                'opacity':'1'
+            },300,'ease');
+            /*
             self.elements.$popbox_popup.css({
                 'opacity':'1'
             });
-
+            */
             self.elements.$popbox_wrapper.css({
                 'visibility':''
             });
@@ -524,15 +549,19 @@
 
         if (self.isOpen()) {
 
-            self.elements.$popbox.css({
-                'display':'none'
+            _static.transition(self.elements.$popbox_popup,{
+                'opacity':'0'
+            },300,'ease',function(){
+                self.elements.$popbox.css({
+                    'display':'none'
+                });
+
+                if (destroy || !self.settings.cache) {
+                    self.destroy();
+                }
             });
 
             self._private.hideOverlay();
-
-            if (destroy || !self.settings.cache) {
-                self.destroy();
-            }
 
             self.properties.is_open = false;
         }
@@ -644,7 +673,18 @@
 
 
     // global events
-    var resize_timer = false;
+    $window.on('resize.'+_event_namespace,function(){
+        if (_instances.length > 0) {
+            for (var i in _instances) {
+                if (_instances.hasOwnProperty(i)) {
+                    if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
+                        _instances[i].adjust(false);
+                    }
+                }
+            }
+        }
+    });
+    /*var resize_timer = false;
     $window.on('resize.'+_event_namespace,function(){
         if (resize_timer === false) {
             resize_timer = setTimeout(function(){
@@ -652,7 +692,7 @@
                     for (var i in _instances) {
                         if (_instances.hasOwnProperty(i)) {
                             if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                                _instances[i].adjust();
+                                _instances[i].adjust(false);
                             }
                         }
                     }
@@ -660,7 +700,7 @@
                 resize_timer = false;
             },100);
         }
-    });
+    });*/
 
 
     $.fn.PopBox = function(settings) {
