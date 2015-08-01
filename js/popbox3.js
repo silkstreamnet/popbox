@@ -2,10 +2,38 @@
 
     var $window = $(window),
         $body = $('body'),
+        _event_namespace = 'Popbox',
         _next_instance_id = 0,
         _instances = {length:0},
         _static = {},
-        _event_namespace = 'Popbox'; // event namespace - evna
+        test_div = document.createElement('div'),
+        _support = {},
+        transition_end_event_names = {
+            'transition':       'transitionend',
+            'MozTransition':    'transitionend',
+            'OTransition':      'oTransitionEnd',
+            'WebkitTransition': 'webkitTransitionEnd',
+            'msTransition':     'MSTransitionEnd'
+        };
+
+    function getVendorPropertyName(prop) {
+        if (prop in test_div.style) return prop;
+
+        var prefixes = ['Moz', 'Webkit', 'O', 'ms'];
+        var prop_ = prop.charAt(0).toUpperCase() + prop.substr(1);
+
+        for (var i=0; i<prefixes.length; ++i) {
+            var vendorProp = prefixes[i] + prop_;
+            if (vendorProp in test_div.style) { return vendorProp; }
+        }
+    }
+
+    _support.transition         = getVendorPropertyName('transition');
+    _support.transform          = getVendorPropertyName('transform');
+    _support.transform_origin   = getVendorPropertyName('transformOrigin');
+    _support.transition_end     = transition_end_event_names[_support.transition] || null;
+
+    test_div = null;
 
     _static.param = function(parameter,_default) {
         return (typeof parameter !== 'undefined' ? parameter : _default);
@@ -100,38 +128,46 @@
 
         var property,
             transitions = [],
-            property_difference = false;
+            property_difference = false,
+            transitioning = false;
 
-        for (property in properties) {
-            if (properties.hasOwnProperty(property)) {
-                //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform
-                transitions.push(property+' '+duration+'ms '+easing);
-                if ($object.css(property) != properties[property]) {
-                    property_difference = true;
+        if (_support.transition_end) {
+            for (property in properties) {
+                if (properties.hasOwnProperty(property)) {
+                    //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform, margin, padding
+                    transitions.push(property+' '+duration+'ms '+easing);
+                    if ($object.css(property) != properties[property]) {
+                        property_difference = true;
+                    }
                 }
             }
-        }
 
-        //TODO check that transitions are supported (if not, apply css and complete)
-        if (transitions.length && property_difference) {
-            $object.css('transition',transitions.join(','));
-            //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint
-            $object.css(properties).addClass('popbox-animating');
-            $object.one('transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd',function(){
-                $object.removeClass('popbox-animating').css('transition','');
-            });
+            if (transitions.length && property_difference) {
+                $object.css('transition',transitions.join(', '));
+                //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
+                $object.css(properties).addClass('popbox-animating');
+                $object.one(_support.transition_end,function(){
+                    $object.removeClass('popbox-animating').css('transition','');
+                });
 
-            if (_static.isFunction(complete)) {
-                _static.onTransitionEnd($object,complete);
+                if (_static.isFunction(complete)) {
+                    _static.onTransitionEnd($object,complete);
+                }
+
+                transitioning = true;
             }
         }
-        else if (_static.isFunction(complete)) {
+
+        if (!transitioning) {
             $object.css(properties);
-            complete();
+
+            if (_static.isFunction(complete)) {
+                complete();
+            }
         }
     };
     _static.onTransitionEnd = function($object,func) {
-        $object.off('.popbox_transitionend').on('transitionend.popbox_transitionend webkitTransitionEnd.popbox_transitionend oTransitionEnd.popbox_transitionend otransitionend.popbox_transitionend MSTransitionEnd.popbox_transitionend',function(){
+        $object.off('.popbox_transitionend').on(_support.transition_end+'.popbox_transitionend',function(){
             if (_static.isFunction(func)) func();
             $(this).off('.popbox_transitionend');
         });
@@ -569,7 +605,6 @@
         animate = _static.param(animate,true);
 
         if (self.isOpen()) {
-            //TODO popbox needs wrapper for example to work as fixed
             var windowWidth = $window.width(),
                 windowHeight = $window.height(),
                 popboxWidthPadding = _static.elementPadding(self.elements.$popbox_popup,'width'),
@@ -612,15 +647,21 @@
             if (animate) {
                 self.showLoading();
 
+                _static.transition(self.elements.$popbox_bottom_push,{
+                    'top':(newPopboxHeight+popboxHeightPadding+(newPopboxTop*2)-1)+'px'
+                },300,'ease');
+
                 _static.transition(self.elements.$popbox_popup,{
                     'width':newPopboxWidth+'px',
                     'height':newPopboxHeight+'px',
                     'top':newPopboxTop+'px',
-                    'left':newPopboxLeft+'px',
-                    'margin-bottom':newPopboxTop+'px'
+                    'left':newPopboxLeft+'px'
                 },300,'ease',function(){
                     self.showContent();
-                    console.log("moo");
+
+                    self.elements.$popbox_bottom_push.css({
+                        'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
+                    });
                 });
             }
             else {
@@ -628,15 +669,13 @@
                     'width':newPopboxWidth+'px',
                     'height':newPopboxHeight+'px',
                     'top':newPopboxTop+'px',
-                    'left':newPopboxLeft+'px',
-                    'margin-bottom':newPopboxTop+'px'
+                    'left':newPopboxLeft+'px'
+                });
+
+                self.elements.$popbox_bottom_push.css({
+                    'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
                 });
             }
-
-            // old style push bottom (do still need or can remove element altogether?)
-            /*self.elements.$popbox_bottom_push.css({
-                'top':(self.elements.$popbox_popup.outerHeight(false)+(newPopboxTop*2)-1)+'px'
-            });*/
         }
     };
 

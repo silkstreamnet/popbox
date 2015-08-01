@@ -37,12 +37,15 @@
 
     $('.click-me-1').on('click',function(e){
         e.preventDefault();
+        p.update({
+            content:'<p>test masses of content</p>'
+        });
         p.open();
         setTimeout(function(){
             p.update({
                 content:'<p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p>'
             });
-        },1000);
+        },2000);
     });
 
     //p.changeMode();

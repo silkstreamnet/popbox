@@ -13,14 +13,8 @@
 }
 
 .popbox-popup {
-    padding:1em;
     background:#fff;
     box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
-    /*-webkit-transition: width 0.4s, height 0.4s, opacity 0.4s, left 0.4s, top 0.4s;
-    -moz-transition: width  0.4s, height  0.4s, opacity 0.4s, left 0.4s, top 0.4s;
-    -ms-transition: width  0.4s, height  0.4s, opacity 0.4s, left 0.4s, top 0.4s;
-    -o-transition: width  0.4s, height  0.4s, opacity 0.4s, left 0.4s, top 0.4s;
-    transition: width  0.4s, height  0.4s, opacity 0.4s, left 0.4s, top 0.4s;*/
 }
 
 .popbox-loading {
@@ -28,13 +22,25 @@
 }
 
 .popbox .popbox-close {
+    padding:1em;
+    background:#ccc;
+    display:block;
+    position:absolute;
+    top:0;
+    right:0;
+    text-decoration:none;
+    color:#000;
+}
 
+.popbox .popbox-close:hover {
+    background:#bbb;
 }
 
 .popbox .popbox-title {
-
+    padding:1em;
+    background:#ccc;
 }
 
 .popbox .popbox-content {
-
+    padding:1em;
 }
