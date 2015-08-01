@@ -194,16 +194,17 @@
 
     Popbox.prototype.version = '3.0.0';
     Popbox.prototype.default_settings = {
-        width:false, //auto
-        height:false, //auto
-        max_width:false, //none
-        max_height:false, //none
+        //width:false, //auto
+        //height:false, //auto
+        max_width:false, // false|true = 100%, number = pixels
+        max_height:false, // false = none, true = 100%, number = pixels. if set, scroll inner is used
         container:false, //specify an alternate container to body
         animation:'fade',
-        animation_duration:400,
-        switch_animation:'fade', // for when content is changed, can accept special 'replace'
         open_animation:'fade',
         close_animation:'fade',
+        animation_speed:400,
+        open_animation_speed:false,
+        close_animation_speed:false,
         content:'',
         close:'X', // TODO: if set to FALSE, set element to display none
         title:'', // TODO: if set to FALSE, set element to display none
@@ -212,7 +213,7 @@
         cache:false,
         width_padding:0.1,
         height_padding:0.1,
-        mode:false, //normal, can be 'gallery'
+        mode:false, //normal, can be 'gallery' if extension is available
         on_open:false,
         after_open:false,
         on_close:false,
@@ -221,15 +222,22 @@
     Popbox.prototype.modes = {}; // override prototype functions
     Popbox.prototype.animations = {
         'fade':{
-            'open':'',
-            'close':''
+            'open':[{
+                //start properties
+                'opacity':'0'
+            },{
+                //end properties
+                'opacity':'1'
+            }],
+            'close':[{
+
+            },{
+
+            }]
         },
-        'fadeIn':{
-            'open':''
-        },
-        'fadeOut':{
-            'close':''
-        }
+        'slide':0,
+        'zoom':0,
+        'fold':0
     };
     Popbox.prototype._static = _static;
     Popbox.prototype._private = {};
@@ -659,6 +667,7 @@
                 },300,'ease',function(){
                     self.showContent();
 
+                    // fail safe in case padding changes on popbox
                     self.elements.$popbox_bottom_push.css({
                         'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
                     });
