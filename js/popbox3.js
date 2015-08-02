@@ -125,7 +125,7 @@
         properties = _static.param(properties,{});
         duration = _static.param(duration,400);
         easing = _static.param(easing,'ease');
-        if ($object.hasClass('popbox-popup')) console.log(properties);
+
         var property,
             transitions = [],
             property_difference = false,
@@ -157,9 +157,9 @@
                 transitioning = true;
             }
         }
-        if ($object.hasClass('popbox-popup')) console.log(transitioning);
+
         if (!transitioning) {
-            if ($object.hasClass('popbox-popup')) console.log(properties);
+
             $object.css(properties);
 
             if (_static.isFunction(complete)) {
@@ -621,7 +621,7 @@
             self.properties.is_open = false;
 
             // prepare animation
-            //self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('close'));
+            self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('close'));
 
             // do animation
             _static.transition(
@@ -662,6 +662,10 @@
                 newPopboxHeight,
                 newPopboxTop,
                 newPopboxLeft;
+
+            if (_static.isNumber(self.settings.max_width,true) && maxPopboxWidth > self.settings.max_width) {
+                maxPopboxWidth = self.settings.max_width;
+            }
 
             self.elements.$popbox_wrapper.css({
                 'position':'absolute',
