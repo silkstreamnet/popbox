@@ -9,28 +9,36 @@
     }
 
     var extend_animations = {
-        'slide':{
+        'slide_up':{
             'open':[{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'translateY(50%)'
             },{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'translateY(0)'
             }],
             'close':[{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'translateY(0)'
             },{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'translateY(-50%)'
             }]
         },
         'zoom':{
             'open':[{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'scale(0.5)'
             },{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'scale(1)'
             }],
             'close':[{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'scale(1)'
             },{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'scale(0.5)'
             }]
         },
         'fold':{

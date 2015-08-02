@@ -146,8 +146,9 @@
                 $object.css('transition',transitions.join(', '));
                 //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
                 $object.css(properties).addClass('popbox-animating');
-                $object.one(_support.transition_end,function(){
+                $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
                     $object.removeClass('popbox-animating').css('transition','');
+                    $(this).off('.popbox_auto_transition_end');
                 });
 
                 if (_static.isFunction(complete)) {
@@ -168,9 +169,9 @@
         }
     };
     _static.onTransitionEnd = function($object,func) {
-        $object.off('.popbox_transitionend').on(_support.transition_end+'.popbox_transitionend',function(){
+        $object.off('.popbox_transition_end').on(_support.transition_end+'.popbox_transition_end',function(){
             if (_static.isFunction(func)) func();
-            $(this).off('.popbox_transitionend');
+            $(this).off('.popbox_transition_end');
         });
     };
     _static.offTransitionEnd = function($object) {
@@ -185,6 +186,9 @@
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
         self.properties = {
             instance_id:_next_instance_id
+        };
+        self.elements = {
+            $popbox_overlay:null
         };
 
         self._private.reset();
@@ -206,6 +210,9 @@
         animation_speed:400,
         open_animation_speed:false,
         close_animation_speed:false,
+        overlay_animation_speed:400, // set to true to match the relevant popup animation speed
+        open_overlay_animation_speed:false,
+        close_overlay_animation_speed:false,
         content:'',
         close:'X', // TODO: if set to FALSE, set element to display none
         title:'', // TODO: if set to FALSE, set element to display none
@@ -266,7 +273,7 @@
         };
         self.elements = {
             $popbox:null,
-            $popbox_overlay:null,
+            $popbox_overlay:self.elements.$popbox_overlay, // not part of individual popbox
             $popbox_loading:null,
             $popbox_popup:null,
             $popbox_wrapper:null,
@@ -328,7 +335,7 @@
                     'bottom':'0',
                     'left':'0'
                 }
-            }).appendTo($container);
+            }).data('is_open',false).appendTo($container);
         }
 
         self.elements.$popbox_overlay.off('click.'+_event_namespace).on('click.'+_event_namespace,function(e){
@@ -346,47 +353,67 @@
 
     Popbox.prototype._private.destroyOverlay = function(){
         var self = this.self;
-
+        console.log(_instances.length);
+        console.log(self.elements.$popbox_overlay);
         if (_instances.length <= 0 && self.elements.$popbox_overlay) {
             self.elements.$popbox_overlay.remove();
             self.elements.$popbox_overlay = null;
         }
     };
 
-    Popbox.prototype._private.showOverlay = function(){
+    Popbox.prototype._private.openOverlay = function(){
         var self = this.self;
 
-        if (!self.isOpen()) {
-            if (!self.elements.$popbox_overlay) {
-                self._private.createOverlay();
-            }
+        if (!self.elements.$popbox_overlay) {
+            self._private.createOverlay();
+        }
+
+        if (self.elements.$popbox_overlay.data('is_open') === false) {
 
             self.elements.$popbox_overlay.css({
                 'display':'block',
                 'opacity':'0'
             });
 
-            _static.transition(self.elements.$popbox_overlay,{
-                'opacity':'1'
-            },300,'ease');
+            _static.transition(
+                self.elements.$popbox_overlay,
+                {'opacity':'1'},
+                self._private.getOverlayAnimationSpeed('open'),
+                'ease'
+            );
+
+            self.elements.$popbox_overlay.data('is_open',true);
         }
     };
 
-    Popbox.prototype._private.hideOverlay = function(){
+    Popbox.prototype._private.closeOverlay = function(){
         var self = this.self;
 
         if (self.elements.$popbox_overlay) {
-            //self.elements.$popbox_overlay.css({'opacity':'1'});
-            _static.transition(self.elements.$popbox_overlay,{
-                'opacity':'0'
-            },300,'ease',function(){
-                if (self.elements.$popbox_overlay) {
-                    self.elements.$popbox_overlay.css({
-                        'display':'none'
-                    });
-                }
+
+            if (self.elements.$popbox_overlay.data('is_open') === true) {
+                self.elements.$popbox_overlay.css({'opacity':'1'});
+
+                _static.transition(
+                    self.elements.$popbox_overlay,
+                    {'opacity':'0'},
+                    self._private.getOverlayAnimationSpeed('close'),
+                    'ease',
+                    function(){
+                        if (self.elements.$popbox_overlay) {
+                            self.elements.$popbox_overlay.css({
+                                'display':'none'
+                            });
+                        }
+                        self._private.destroyOverlay();
+                    }
+                );
+
+                self.elements.$popbox_overlay.data('is_open',false);
+            }
+            else {
                 self._private.destroyOverlay();
-            });
+            }
         }
     };
 
@@ -406,6 +433,12 @@
         var self = this.self;
 
         return self.settings[type+'_animation_speed'] || self.settings.animation_speed || 400;
+    };
+
+    Popbox.prototype._private.getOverlayAnimationSpeed = function(type){
+        var self = this.self;
+        if (self.settings[type+'_overlay_animation_speed'] === true) return self._private.getAnimationSpeed(type);
+        return self.settings[type+'_overlay_animation_speed'] || self.settings.overlay_animation_speed || self._private.getAnimationSpeed(type);
     };
 
     Popbox.prototype.create = function(){
@@ -518,7 +551,8 @@
                 _instances.length--;
             }
 
-            self._private.hideOverlay();
+            self._private.closeOverlay();
+            //self._private.destroyOverlay();
             self._private.reset();
             self._private.applyMode();
         }
@@ -576,7 +610,7 @@
             if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
 
             // show elements
-            self._private.showOverlay();
+            self._private.openOverlay();
             self.elements.$popbox_wrapper.css({
                 'visibility':'hidden'
             });
@@ -640,7 +674,7 @@
                 }
             );
 
-            self._private.hideOverlay();
+            self._private.closeOverlay();
 
             if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
         }
