@@ -125,7 +125,7 @@
         properties = _static.param(properties,{});
         duration = _static.param(duration,400);
         easing = _static.param(easing,'ease');
-
+        if ($object.hasClass('popbox-popup')) console.log(properties);
         var property,
             transitions = [],
             property_difference = false,
@@ -157,8 +157,9 @@
                 transitioning = true;
             }
         }
-
+        if ($object.hasClass('popbox-popup')) console.log(transitioning);
         if (!transitioning) {
+            if ($object.hasClass('popbox-popup')) console.log(properties);
             $object.css(properties);
 
             if (_static.isFunction(complete)) {
@@ -223,21 +224,16 @@
     Popbox.prototype.animations = {
         'fade':{
             'open':[{
-                //start properties
                 'opacity':'0'
             },{
-                //end properties
                 'opacity':'1'
             }],
             'close':[{
-
+                'opacity':'1'
             },{
-
+                'opacity':'0'
             }]
-        },
-        'slide':0,
-        'zoom':0,
-        'fold':0
+        }
     };
     Popbox.prototype._static = _static;
     Popbox.prototype._private = {};
@@ -269,16 +265,16 @@
             instance_id:self.properties.instance_id
         };
         self.elements = {
-            $popbox:false,
-            $popbox_overlay:false,
-            $popbox_loading:false,
-            $popbox_popup:false,
-            $popbox_wrapper:false,
-            $popbox_container:false,
-            $popbox_title:false,
-            $popbox_close:false,
-            $popbox_content:false,
-            $popbox_bottom_push:false
+            $popbox:null,
+            $popbox_overlay:null,
+            $popbox_loading:null,
+            $popbox_popup:null,
+            $popbox_wrapper:null,
+            $popbox_container:null,
+            $popbox_title:null,
+            $popbox_close:null,
+            $popbox_content:null,
+            $popbox_bottom_push:null
         };
     };
 
@@ -335,7 +331,7 @@
             }).appendTo($container);
         }
 
-        self.elements.$popbox_overlay.on('click.'+_event_namespace,function(e){
+        self.elements.$popbox_overlay.off('click.'+_event_namespace).on('click.'+_event_namespace,function(e){
             e.preventDefault();
             for (var i in _instances) {
                 if (_instances.hasOwnProperty(i)) {
@@ -353,6 +349,7 @@
 
         if (_instances.length <= 0 && self.elements.$popbox_overlay) {
             self.elements.$popbox_overlay.remove();
+            self.elements.$popbox_overlay = null;
         }
     };
 
@@ -378,7 +375,8 @@
     Popbox.prototype._private.hideOverlay = function(){
         var self = this.self;
 
-        if (self.isOpen() && self.elements.$popbox_overlay) {
+        if (self.elements.$popbox_overlay) {
+            //self.elements.$popbox_overlay.css({'opacity':'1'});
             _static.transition(self.elements.$popbox_overlay,{
                 'opacity':'0'
             },300,'ease',function(){
@@ -387,8 +385,27 @@
                         'display':'none'
                     });
                 }
+                self._private.destroyOverlay();
             });
         }
+    };
+
+    Popbox.prototype._private.getAnimationStartProperties = function(type){
+        var self = this.self;
+
+        return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][0] : self.animations['fade'][type][0];
+    };
+
+    Popbox.prototype._private.getAnimationEndProperties = function(type){
+        var self = this.self;
+
+        return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][self.animations[self.settings.animation][type].length-1] : self.animations['fade'][type][self.animations['fade'][type].length-1];
+    };
+
+    Popbox.prototype._private.getAnimationSpeed = function(type){
+        var self = this.self;
+
+        return self.settings[type+'_animation_speed'] || self.settings.animation_speed || 400;
     };
 
     Popbox.prototype.create = function(){
@@ -494,13 +511,14 @@
 
         if (self.elements.$popbox) {
             self.elements.$popbox.remove();
+            self.elements.$popbox = null;
 
             if (_static.isSet(_instances[self.properties.instance_id])) {
                 delete _instances[self.properties.instance_id];
                 _instances.length--;
             }
 
-            self._private.destroyOverlay();
+            self._private.hideOverlay();
             self._private.reset();
             self._private.applyMode();
         }
@@ -555,32 +573,41 @@
                 self.create();
             }
 
-            self._private.showOverlay();
+            if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
 
+            // show elements
+            self._private.showOverlay();
             self.elements.$popbox_wrapper.css({
                 'visibility':'hidden'
             });
-
             self.elements.$popbox_popup.css({
-                'display':'block',
-                'opacity':'0'
+                'display':'block'
             });
-
             self.elements.$popbox.css({
                 'display':'block'
             });
 
             self.properties.is_open = true;
 
+            // prepare animation
+            self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
+
+            // adjust
             self.adjust(false);
 
-            _static.transition(self.elements.$popbox_popup,{
-                'opacity':'1'
-            },300,'ease');
+            // do animation
+            _static.transition(
+                self.elements.$popbox_popup,
+                self._private.getAnimationEndProperties('open'),
+                self._private.getAnimationSpeed('open'),
+                'ease'
+            );
 
             self.elements.$popbox_wrapper.css({
                 'visibility':''
             });
+
+            if (_static.isFunction(self.settings.after_open)) self.settings.after_open();
         }
     };
 
@@ -589,21 +616,33 @@
 
         if (self.isOpen()) {
 
-            _static.transition(self.elements.$popbox_popup,{
-                'opacity':'0'
-            },300,'ease',function(){
-                self.elements.$popbox.css({
-                    'display':'none'
-                });
+            if (_static.isFunction(self.settings.on_close)) self.settings.on_close();
 
-                if (destroy || !self.settings.cache) {
-                    self.destroy();
+            self.properties.is_open = false;
+
+            // prepare animation
+            //self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('close'));
+
+            // do animation
+            _static.transition(
+                self.elements.$popbox_popup,
+                self._private.getAnimationEndProperties('close'),
+                self._private.getAnimationSpeed('close'),
+                'ease',
+                function(){
+                    self.elements.$popbox.css({
+                        'display':'none'
+                    });
+
+                    if (destroy || !self.settings.cache) {
+                        self.destroy();
+                    }
                 }
-            });
+            );
 
             self._private.hideOverlay();
 
-            self.properties.is_open = false;
+            if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
         }
     };
 
@@ -712,7 +751,7 @@
 
     Popbox.prototype.isCreated = function(){
         var self = this;
-        return self.elements.$popbox !== false;
+        return self.elements.$popbox;
     };
 
 
