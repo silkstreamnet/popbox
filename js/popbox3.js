@@ -6,15 +6,53 @@
         _next_instance_id = 0,
         _instances = {length:0},
         _static = {},
-        test_div = document.createElement('div'),
         _support = {},
+        _speeds = {
+            '_default':300,
+            'fast':300,
+            'medium':600,
+            'slow':1000
+        },
+        _eases = {
+            '_default':       'ease',
+            'in':             'ease-in',
+            'out':            'ease-out',
+            'in-out':         'ease-in-out',
+            'snap':           'cubic-bezier(0,1,.5,1)',
+            // Penner equations
+            'easeInCubic':    'cubic-bezier(.550,.055,.675,.190)',
+            'easeOutCubic':   'cubic-bezier(.215,.61,.355,1)',
+            'easeInOutCubic': 'cubic-bezier(.645,.045,.355,1)',
+            'easeInCirc':     'cubic-bezier(.6,.04,.98,.335)',
+            'easeOutCirc':    'cubic-bezier(.075,.82,.165,1)',
+            'easeInOutCirc':  'cubic-bezier(.785,.135,.15,.86)',
+            'easeInExpo':     'cubic-bezier(.95,.05,.795,.035)',
+            'easeOutExpo':    'cubic-bezier(.19,1,.22,1)',
+            'easeInOutExpo':  'cubic-bezier(1,0,0,1)',
+            'easeInQuad':     'cubic-bezier(.55,.085,.68,.53)',
+            'easeOutQuad':    'cubic-bezier(.25,.46,.45,.94)',
+            'easeInOutQuad':  'cubic-bezier(.455,.03,.515,.955)',
+            'easeInQuart':    'cubic-bezier(.895,.03,.685,.22)',
+            'easeOutQuart':   'cubic-bezier(.165,.84,.44,1)',
+            'easeInOutQuart': 'cubic-bezier(.77,0,.175,1)',
+            'easeInQuint':    'cubic-bezier(.755,.05,.855,.06)',
+            'easeOutQuint':   'cubic-bezier(.23,1,.32,1)',
+            'easeInOutQuint': 'cubic-bezier(.86,0,.07,1)',
+            'easeInSine':     'cubic-bezier(.47,0,.745,.715)',
+            'easeOutSine':    'cubic-bezier(.39,.575,.565,1)',
+            'easeInOutSine':  'cubic-bezier(.445,.05,.55,.95)',
+            'easeInBack':     'cubic-bezier(.6,-.28,.735,.045)',
+            'easeOutBack':    'cubic-bezier(.175, .885,.32,1.275)',
+            'easeInOutBack':  'cubic-bezier(.68,-.55,.265,1.55)'
+        },
         transition_end_event_names = {
             'transition':       'transitionend',
             'MozTransition':    'transitionend',
             'OTransition':      'oTransitionEnd',
             'WebkitTransition': 'webkitTransitionEnd',
             'msTransition':     'MSTransitionEnd'
-        };
+        },
+        test_div = document.createElement('div');
 
     function getVendorPropertyName(prop) {
         if (prop in test_div.style) return prop;
@@ -123,8 +161,8 @@
     };
     _static.transition = function($object,properties,duration,easing,complete){
         properties = _static.param(properties,{});
-        duration = _static.param(duration,400);
-        easing = _static.param(easing,'ease');
+        duration = _static.param(duration,_speeds._default);
+        easing = _static.param(easing,_eases._default);
 
         var property,
             transitions = [],
@@ -205,14 +243,20 @@
         max_height:false, // false = none, true = 100%, number = pixels. if set, scroll inner is used
         container:false, //specify an alternate container to body
         animation:'fade',
-        open_animation:'fade',
-        close_animation:'fade',
-        animation_speed:400,
-        open_animation_speed:false,
-        close_animation_speed:false,
-        overlay_animation_speed:400, // set to true to match the relevant popup animation speed
-        open_overlay_animation_speed:false,
-        close_overlay_animation_speed:false,
+        animation_speed:_speeds._default,
+        animation_ease:_eases._default,
+        open_animation:null,
+        open_animation_speed:null,
+        open_animation_ease:null,
+        close_animation:null,
+        close_animation_speed:null,
+        close_animation_ease:null,
+        overlay_animation_speed:_speeds._default, // set to true to match the relevant popup animation speed
+        overlay_animation_ease:_eases._default,
+        open_overlay_animation_speed:null,
+        open_overlay_animation_ease:null,
+        close_overlay_animation_speed:null,
+        close_overlay_animation_ease:null,
         content:'',
         close:'X', // TODO: if set to FALSE, set element to display none
         title:'', // TODO: if set to FALSE, set element to display none
@@ -379,7 +423,7 @@
                 self.elements.$popbox_overlay,
                 {'opacity':'1'},
                 self._private.getOverlayAnimationSpeed('open'),
-                'ease'
+                self._private.getOverlayAnimationEase('open')
             );
 
             self.elements.$popbox_overlay.data('is_open',true);
@@ -398,7 +442,7 @@
                     self.elements.$popbox_overlay,
                     {'opacity':'0'},
                     self._private.getOverlayAnimationSpeed('close'),
-                    'ease',
+                    self._private.getOverlayAnimationEase('close'),
                     function(){
                         if (self.elements.$popbox_overlay) {
                             self.elements.$popbox_overlay.css({
@@ -411,7 +455,7 @@
 
                 self.elements.$popbox_overlay.data('is_open',false);
             }
-            else {
+            else if (!self.elements.$popbox_overlay.hasClass('popbox-animating')) {
                 self._private.destroyOverlay();
             }
         }
@@ -419,26 +463,34 @@
 
     Popbox.prototype._private.getAnimationStartProperties = function(type){
         var self = this.self;
-
         return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][0] : self.animations['fade'][type][0];
     };
 
     Popbox.prototype._private.getAnimationEndProperties = function(type){
         var self = this.self;
-
         return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][self.animations[self.settings.animation][type].length-1] : self.animations['fade'][type][self.animations['fade'][type].length-1];
     };
 
     Popbox.prototype._private.getAnimationSpeed = function(type){
         var self = this.self;
+        return self.settings[type+'_animation_speed'] || self.settings.animation_speed || _speeds._default;
+    };
 
-        return self.settings[type+'_animation_speed'] || self.settings.animation_speed || 400;
+    Popbox.prototype._private.getAnimationEase = function(type){
+        var self = this.self;
+        return self.settings[type+'_animation_ease'] || self.settings.animation_ease || _eases._default;
     };
 
     Popbox.prototype._private.getOverlayAnimationSpeed = function(type){
         var self = this.self;
         if (self.settings[type+'_overlay_animation_speed'] === true) return self._private.getAnimationSpeed(type);
         return self.settings[type+'_overlay_animation_speed'] || self.settings.overlay_animation_speed || self._private.getAnimationSpeed(type);
+    };
+
+    Popbox.prototype._private.getOverlayAnimationEase = function(type){
+        var self = this.self;
+        if (self.settings[type+'_overlay_animation_ease'] === true) return self._private.getAnimationEase(type);
+        return self.settings[type+'_overlay_animation_ease'] || self.settings.overlay_animation_ease || self._private.getAnimationEase(type);
     };
 
     Popbox.prototype.create = function(){
@@ -615,7 +667,8 @@
                 'visibility':'hidden'
             });
             self.elements.$popbox_popup.css({
-                'display':'block'
+                'display':'block',
+                'visibility':'hidden'
             });
             self.elements.$popbox.css({
                 'display':'block'
@@ -623,18 +676,22 @@
 
             self.properties.is_open = true;
 
-            // prepare animation
-            self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
-
             // adjust
             self.adjust(false);
+
+            self.elements.$popbox_popup.css({
+                'visibility':'visible'
+            });
+
+            // prepare animation
+            self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
 
             // do animation
             _static.transition(
                 self.elements.$popbox_popup,
                 self._private.getAnimationEndProperties('open'),
                 self._private.getAnimationSpeed('open'),
-                'ease'
+                self._private.getAnimationEase('open')
             );
 
             self.elements.$popbox_wrapper.css({
@@ -662,7 +719,7 @@
                 self.elements.$popbox_popup,
                 self._private.getAnimationEndProperties('close'),
                 self._private.getAnimationSpeed('close'),
-                'ease',
+                self._private.getAnimationEase('close'),
                 function(){
                     self.elements.$popbox.css({
                         'display':'none'
@@ -732,23 +789,35 @@
             if (animate) {
                 self.showLoading();
 
-                _static.transition(self.elements.$popbox_bottom_push,{
-                    'top':(newPopboxHeight+popboxHeightPadding+(newPopboxTop*2)-1)+'px'
-                },300,'ease');
+                _static.transition(
+                    self.elements.$popbox_bottom_push,
+                    {
+                        'top':(newPopboxHeight+popboxHeightPadding+(newPopboxTop*2)-1)+'px'
+                    },
+                    _speeds.fast,
+                    _eases.easeInOutQuad
+                );
 
-                _static.transition(self.elements.$popbox_popup,{
-                    'width':newPopboxWidth+'px',
-                    'height':newPopboxHeight+'px',
-                    'top':newPopboxTop+'px',
-                    'left':newPopboxLeft+'px'
-                },300,'ease',function(){
-                    self.showContent();
+                _static.transition(
+                    self.elements.$popbox_popup,
+                    {
+                        'width':newPopboxWidth+'px',
+                        'height':newPopboxHeight+'px',
+                        'top':newPopboxTop+'px',
+                        'left':newPopboxLeft+'px'
+                    },
+                    _speeds.fast,
+                    _eases.easeInOutQuad,
+                    function(){
+                        console.log("hi");
+                        self.showContent();
 
-                    // fail safe in case padding changes on popbox
-                    self.elements.$popbox_bottom_push.css({
-                        'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
-                    });
-                });
+                        // fail safe in case padding changes on popbox
+                        self.elements.$popbox_bottom_push.css({
+                            'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
+                        });
+                    }
+                );
             }
             else {
                 self.elements.$popbox_popup.css({
@@ -757,7 +826,8 @@
                     'top':newPopboxTop+'px',
                     'left':newPopboxLeft+'px'
                 });
-
+                console.log(newPopboxTop);
+                console.log(self.elements.$popbox_popup.position().top);
                 self.elements.$popbox_bottom_push.css({
                     'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
                 });
