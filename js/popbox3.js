@@ -182,23 +182,19 @@
 
             if (transitions.length && property_difference) {
 
+                $object.css('transition',transitions.join(', '));
+                //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
+                $object.css(properties).addClass('popbox-animating');
+
                 setTimeout(function(){
-                    $object.css('transition',transitions.join(', '));
-                    //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                    $object.css(properties).addClass('popbox-animating');
-                    console.log($object.css('transform'));
+                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                        $object.css('transition','').removeClass('popbox-animating');
+                        $(this).off('.popbox_auto_transition_end');
+                    });
 
-                    setTimeout(function(){
-                        $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
-                            $object.removeClass('popbox-animating');
-                            if (!$object.hasClass('popbox-popup')) $object.css('transition','');
-                            $(this).off('.popbox_auto_transition_end');
-                        });
-
-                        if (_static.isFunction(complete)) {
-                            _static.onTransitionEnd($object,complete);
-                        }
-                    },1);
+                    if (_static.isFunction(complete)) {
+                        _static.onTransitionEnd($object,complete);
+                    }
                 },1);
 
                 transitioning = true;
@@ -742,7 +738,7 @@
                 self._private.getAnimationSpeed('close'),
                 self._private.getAnimationEase('close'),
                 function(){
-                    self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
+                    //self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
 
                     self.elements.$popbox.css({
                         'display':'none'
