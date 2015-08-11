@@ -12,14 +12,16 @@
         'slide_up':{
             'open':[{
                 'opacity':'0',
-                'transform':'translateY(100px)'
+                'transform':'translateY(100px)',
+                'transform-style':'preserve-3d'
             },{
                 'opacity':'1',
                 'transform':'translateY(0)'
             }],
             'close':[{
                 'opacity':'1',
-                'transform':'translateY(0)'
+                'transform':'translateY(0)',
+                'transform-style':'preserve-3d'
             },{
                 'opacity':'0',
                 'transform':'translateY(-100px)'

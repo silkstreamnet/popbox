@@ -183,8 +183,8 @@
             if (transitions.length && property_difference) {
 
                 $object.css('transition',transitions.join(', '));
-                //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
                 $object.css(properties).addClass('popbox-animating');
+                //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
 
                 setTimeout(function(){
                     $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
@@ -244,7 +244,7 @@
         //width:false, //auto
         //height:false, //auto
         max_width:false, // false|true = 100%, number = pixels
-        max_height:false, // false = none, true = 100%, number = pixels. if set, scroll inner is used
+        max_height:false, // false = none, true = 100%. if set, scroll inner is used
         container:false, //specify an alternate container to body
         animation:'fade',
         animation_speed:_speeds._default,
@@ -264,7 +264,7 @@
         content:'',
         close:'X', // TODO: if set to FALSE, set element to display none
         title:'', // TODO: if set to FALSE, set element to display none
-        loading:'',
+        loading:'Loading',
         href:'', //can be used for none-anchor elements to grab content
         cache:false,
         width_padding:0.1,
@@ -392,6 +392,7 @@
             for (var i in _instances) {
                 if (_instances.hasOwnProperty(i)) {
                     if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
+                        console.log("overlay clicked");
                         _instances[i].close();
                     }
                 }
@@ -583,7 +584,10 @@
         });
 
         self.elements.$popbox.on('click.'+_event_namespace,function(e){
-            if ($(e.target).closest('.popbox-popup').length === 0) {
+            console.log(self.elements.$popbox_popup.attr('class'));
+            console.log(self.elements.$popbox_popup.css('transition'));
+            console.log(self.elements.$popbox_popup.css('opacity'));
+            if (!self.elements.$popbox_popup.hasClass('popbox-animating') && $(e.target).closest('.popbox-popup').length === 0) {
                 e.preventDefault();
                 self.close();
                 return false;
