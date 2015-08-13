@@ -21,15 +21,19 @@
 
         .test-translate {
             left:0;
-            top:0;
+            top:100px;
             position:absolute;
             height:200px;
             width:200px;
             background:#000;
             transition: transform 2s linear, opacity 2s linear;
-            transform: translateY(0px);
+            transform: scale(0.5);
             opacity:0.5;
             float:left;
+        }
+
+        .test-translate:hover {
+            background:#aaa;
         }
 
     </style>
@@ -46,7 +50,7 @@
 
     window.onload = function(){
         $('.test-translate').css({
-            'transform':'translateY(300px)'
+            'transform':'scale(1)'
         });
 
         $(document).on('click',function(e){
@@ -59,9 +63,9 @@
         max_width:800,
         content:'<p>test masses of content</p>',
         title:'chicken',
-        animation:'slide_up',
-        animation_speed:300,
-        overlay_animation_speed:500,
+        animation:'zoom',
+        animation_speed:250,
+        overlay_animation_speed:300,
         cache:true,
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });

@@ -392,7 +392,6 @@
             for (var i in _instances) {
                 if (_instances.hasOwnProperty(i)) {
                     if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                        console.log("overlay clicked");
                         _instances[i].close();
                     }
                 }
@@ -583,17 +582,19 @@
             return false;
         });
 
-        self.elements.$popbox.on('click.'+_event_namespace,function(e){
-            console.log(self.elements.$popbox_popup.attr('class'));
-            console.log(self.elements.$popbox_popup.css('transition'));
-            console.log(self.elements.$popbox_popup.css('opacity'));
-            if (!self.elements.$popbox_popup.hasClass('popbox-animating') && $(e.target).closest('.popbox-popup').length === 0) {
-                e.preventDefault();
-                self.close();
+        self.elements.$popbox.on('mousedown.'+_event_namespace,function(e1){
+            if ($(e1.target).closest('.popbox-popup').length === 0) {
+                e1.preventDefault();
+                self.elements.$popbox.off('mouseup.'+_event_namespace).on('mouseup.'+_event_namespace,function(e2){
+                    if (e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
+                        e2.preventDefault();
+                        self.close();
+                        return false;
+                    }
+                });
                 return false;
             }
         });
-
 
         self.elements.$popbox.appendTo($container);
 
