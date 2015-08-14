@@ -267,8 +267,8 @@
         loading:'Loading',
         href:'', //can be used for none-anchor elements to grab content
         cache:false,
-        width_padding:0.1,
-        height_padding:0.1,
+        width_margin:0.1,
+        height_margin:0.1,
         mode:false, //normal, can be 'gallery' if extension is available
         on_open:false,
         after_open:false,
@@ -315,9 +315,15 @@
             }
         }
 
+        if (self.properties.disable_background_click_timer !== false) {
+            clearTimeout(self.properties.disable_background_click_timer);
+        }
+
         self.properties = {
             is_open:false,
             is_loading:false,
+            disable_background_click:false,
+            disable_background_click_timer:false,
             instance_id:self.properties.instance_id
         };
         self.elements = {
@@ -586,7 +592,8 @@
             if ($(e1.target).closest('.popbox-popup').length === 0) {
                 e1.preventDefault();
                 self.elements.$popbox.off('mouseup.'+_event_namespace).on('mouseup.'+_event_namespace,function(e2){
-                    if (e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
+                    self.elements.$popbox.off('mouseup.'+_event_namespace);
+                    if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
                         e2.preventDefault();
                         self.close();
                         return false;
@@ -649,6 +656,10 @@
             };
 
             if (self.isOpen()) {
+                //TODO
+                /*
+                 * in show loading function, if already loading
+                 */
                 self.showLoading(function(){
                     update_elements();
 
@@ -709,12 +720,24 @@
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
 
             // do animation
+            console.log("t1");
             _static.transition(
                 self.elements.$popbox_popup,
                 self._private.getAnimationEndProperties('open'),
                 self._private.getAnimationSpeed('open'),
-                self._private.getAnimationEase('open')
+                self._private.getAnimationEase('open'),
+                function(){
+                    console.log("t2");
+                }
             );
+
+            if (self.elements.$popbox_popup.hasClass('popbox-animating')) {
+                self.properties.disable_background_click = true;
+                self.properties.disable_background_click_timer = setTimeout(function(){
+                    self.properties.disable_background_click = false;
+                    self.properties.disable_background_click_timer = false;
+                },self._private.getAnimationSpeed('open')+1000);
+            }
 
             self.elements.$popbox_wrapper.css({
                 'visibility':''
@@ -743,14 +766,21 @@
                 self._private.getAnimationSpeed('close'),
                 self._private.getAnimationEase('close'),
                 function(){
-                    //self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
-
                     self.elements.$popbox.css({
                         'display':'none'
                     });
 
                     if (destroy || !self.settings.cache) {
                         self.destroy();
+                    }
+                    else {
+                        self.elements.$popbox_popup.css(self._private.getAnimationEndProperties('open'));
+
+                        self.properties.disable_background_click = false;
+                        if (self.properties.disable_background_click_timer !== false) {
+                            clearTimeout(self.properties.disable_background_click_timer);
+                            self.properties.disable_background_click_timer = false;
+                        }
                     }
                 }
             );
@@ -774,8 +804,8 @@
                     windowHeight = $window.height(),
                     popboxWidthPadding = _static.elementPadding(self.elements.$popbox_popup,'width'),
                     popboxHeightPadding = _static.elementPadding(self.elements.$popbox_popup,'height'),
-                    maxPopboxWidth = ((self.settings.width_padding > 0) ? windowWidth-(windowWidth*self.settings.width_padding) : windowWidth)-popboxWidthPadding,
-                    maxPopboxHeight = ((self.settings.height_padding > 0) ? windowHeight-(windowHeight*self.settings.height_padding) : windowHeight)-popboxHeightPadding,
+                    maxPopboxWidth = ((self.settings.width_margin > 0) ? windowWidth-(windowWidth*self.settings.width_margin) : windowWidth)-popboxWidthPadding,
+                    maxPopboxHeight = ((self.settings.height_margin > 0) ? windowHeight-(windowHeight*self.settings.height_margin) : windowHeight)-popboxHeightPadding,
                     newPopboxWidth,
                     newPopboxHeight,
                     newPopboxTop,
@@ -807,7 +837,7 @@
                 newPopboxTop = (windowHeight-(newPopboxHeight+popboxHeightPadding))/2;
 
                 if (newPopboxHeight > maxPopboxHeight) {
-                    newPopboxTop = (self.settings.height_padding > 0) ? windowHeight*self.settings.height_padding : 0;
+                    newPopboxTop = (self.settings.height_margin > 0) ? windowHeight*self.settings.height_margin : 0;
                 }
 
                 self.elements.$popbox_wrapper.css({
@@ -844,7 +874,7 @@
                             'top':newPopboxTop+'px',
                             'left':newPopboxLeft+'px'
                         },
-                        200,
+                        _speeds.fast,
                         _eases.easeInOutQuad,
                         function(){
                             self.showContent();
@@ -874,7 +904,6 @@
                 adjust_elements(animate);
             }
             else {
-                // TODO need to add queues for showloading and showcontent so that when they are ready, callbacks are run (full proof)
                 self.showLoading(function(){
                     adjust_elements(true);
                 });
@@ -884,20 +913,26 @@
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
+        console.trace();
+        console.log(self.isLoading());
         if (self.isLoading()){
             if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
             return;
         }
+        console.log("init loading");
+        /*if (!self.elements.$popbox_wrapper.hasClass('popbox-animating')) {
+            self.elements.$popbox_wrapper.css({
+                'opacity':'1'
+            });
+        }*/
 
-        self.elements.$popbox_wrapper.css({
-            'opacity':'1'
-        });
         _static.transition(
             self.elements.$popbox_wrapper,
             {'opacity':'0'},
-            200,
-            'ease',
+            _speeds.fast,
+            'linear',
             function(){
+                console.log("wrapper hidden");
                 self.elements.$popbox_wrapper.css({
                     'visibility':'hidden'
                 });
@@ -910,9 +945,10 @@
                 _static.transition(
                     self.elements.$popbox_loading,
                     {'opacity':'1'},
-                    200,
-                    'ease',
+                    _speeds.fast,
+                    'linear',
                     function(){
+                        console.log("loading shown");
                         if (_static.isFunction(ready)) ready();
                     }
                 );
@@ -930,14 +966,14 @@
             return;
         }
 
-        self.elements.$popbox_loading.css({
+        /*self.elements.$popbox_loading.css({
             'opacity':'1'
-        });
+        });*/
         _static.transition(
             self.elements.$popbox_loading,
             {'opacity':'0'},
-            200,
-            'ease',
+            _speeds.fast,
+            'linear',
             function(){
                 self.elements.$popbox_loading.css({
                     'display':'none'
@@ -951,8 +987,8 @@
                 _static.transition(
                     self.elements.$popbox_wrapper,
                     {'opacity':'1'},
-                    200,
-                    'ease',
+                    _speeds.fast,
+                    'linear',
                     function(){
                         if (_static.isFunction(ready)) ready();
                     }
