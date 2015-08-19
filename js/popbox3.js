@@ -622,7 +622,6 @@
             }
 
             self._private.closeOverlay();
-            //self._private.destroyOverlay();
             self._private.reset();
             self._private.applyMode();
         }
@@ -656,10 +655,6 @@
             };
 
             if (self.isOpen()) {
-                //TODO
-                /*
-                 * in show loading function, if already loading
-                 */
                 self.showLoading(function(){
                     update_elements();
 
@@ -678,6 +673,7 @@
 
         if (!self.isOpen()) {
             // erase existing mode functions
+            self.destroy();
             self._private.reset();
             self.settings.mode = new_mode || false;
             self._private.applyMode();
@@ -720,15 +716,11 @@
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
 
             // do animation
-            console.log("t1");
             _static.transition(
                 self.elements.$popbox_popup,
                 self._private.getAnimationEndProperties('open'),
                 self._private.getAnimationSpeed('open'),
-                self._private.getAnimationEase('open'),
-                function(){
-                    console.log("t2");
-                }
+                self._private.getAnimationEase('open')
             );
 
             if (self.elements.$popbox_popup.hasClass('popbox-animating')) {
@@ -794,6 +786,8 @@
     Popbox.prototype.adjust = function(animate){
         var self = this;
 
+        // TODO: whenever you do an adjust, always check all the images to see if they are complete or have a natural width set.
+        // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
 
         if (self.isOpen()) {
@@ -913,18 +907,10 @@
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
-        console.trace();
-        console.log(self.isLoading());
         if (self.isLoading()){
             if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
             return;
         }
-        console.log("init loading");
-        /*if (!self.elements.$popbox_wrapper.hasClass('popbox-animating')) {
-            self.elements.$popbox_wrapper.css({
-                'opacity':'1'
-            });
-        }*/
 
         _static.transition(
             self.elements.$popbox_wrapper,
@@ -932,7 +918,6 @@
             _speeds.fast,
             'linear',
             function(){
-                console.log("wrapper hidden");
                 self.elements.$popbox_wrapper.css({
                     'visibility':'hidden'
                 });
@@ -948,7 +933,6 @@
                     _speeds.fast,
                     'linear',
                     function(){
-                        console.log("loading shown");
                         if (_static.isFunction(ready)) ready();
                     }
                 );
@@ -966,9 +950,6 @@
             return;
         }
 
-        /*self.elements.$popbox_loading.css({
-            'opacity':'1'
-        });*/
         _static.transition(
             self.elements.$popbox_loading,
             {'opacity':'0'},

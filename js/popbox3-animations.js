@@ -25,6 +25,22 @@
                 'transform':'translateY(-100px)'
             }]
         },
+        'slide_down':{
+            'open':[{
+                'opacity':'0',
+                'transform':'translateY(-100px)'
+            },{
+                'opacity':'1',
+                'transform':'translateY(0px)'
+            }],
+            'close':[{
+                'opacity':'1',
+                'transform':'translateY(0px)'
+            },{
+                'opacity':'0',
+                'transform':'translateY(100px)'
+            }]
+        },
         'zoom':{
             'open':[{
                 'opacity':'0',

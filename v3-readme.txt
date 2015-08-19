@@ -1,4 +1,4 @@
 popbox.js
 
 Requirements:
-- jQuery 1.8+
+- jQuery 1.7+
