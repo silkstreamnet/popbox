@@ -324,6 +324,8 @@
             is_loading:false,
             disable_background_click:false,
             disable_background_click_timer:false,
+            image_cache:{},
+            image_cache_pending:0,
             instance_id:self.properties.instance_id
         };
         self.elements = {
@@ -500,6 +502,52 @@
         var self = this.self;
         if (self.settings[type+'_overlay_animation_ease'] === true) return self._private.getAnimationEase(type);
         return self.settings[type+'_overlay_animation_ease'] || self.settings.overlay_animation_ease || self._private.getAnimationEase(type);
+    };
+
+    Popbox.prototype._private.checkImagesLoaded = function(adjust){
+        var self = this.self;
+        adjust = _static.param(adjust,false);
+
+        if (self.isCreated()) {
+
+            var $images = self.elements.$popbox.find('img');
+
+            $images.each(function(){
+                var image = this;
+
+                if (image.src && !self.properties.image_cache[image.src]) {
+
+                    if (image.complete && _static.isSet(image.naturalWidth)) {
+                        if (_static.isNumber(image.naturalWidth,true)) {
+                            //self.adjust(true);
+                        }
+                    }
+                    else {
+                        var proxy_image = new Image();
+
+                        proxy_image.onload = function(){
+                            self.properties.image_cache_pending--;
+                            self._private.checkImagesLoaded(true);
+                        };
+
+                        proxy_image.onerror = function(){
+                            self.properties.image_cache_pending--;
+                            self._private.checkImagesLoaded(true);
+                        };
+
+                        proxy_image.src = image.src;
+
+                        self.properties.image_cache_pending++;
+                    }
+
+                    self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
+                }
+            });
+
+            if (adjust && self.properties.image_cache_pending == 0) {
+                self.adjust(true);
+            }
+        }
     };
 
     Popbox.prototype.create = function(){
@@ -792,28 +840,30 @@
 
         if (self.isOpen()) {
 
+            self._private.checkImagesLoaded();
+
             var adjust_elements = function(animate) {
 
-                var windowWidth = $window.width(),
-                    windowHeight = $window.height(),
-                    popboxWidthPadding = _static.elementPadding(self.elements.$popbox_popup,'width'),
-                    popboxHeightPadding = _static.elementPadding(self.elements.$popbox_popup,'height'),
-                    maxPopboxWidth = ((self.settings.width_margin > 0) ? windowWidth-(windowWidth*self.settings.width_margin) : windowWidth)-popboxWidthPadding,
-                    maxPopboxHeight = ((self.settings.height_margin > 0) ? windowHeight-(windowHeight*self.settings.height_margin) : windowHeight)-popboxHeightPadding,
-                    newPopboxWidth,
-                    newPopboxHeight,
-                    newPopboxTop,
-                    newPopboxLeft;
+                var window_width = $window.width(),
+                    window_height = $window.height(),
+                    popbox_width_padding = _static.elementPadding(self.elements.$popbox_popup,'width'),
+                    popbox_height_padding = _static.elementPadding(self.elements.$popbox_popup,'height'),
+                    max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*self.settings.width_margin) : window_width)-popbox_width_padding,
+                    max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*self.settings.height_margin) : window_height)-popbox_height_padding,
+                    new_popbox_width,
+                    new_popbox_height,
+                    new_popbox_top,
+                    new_popbox_left;
 
-                if (_static.isNumber(self.settings.max_width,true) && maxPopboxWidth > self.settings.max_width) {
-                    maxPopboxWidth = self.settings.max_width;
+                if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
+                    max_popbox_width = self.settings.max_width;
                 }
 
                 self.elements.$popbox_wrapper.css({
                     'position':'absolute',
                     'top':'0px',
                     'left':'0px',
-                    'width':maxPopboxWidth+'px',
+                    'width':max_popbox_width+'px',
                     'height':'auto'
                 });
 
@@ -825,13 +875,13 @@
                     'height':'auto'
                 });
 
-                newPopboxWidth = self.elements.$popbox_container.width()+1;
-                newPopboxHeight = self.elements.$popbox_container.height()+1;
-                newPopboxLeft = (windowWidth-(newPopboxWidth+popboxWidthPadding))/2;
-                newPopboxTop = (windowHeight-(newPopboxHeight+popboxHeightPadding))/2;
+                new_popbox_width = self.elements.$popbox_container.width()+1;
+                new_popbox_height = self.elements.$popbox_container.height()+1;
+                new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
+                new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
 
-                if (newPopboxHeight > maxPopboxHeight) {
-                    newPopboxTop = (self.settings.height_margin > 0) ? windowHeight*self.settings.height_margin : 0;
+                if (new_popbox_height > max_popbox_height) {
+                    new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
                 }
 
                 self.elements.$popbox_wrapper.css({
@@ -854,7 +904,7 @@
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
-                            'top':(newPopboxHeight+popboxHeightPadding+(newPopboxTop*2)-1)+'px'
+                            'top':(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-1)+'px'
                         },
                         _speeds.fast,
                         _eases.easeInOutQuad
@@ -863,10 +913,10 @@
                     _static.transition(
                         self.elements.$popbox_popup,
                         {
-                            'width':newPopboxWidth+'px',
-                            'height':newPopboxHeight+'px',
-                            'top':newPopboxTop+'px',
-                            'left':newPopboxLeft+'px'
+                            'width':new_popbox_width+'px',
+                            'height':new_popbox_height+'px',
+                            'top':new_popbox_top+'px',
+                            'left':new_popbox_left+'px'
                         },
                         _speeds.fast,
                         _eases.easeInOutQuad,
@@ -882,10 +932,10 @@
                 }
                 else {
                     self.elements.$popbox_popup.css({
-                        'width':newPopboxWidth+'px',
-                        'height':newPopboxHeight+'px',
-                        'top':newPopboxTop+'px',
-                        'left':newPopboxLeft+'px'
+                        'width':new_popbox_width+'px',
+                        'height':new_popbox_height+'px',
+                        'top':new_popbox_top+'px',
+                        'left':new_popbox_left+'px'
                     });
 
                     self.elements.$popbox_bottom_push.css({

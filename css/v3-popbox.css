@@ -61,3 +61,12 @@
 .popbox .popbox-content {
     padding:1em;
 }
+
+.popbox img {
+    max-width:100%;
+    height:auto;
+}
+
+.popbox iframe, .popbox object, .popbox embed {
+    max-width:100%;
+}
