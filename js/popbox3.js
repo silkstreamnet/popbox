@@ -6,6 +6,7 @@
         _next_instance_id = 0,
         _instances = {length:0},
         _static = {},
+        _private = function(){},
         _support = {},
         _speeds = {
             '_default':300,
@@ -220,80 +221,9 @@
         $object.off('.popbox_transitionend');
     };
 
-    var Popbox = function(settings){
-        var self = this;
 
-        self._private.self = self;
 
-        self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
-        self.properties = {
-            instance_id:_next_instance_id
-        };
-        self.elements = {
-            $popbox_overlay:null
-        };
-
-        self._private.reset();
-        self._private.applyMode();
-
-        _next_instance_id++;
-    };
-
-    Popbox.prototype.version = '3.0.0';
-    Popbox.prototype.default_settings = {
-        //width:false, //auto
-        //height:false, //auto
-        max_width:false, // false|true = 100%, number = pixels
-        max_height:false, // false = none, true = 100%. if set, scroll inner is used
-        container:false, //specify an alternate container to body
-        animation:'fade',
-        animation_speed:_speeds._default,
-        animation_ease:_eases._default,
-        open_animation:null,
-        open_animation_speed:null,
-        open_animation_ease:null,
-        close_animation:null,
-        close_animation_speed:null,
-        close_animation_ease:null,
-        overlay_animation_speed:_speeds._default, // set to true to match the relevant popup animation speed
-        overlay_animation_ease:_eases._default,
-        open_overlay_animation_speed:null,
-        open_overlay_animation_ease:null,
-        close_overlay_animation_speed:null,
-        close_overlay_animation_ease:null,
-        content:'',
-        close:'X', // TODO: if set to FALSE, set element to display none
-        title:'', // TODO: if set to FALSE, set element to display none
-        loading:'Loading',
-        href:'', //can be used for none-anchor elements to grab content
-        cache:false,
-        width_margin:0.1,
-        height_margin:0.1,
-        mode:false, //normal, can be 'gallery' if extension is available
-        on_open:false,
-        after_open:false,
-        on_close:false,
-        after_close:false
-    };
-    Popbox.prototype.modes = {}; // override prototype functions
-    Popbox.prototype.animations = {
-        'fade':{
-            'open':[{
-                'opacity':'0'
-            },{
-                'opacity':'1'
-            }],
-            'close':[{
-                'opacity':'1'
-            },{
-                'opacity':'0'
-            }]
-        }
-    };
-    Popbox.prototype._static = _static;
-    Popbox.prototype._private = {};
-
-    Popbox.prototype._private.reset = function() {
+    _private.prototype.reset = function() {
         var self = this.self;
 
         if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
@@ -342,7 +272,7 @@
         };
     };
 
-    Popbox.prototype._private.applyMode = function(){
+    _private.prototype.applyMode = function(){
         var self = this.self;
 
         // check if mode exists and has override methods
@@ -370,7 +300,7 @@
         }
     };
 
-    Popbox.prototype._private.createOverlay = function(){
+    _private.prototype.createOverlay = function(){
         var self = this.self;
         // add close button to overlay?
 
@@ -408,7 +338,7 @@
         });
     };
 
-    Popbox.prototype._private.destroyOverlay = function(){
+    _private.prototype.destroyOverlay = function(){
         var self = this.self;
         if (_instances.length <= 0 && self.elements.$popbox_overlay) {
             self.elements.$popbox_overlay.remove();
@@ -416,7 +346,7 @@
         }
     };
 
-    Popbox.prototype._private.openOverlay = function(){
+    _private.prototype.openOverlay = function(){
         var self = this.self;
 
         if (!self.elements.$popbox_overlay) {
@@ -441,7 +371,7 @@
         }
     };
 
-    Popbox.prototype._private.closeOverlay = function(){
+    _private.prototype.closeOverlay = function(){
         var self = this.self;
 
         if (self.elements.$popbox_overlay) {
@@ -472,42 +402,42 @@
         }
     };
 
-    Popbox.prototype._private.getAnimationStartProperties = function(type){
+    _private.prototype.getAnimationStartProperties = function(type){
         var self = this.self;
         return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][0] : self.animations['fade'][type][0];
     };
 
-    Popbox.prototype._private.getAnimationEndProperties = function(type){
+    _private.prototype.getAnimationEndProperties = function(type){
         var self = this.self;
         return (_static.isSet(self.animations[self.settings.animation])) ? self.animations[self.settings.animation][type][self.animations[self.settings.animation][type].length-1] : self.animations['fade'][type][self.animations['fade'][type].length-1];
     };
 
-    Popbox.prototype._private.getAnimationSpeed = function(type){
+    _private.prototype.getAnimationSpeed = function(type){
         var self = this.self;
         return self.settings[type+'_animation_speed'] || self.settings.animation_speed || _speeds._default;
     };
 
-    Popbox.prototype._private.getAnimationEase = function(type){
+    _private.prototype.getAnimationEase = function(type){
         var self = this.self;
         return self.settings[type+'_animation_ease'] || self.settings.animation_ease || _eases._default;
     };
 
-    Popbox.prototype._private.getOverlayAnimationSpeed = function(type){
+    _private.prototype.getOverlayAnimationSpeed = function(type){
         var self = this.self;
         if (self.settings[type+'_overlay_animation_speed'] === true) return self._private.getAnimationSpeed(type);
         return self.settings[type+'_overlay_animation_speed'] || self.settings.overlay_animation_speed || self._private.getAnimationSpeed(type);
     };
 
-    Popbox.prototype._private.getOverlayAnimationEase = function(type){
+    _private.prototype.getOverlayAnimationEase = function(type){
         var self = this.self;
         if (self.settings[type+'_overlay_animation_ease'] === true) return self._private.getAnimationEase(type);
         return self.settings[type+'_overlay_animation_ease'] || self.settings.overlay_animation_ease || self._private.getAnimationEase(type);
     };
 
-    Popbox.prototype._private.checkImagesLoaded = function(adjust){
+    _private.prototype.checkImagesLoaded = function(adjust){
         var self = this.self;
         adjust = _static.param(adjust,false);
-
+        console.dir(self);
         if (self.isCreated()) {
 
             var $images = self.elements.$popbox.find('img');
@@ -515,14 +445,14 @@
             $images.each(function(){
                 var image = this;
 
-                if (image.src && !self.properties.image_cache[image.src]) {
+                if (image.src) {
 
                     if (image.complete && _static.isSet(image.naturalWidth)) {
                         if (_static.isNumber(image.naturalWidth,true)) {
                             //self.adjust(true);
                         }
                     }
-                    else {
+                    else if (!self.properties.image_cache[image.src]) {
                         var proxy_image = new Image();
 
                         proxy_image.onload = function(){
@@ -538,17 +468,98 @@
                         proxy_image.src = image.src;
 
                         self.properties.image_cache_pending++;
-                    }
 
-                    self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
+                        self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
+                    }
                 }
             });
-
-            if (adjust && self.properties.image_cache_pending == 0) {
-                self.adjust(true);
+            console.log(self.properties.image_cache);
+            console.log(self.properties.image_cache_pending);
+            if (self.properties.image_cache_pending == 0) {
+                if (adjust) {
+                    self.adjust(true);
+                }
+                return true;
             }
         }
+
+        return false;
     };
+
+    var Popbox = function(settings){
+        var self = this;
+
+        self._private = new _private();
+        self._private.self = self;
+
+        self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
+        self.properties = {
+            instance_id:_next_instance_id
+        };
+        self.elements = {
+            $popbox_overlay:null
+        };
+
+        self._private.reset();
+        self._private.applyMode();
+
+        _next_instance_id++;
+    };
+
+    Popbox.prototype.version = '3.0.0';
+    Popbox.prototype.default_settings = {
+        //width:false, //auto
+        //height:false, //auto
+        max_width:false, // false|true = 100%, number = pixels
+        max_height:false, // false = none, true = 100%. if set, scroll inner is used
+        container:false, //specify an alternate container to body
+        animation:'fade',
+        animation_speed:_speeds._default,
+        animation_ease:_eases._default,
+        open_animation:null,
+        open_animation_speed:null,
+        open_animation_ease:null,
+        close_animation:null,
+        close_animation_speed:null,
+        close_animation_ease:null,
+        overlay_animation_speed:_speeds._default, // set to true to match the relevant popup animation speed
+        overlay_animation_ease:_eases._default,
+        open_overlay_animation_speed:null,
+        open_overlay_animation_ease:null,
+        close_overlay_animation_speed:null,
+        close_overlay_animation_ease:null,
+        content:'',
+        close:'X', // TODO: if set to FALSE, set element to display none
+        title:'', // TODO: if set to FALSE, set element to display none
+        loading:'Loading',
+        href:'', //can be used for none-anchor elements to grab content
+        cache:false,
+        wait_for_images:true,
+        width_margin:0.1,
+        height_margin:0.1,
+        mode:false, //normal, can be 'gallery' if extension is available
+        on_open:false,
+        after_open:false,
+        on_close:false,
+        after_close:false
+    };
+    Popbox.prototype.modes = {}; // override prototype functions
+    Popbox.prototype.animations = {
+        'fade':{
+            'open':[{
+                'opacity':'0'
+            },{
+                'opacity':'1'
+            }],
+            'close':[{
+                'opacity':'1'
+            },{
+                'opacity':'0'
+            }]
+        }
+    };
+    Popbox.prototype._static = _static;
+    Popbox.prototype._private = {};
 
     Popbox.prototype.create = function(){
         var self = this;
@@ -840,9 +851,12 @@
 
         if (self.isOpen()) {
 
-            self._private.checkImagesLoaded();
+            var images_loaded = self._private.checkImagesLoaded();
+            console.log(images_loaded);
+            var adjust_elements = function(animate,show_content) {
 
-            var adjust_elements = function(animate) {
+                animate = _static.param(animate,false);
+                show_content = _static.param(show_content,false);
 
                 var window_width = $window.width(),
                     window_height = $window.height(),
@@ -921,7 +935,7 @@
                         _speeds.fast,
                         _eases.easeInOutQuad,
                         function(){
-                            self.showContent();
+                            if (show_content) self.showContent();
 
                             // fail safe in case padding changes on popbox
                             self.elements.$popbox_bottom_push.css({
@@ -944,13 +958,24 @@
                 }
             };
 
-            if (!animate || self.isLoading()) {
-                adjust_elements(animate);
+            if (!images_loaded && self.settings.wait_for_images) {
+
+                self.showLoading(function(){
+                    adjust_elements(true,false);
+                });
+
             }
             else {
-                self.showLoading(function(){
-                    adjust_elements(true);
-                });
+
+                if (!animate || self.isLoading()) {
+                    adjust_elements(animate,true);
+                }
+                else {
+                    self.showLoading(function(){
+                        adjust_elements(true,true);
+                    });
+                }
+
             }
         }
     };
@@ -1042,7 +1067,7 @@
 
     Popbox.prototype.isCreated = function(){
         var self = this;
-        return self.elements.$popbox;
+        return !!self.elements.$popbox;
     };
 
 
