@@ -87,10 +87,10 @@
         return typeof func === "function";
     };
     _static.isNumber = function(number,required) {
-        return ! isNaN (number-0) && number != null && number != "" && (!_static.param(required,false) || number > 0);
+        return typeof string === "number" && (!_static.param(required,false) || number > 0);
     };
     _static.isString = function(string,required) {
-        return typeof string === "string" && string != null && (!_static.param(required,false) || string != '');
+        return typeof string === "string" && (!_static.param(required,false) || string != '');
     };
     _static.getAttributeString = function($object,attr) {
         var val = $object.attr(attr);
@@ -492,9 +492,7 @@
                     }
                 }
             });
-            console.log(self.properties.image_cache);
-            console.log(self.properties.interface_image_cache_pending);
-            console.log(self.properties.content_image_cache_pending);
+
             if (self.properties.interface_image_cache_pending == 0 && self.properties.content_image_cache_pending == 0) {
                 return true;
             }
@@ -657,6 +655,14 @@
             }
         }).html(self.settings.content).appendTo(self.elements.$popbox_container);
 
+        // checks
+        if (self.settings.title) {
+            self.elements.$popbox_title.css('display','block');
+        }
+        else {
+            self.elements.$popbox_title.css('display','none');
+        }
+
         // events
         self.elements.$popbox_close.on('click.'+_event_namespace,function(e){
             e.preventDefault();
@@ -724,6 +730,12 @@
                 }
                 if (existing_settings.title !== self.settings.title) {
                     self.elements.$popbox_title.html(self.settings.title);
+                    if (self.settings.title) {
+                        self.elements.$popbox_title.css('display','block');
+                    }
+                    else {
+                        self.elements.$popbox_title.css('display','none');
+                    }
                 }
                 if (existing_settings.content !== self.settings.content) {
                     self.elements.$popbox_content.html(self.settings.content);
@@ -879,8 +891,8 @@
                     window_height = $window.height(),
                     popbox_width_padding = _static.elementPadding(self.elements.$popbox_popup,'width'),
                     popbox_height_padding = _static.elementPadding(self.elements.$popbox_popup,'height'),
-                    max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*self.settings.width_margin) : window_width)-popbox_width_padding,
-                    max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*self.settings.height_margin) : window_height)-popbox_height_padding,
+                    max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*(self.settings.width_margin*2)) : window_width)-popbox_width_padding,
+                    max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*(self.settings.height_margin*2)) : window_height)-popbox_height_padding,
                     new_popbox_width,
                     new_popbox_height,
                     new_popbox_top,
@@ -903,13 +915,18 @@
                     'top':'0px',
                     'left':'0px',
                     'width':'auto',
-                    'height':'auto'
+                    'height':'auto',
+                    'max-height':(self.settings.max_height === true) ? max_popbox_height+'px' : 'none'
                 });
 
                 new_popbox_width = self.elements.$popbox_container.width()+1;
                 new_popbox_height = self.elements.$popbox_container.height()+1;
                 new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
                 new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
+
+                if (_static.isNumber(self.settings.max_height,true) && new_popbox_height > self.settings.max_height) {
+                    new_popbox_height = self.settings.max_height;
+                }
 
                 if (new_popbox_height > max_popbox_height) {
                     new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
@@ -928,14 +945,24 @@
                     'top':'',
                     'left':'',
                     'width':'',
-                    'height':''
+                    'height':'',
+                    'max-height':'',
+                    'overflow-y':''
                 });
 
+                if (self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) {
+                    self.elements.$popbox_container.css({
+                        'max-height':new_popbox_height+'px',
+                        'overflow-y':'auto'
+                    });
+                }
+
                 if (animate) {
+
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
-                            'top':(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-1)+'px'
+                            'top':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-2)+'px'
                         },
                         _speeds.fast,
                         _eases.easeInOutQuad
@@ -956,12 +983,13 @@
 
                             // fail safe in case padding changes on popbox
                             self.elements.$popbox_bottom_push.css({
-                                'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
+                                'top':Math.floor(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-2)+'px'
                             });
                         }
                     );
                 }
                 else {
+
                     self.elements.$popbox_popup.css({
                         'width':new_popbox_width+'px',
                         'height':new_popbox_height+'px',
@@ -970,7 +998,7 @@
                     });
 
                     self.elements.$popbox_bottom_push.css({
-                        'top':(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-1)+'px'
+                        'top':Math.floor(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-2)+'px'
                     });
                 }
             };

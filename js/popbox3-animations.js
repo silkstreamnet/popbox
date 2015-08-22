@@ -57,6 +57,7 @@
                 'transform':'scale(0.5)'
             }]
         },
+        // zoom big / zoom small
         'fold':{
             'open':[{
                 'opacity':'0'

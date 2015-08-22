@@ -4,6 +4,7 @@ To do
 - Take out awkward clone calculation and rely strictly on naturalWidth and naturalHeight from loaded image. If not supported, don't expect miracles.
 - Native url content handling. Support popbox content switch. Support form submissions.
 - Add addEventListener method to popbox class.
+- CSS3 transition complete events are unreliable, need a timeout slightly longer than animation time to make sure it isn't stuck.
 
 Done
 - Change function definition convention for private functions to var function plus camelCase.

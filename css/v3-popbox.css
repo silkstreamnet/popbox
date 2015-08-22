@@ -65,6 +65,7 @@
 .popbox img {
     max-width:100%;
     height:auto;
+    max-height:100%;
 }
 
 .popbox iframe, .popbox object, .popbox embed {
