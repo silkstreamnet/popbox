@@ -255,7 +255,8 @@
             disable_background_click:false,
             disable_background_click_timer:false,
             image_cache:{},
-            image_cache_pending:0,
+            interface_image_cache_pending:0,
+            content_image_cache_pending:0,
             instance_id:self.properties.instance_id
         };
         self.elements = {
@@ -443,7 +444,8 @@
             var $images = self.elements.$popbox.find('img');
 
             $images.each(function(){
-                var image = this;
+                var image = this,
+                    $image = $(this);
 
                 if (image.src) {
 
@@ -453,32 +455,47 @@
                         }
                     }
                     else if (!self.properties.image_cache[image.src]) {
-                        var proxy_image = new Image();
+                        var proxy_image = new Image(),
+                            proxy_image_event = function(){
+                                if ($image.closest(self.elements.$popbox_content).length > 0) {
+                                    self.properties.content_image_cache_pending--;
+                                    if (self.properties.content_image_cache_pending == 0) {
+                                        self.adjust(true);
+                                    }
+                                }
+                                else {
+                                    self.properties.interface_image_cache_pending--;
+                                    if (self.properties.interface_image_cache_pending == 0) {
+                                        self.adjust(true);
+                                    }
+                                }
+                            };
 
                         proxy_image.onload = function(){
-                            self.properties.image_cache_pending--;
-                            self._private.checkImagesLoaded(true);
+                            proxy_image_event();
                         };
 
                         proxy_image.onerror = function(){
-                            self.properties.image_cache_pending--;
-                            self._private.checkImagesLoaded(true);
+                            proxy_image_event();
                         };
 
-                        proxy_image.src = image.src;
+                        if ($image.closest(self.elements.$popbox_content).length > 0) {
+                            self.properties.content_image_cache_pending++;
+                        }
+                        else {
+                            self.properties.interface_image_cache_pending++;
+                        }
 
-                        self.properties.image_cache_pending++;
+                        proxy_image.src = image.src;
 
                         self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
                     }
                 }
             });
             console.log(self.properties.image_cache);
-            console.log(self.properties.image_cache_pending);
-            if (self.properties.image_cache_pending == 0) {
-                if (adjust) {
-                    self.adjust(true);
-                }
+            console.log(self.properties.interface_image_cache_pending);
+            console.log(self.properties.content_image_cache_pending);
+            if (self.properties.interface_image_cache_pending == 0 && self.properties.content_image_cache_pending == 0) {
                 return true;
             }
         }
@@ -762,8 +779,6 @@
                 'display':'block'
             });
 
-            self.properties.is_open = true;
-
             // adjust
             self.adjust(false);
 
@@ -793,6 +808,8 @@
             self.elements.$popbox_wrapper.css({
                 'visibility':''
             });
+
+            self.properties.is_open = true;
 
             if (_static.isFunction(self.settings.after_open)) self.settings.after_open();
         }
@@ -849,7 +866,7 @@
         // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
 
-        if (self.isOpen()) {
+        if (self.isCreated()) {
 
             var images_loaded = self._private.checkImagesLoaded();
             console.log(images_loaded);
@@ -977,82 +994,114 @@
                 }
 
             }
+
         }
     };
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
-        if (self.isLoading()){
-            if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
-            return;
-        }
 
-        _static.transition(
-            self.elements.$popbox_wrapper,
-            {'opacity':'0'},
-            _speeds.fast,
-            'linear',
-            function(){
+        if (self.isCreated()) {
+            if (self.isLoading()){
+                if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
+                return;
+            }
+
+            if (self.isOpen()) {
+                _static.transition(
+                    self.elements.$popbox_wrapper,
+                    {'opacity':'0'},
+                    _speeds.fast,
+                    'linear',
+                    function(){
+                        self.elements.$popbox_wrapper.css({
+                            'visibility':'hidden'
+                        });
+
+                        self.elements.$popbox_loading.css({
+                            'opacity':'0',
+                            'display':'block'
+                        });
+
+                        _static.transition(
+                            self.elements.$popbox_loading,
+                            {'opacity':'1'},
+                            _speeds.fast,
+                            'linear',
+                            function(){
+                                if (_static.isFunction(ready)) ready();
+                            }
+                        );
+                    }
+                );
+            }
+            else {
                 self.elements.$popbox_wrapper.css({
+                    'opacity':'0',
                     'visibility':'hidden'
                 });
 
                 self.elements.$popbox_loading.css({
-                    'opacity':'0',
+                    'opacity':'1',
                     'display':'block'
                 });
-
-                _static.transition(
-                    self.elements.$popbox_loading,
-                    {'opacity':'1'},
-                    _speeds.fast,
-                    'linear',
-                    function(){
-                        if (_static.isFunction(ready)) ready();
-                    }
-                );
             }
-        );
 
-
-        self.properties.is_loading = true;
+            self.properties.is_loading = true;
+        }
     };
 
     Popbox.prototype.showContent = function(ready){
         var self = this;
-        if (!self.isLoading()){
-            if (!self.elements.$popbox_popup.hasClass('popbox-animating') && !self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
-            return;
-        }
 
-        _static.transition(
-            self.elements.$popbox_loading,
-            {'opacity':'0'},
-            _speeds.fast,
-            'linear',
-            function(){
-                self.elements.$popbox_loading.css({
-                    'display':'none'
-                });
+        if (self.isCreated()) {
+            if (!self.isLoading()){
+                if (!self.elements.$popbox_popup.hasClass('popbox-animating') && !self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
+                return;
+            }
 
-                self.elements.$popbox_wrapper.css({
-                    'opacity':'0',
-                    'visibility':'visible'
-                });
-
+            if (self.isOpen()) {
                 _static.transition(
-                    self.elements.$popbox_wrapper,
-                    {'opacity':'1'},
+                    self.elements.$popbox_loading,
+                    {'opacity':'0'},
                     _speeds.fast,
                     'linear',
                     function(){
-                        if (_static.isFunction(ready)) ready();
+                        self.elements.$popbox_loading.css({
+                            'display':'none'
+                        });
+
+                        self.elements.$popbox_wrapper.css({
+                            'opacity':'0',
+                            'visibility':'visible'
+                        });
+
+                        _static.transition(
+                            self.elements.$popbox_wrapper,
+                            {'opacity':'1'},
+                            _speeds.fast,
+                            'linear',
+                            function(){
+                                if (_static.isFunction(ready)) ready();
+                            }
+                        );
                     }
                 );
             }
-        );
+            else {
+                self.elements.$popbox_loading.css({
+                    'display':'none',
+                    'opacity':'0'
+                });
 
-        self.properties.is_loading = false;
+                self.elements.$popbox_wrapper.css({
+                    'opacity':'1',
+                    'visibility':'visible'
+                });
+            }
+
+            self.properties.is_loading = false;
+        }
     };
 
     Popbox.prototype.isLoading = function(){
