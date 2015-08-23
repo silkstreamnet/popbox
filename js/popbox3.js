@@ -861,16 +861,11 @@
 
     Popbox.prototype.close = function(destroy){
         var self = this;
-
         if (self.isOpen()) {
-
             if (_static.isFunction(self.settings.on_close)) self.settings.on_close();
-
             self.properties.is_open = false;
-
             // prepare animation
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('close'));
-
             // do animation
             _static.transition(
                 self.elements.$popbox_popup,
@@ -881,7 +876,6 @@
                     self.elements.$popbox.css({
                         'display':'none'
                     });
-
                     if (destroy || !self.settings.cache) {
                         self.destroy();
                     }
@@ -896,29 +890,22 @@
                     }
                 }
             );
-
             self._private.closeOverlay();
-
             if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
         }
     };
 
     Popbox.prototype.adjust = function(animate){
         var self = this;
-
         // TODO: whenever you do an adjust, always check all the images to see if they are complete or have a natural width set.
         // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
-
         if (self.isCreated()) {
-
             var images_loaded = self._private.checkImagesLoaded();
             console.log(images_loaded);
             var adjust_elements = function(animate,show_content) {
-
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
-
                 var window_width = $window.width(),
                     window_height = $window.height(),
                     popbox_width_padding = _static.elementPadding(self.elements.$popbox_popup,'width'),
@@ -930,15 +917,12 @@
                     new_popbox_height,
                     new_popbox_top,
                     new_popbox_left;
-
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
                 }
-
                 if (_static.isNumber(self.settings.max_height,true) && max_popbox_height > self.settings.max_height) {
                     max_popbox_height = self.settings.max_height;
                 }
-
                 self.elements.$popbox_wrapper.css({
                     'position':'absolute',
                     'top':'0px',
@@ -946,7 +930,6 @@
                     'width':max_popbox_width+'px',
                     'height':'auto'
                 });
-
                 self.elements.$popbox_container.css({
                     'position':'absolute',
                     'top':'0px',
@@ -955,7 +938,6 @@
                     'height':'auto',
                     'max-height':(self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) ? max_popbox_height+'px' : ''
                 });
-
                 new_popbox_width = self.elements.$popbox_container.width()+1;
                 new_popbox_height = self.elements.$popbox_container.height()+1;
                 new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
@@ -964,7 +946,6 @@
                 if (new_popbox_height > max_popbox_screen_height) {
                     new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
                 }
-
                 self.elements.$popbox_wrapper.css({
                     'position':'',
                     'top':'',
@@ -972,7 +953,6 @@
                     'width':'',
                     'height':''
                 });
-
                 self.elements.$popbox_container.css({
                     'position':'',
                     'top':'',
@@ -982,7 +962,6 @@
                     'max-height':'',
                     'overflow-y':''
                 });
-
                 // round numbers
                 new_popbox_width = Math.round(new_popbox_width*10)/10;
                 new_popbox_height = Math.round(new_popbox_height*10)/10;
@@ -995,9 +974,7 @@
                         'overflow-y':'auto'
                     });
                 }
-
                 if (animate) {
-
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
@@ -1006,7 +983,6 @@
                         _speeds.fast,
                         _eases.easeInOutQuad
                     );
-
                     _static.transition(
                         self.elements.$popbox_popup,
                         {
@@ -1041,16 +1017,12 @@
                     });
                 }
             };
-
             if (!images_loaded && self.settings.wait_for_images) {
-
                 self.showLoading(function(){
                     adjust_elements(true,false);
                 });
-
             }
             else {
-
                 if (!animate || self.isLoading()) {
                     adjust_elements(animate,true);
                 }
@@ -1059,21 +1031,17 @@
                         adjust_elements(true,true);
                     });
                 }
-
             }
-
         }
     };
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
-
         if (self.isCreated()) {
             if (self.isLoading()){
                 if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
-
             if (self.isOpen()) {
                 _static.transition(
                     self.elements.$popbox_wrapper,
@@ -1084,12 +1052,10 @@
                         self.elements.$popbox_wrapper.css({
                             'visibility':'hidden'
                         });
-
                         self.elements.$popbox_loading.css({
                             'opacity':'0',
                             'display':'block'
                         });
-
                         _static.transition(
                             self.elements.$popbox_loading,
                             {'opacity':'1'},
@@ -1107,13 +1073,11 @@
                     'opacity':'0',
                     'visibility':'hidden'
                 });
-
                 self.elements.$popbox_loading.css({
                     'opacity':'1',
                     'display':'block'
                 });
             }
-
             self.properties.is_loading = true;
         }
     };
@@ -1137,12 +1101,10 @@
                         self.elements.$popbox_loading.css({
                             'display':'none'
                         });
-
                         self.elements.$popbox_wrapper.css({
                             'opacity':'0',
                             'visibility':'visible'
                         });
-
                         _static.transition(
                             self.elements.$popbox_wrapper,
                             {'opacity':'1'},
@@ -1160,13 +1122,11 @@
                     'display':'none',
                     'opacity':'0'
                 });
-
                 self.elements.$popbox_wrapper.css({
                     'opacity':'1',
                     'visibility':'visible'
                 });
             }
-
             self.properties.is_loading = false;
         }
     };
@@ -1186,7 +1146,6 @@
         return !!self.elements.$popbox;
     };
 
-
     // global events
     $window.on('resize.'+_event_namespace,function(){
         if (_instances.length > 0) {
@@ -1201,30 +1160,23 @@
     });
 
     $.fn.PopBox = function(settings) {
-
         settings = _static.param(settings,{});
         var $elements = $(this);
-
         if ($elements.length) {
             $elements.each(function() {
                 var $element = $(this),
                     _popbox = new PopBox(settings);
-
                 $element.on('click.'+_event_namespace,function(e){
                     e.preventDefault();
-
                     // update data settings
                     // process video or image link
                     // display popup
-
                     return false;
                 });
-
                 // bind created popbox to element
                 $element.data('Popbox',_popbox);
             });
         }
-
         return this;
     };
 
