@@ -39,7 +39,7 @@
 }
 
 .popbox .popbox-close {
-    padding:1em;
+    padding:15px;
     background:#ccc;
     display:block;
     position:absolute;
@@ -54,12 +54,12 @@
 }
 
 .popbox .popbox-title {
-    padding:1em;
+    padding:15px;
     background:#ccc;
 }
 
 .popbox .popbox-content {
-    padding:1em;
+    padding:15px;
 }
 
 .popbox img {
