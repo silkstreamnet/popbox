@@ -925,6 +925,7 @@
                     popbox_height_padding = _static.elementPadding(self.elements.$popbox_popup,'height'),
                     max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*(self.settings.width_margin*2)) : window_width)-popbox_width_padding,
                     max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*(self.settings.height_margin*2)) : window_height)-popbox_height_padding,
+                    max_popbox_screen_height = max_popbox_height,
                     new_popbox_width,
                     new_popbox_height,
                     new_popbox_top,
@@ -932,6 +933,10 @@
 
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
+                }
+
+                if (_static.isNumber(self.settings.max_height,true) && max_popbox_height > self.settings.max_height) {
+                    max_popbox_height = self.settings.max_height;
                 }
 
                 self.elements.$popbox_wrapper.css({
@@ -948,7 +953,7 @@
                     'left':'0px',
                     'width':'auto',
                     'height':'auto',
-                    'max-height':(self.settings.max_height === true) ? max_popbox_height+'px' : 'none'
+                    'max-height':(self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) ? max_popbox_height+'px' : ''
                 });
 
                 new_popbox_width = self.elements.$popbox_container.width()+1;
@@ -956,11 +961,7 @@
                 new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
                 new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
 
-                if (_static.isNumber(self.settings.max_height,true) && new_popbox_height > self.settings.max_height) {
-                    new_popbox_height = self.settings.max_height;
-                }
-
-                if (new_popbox_height > max_popbox_height) {
+                if (new_popbox_height > max_popbox_screen_height) {
                     new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
                 }
 
@@ -988,7 +989,7 @@
                 new_popbox_left = Math.round(new_popbox_left*10)/10;
                 new_popbox_top = Math.round(new_popbox_top*10)/10;
 
-                if (self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) {
+                if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
                     self.elements.$popbox_container.css({
                         'max-height':new_popbox_height+'px',
                         'overflow-y':'auto'
