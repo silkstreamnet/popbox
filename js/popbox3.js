@@ -87,7 +87,7 @@
         return typeof func === "function";
     };
     _static.isNumber = function(number,required) {
-        return typeof string === "number" && (!_static.param(required,false) || number > 0);
+        return typeof number === "number" && (!_static.param(required,false) || number > 0);
     };
     _static.isString = function(string,required) {
         return typeof string === "string" && (!_static.param(required,false) || string != '');
@@ -175,7 +175,39 @@
                 if (properties.hasOwnProperty(property)) {
                     //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform, margin, padding
                     transitions.push(property+' '+duration+'ms '+easing);
-                    if ($object.css(property) != properties[property]) {
+
+                    // round number values to 1 decimal place for comparison
+                    var cur_property_val = $object.css(property),
+                        new_property_val = properties[property];
+
+                    if (_static.isString(cur_property_val,true)) {
+                        cur_property_val = cur_property_val.trim();
+                        if (cur_property_val.match(/^[0-9]+(?:\.[0-9]+)?\s*.{0,4}$/)) {
+                            cur_property_val = parseFloat(cur_property_val);
+                        }
+                    }
+                    if (_static.isString(new_property_val,true)) {
+                        new_property_val = new_property_val.trim();
+                        if (new_property_val.match(/^[0-9]+(?:\.[0-9]+)?\s*.{0,4}$/)) {
+                            new_property_val = parseFloat(new_property_val);
+                        }
+                    }
+
+                    if (_static.isNumber(cur_property_val,true)) {
+                        cur_property_val = Math.round(cur_property_val*10)/10;
+                    }
+
+                    if (_static.isNumber(new_property_val,true)) {
+                        new_property_val = Math.round(new_property_val*10)/10;
+                    }
+
+                    if ($object.hasClass('popbox-popup')) {
+                        console.log(cur_property_val);
+                        console.log(_static.isNumber(cur_property_val));
+                        console.log("current "+property+" "+cur_property_val);
+                        console.log("new "+property+" "+new_property_val);
+                    }
+                    if (cur_property_val != new_property_val) {
                         property_difference = true;
                     }
                 }
@@ -949,6 +981,12 @@
                     'max-height':'',
                     'overflow-y':''
                 });
+
+                // round numbers
+                new_popbox_width = Math.round(new_popbox_width*10)/10;
+                new_popbox_height = Math.round(new_popbox_height*10)/10;
+                new_popbox_left = Math.round(new_popbox_left*10)/10;
+                new_popbox_top = Math.round(new_popbox_top*10)/10;
 
                 if (self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) {
                     self.elements.$popbox_container.css({
