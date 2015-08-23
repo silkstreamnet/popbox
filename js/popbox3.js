@@ -601,7 +601,7 @@
         loading:'Loading',
         href:'', //can be used for none-anchor elements to grab content
         add_class:'',
-        aspect_fit:false,
+        aspect_fit:false, // recommended for images and iframes - not for content
         cache:false,
         wait_for_images:true,
         width_margin:0.1,
@@ -913,25 +913,51 @@
                     'top':'0px',
                     'left':'0px',
                     'width':max_popbox_width+'px',
-                    'height':'auto'
+                    'height':'auto',
+                    'overflow-y':''
                 });
                 self.elements.$popbox_container.css({
                     'position':'absolute',
                     'top':'0px',
                     'left':'0px',
                     'width':'auto',
-                    'height':'auto',
-                    'max-height':(self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) ? max_popbox_height+'px' : '',
-                    'overflow-y':'hidden'
+                    'height':'auto'
                 });
-                new_popbox_width = self.elements.$popbox_container.width()+1;
-                new_popbox_height = self.elements.$popbox_container.height()+1;
+
+                new_popbox_width = self.elements.$popbox_container.width();
+                new_popbox_height = self.elements.$popbox_container.height();
+
+                // size adjustment checks
+                if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
+                    if (self.settings.aspect_fit) {
+                        // calculate new width based on height difference
+                        new_popbox_width *= (max_popbox_height/new_popbox_height);
+                        new_popbox_height = max_popbox_height;
+                    }
+                    else {
+                        new_popbox_height = max_popbox_height;
+                        self.elements.$popbox_wrapper.css({
+                            'height':new_popbox_height+'px',
+                            'overflow-y':'scroll'
+                        });
+                    }
+                }
+
                 new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
                 new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
 
+                // offset adjustment checks
                 if (new_popbox_height > max_popbox_screen_height) {
                     new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
                 }
+
+                // round numbers
+                new_popbox_width = Math.round(new_popbox_width*10)/10;
+                new_popbox_height = Math.round(new_popbox_height*10)/10;
+                new_popbox_left = Math.round(new_popbox_left*10)/10;
+                new_popbox_top = Math.round(new_popbox_top*10)/10;
+
+                // cleanup
                 self.elements.$popbox_wrapper.css({
                     'position':'',
                     'top':'',
@@ -944,22 +970,9 @@
                     'top':'',
                     'left':'',
                     'width':'',
-                    'height':'',
-                    'max-height':'',
-                    'overflow-y':''
+                    'height':''
                 });
-                // round numbers
-                new_popbox_width = Math.round(new_popbox_width*10)/10;
-                new_popbox_height = Math.round(new_popbox_height*10)/10;
-                new_popbox_left = Math.round(new_popbox_left*10)/10;
-                new_popbox_top = Math.round(new_popbox_top*10)/10;
 
-                if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
-                    self.elements.$popbox_container.css({
-                        'height':new_popbox_height+'px',
-                        'overflow-y':'scroll'
-                    });
-                }
                 if (animate) {
                     _static.transition(
                         self.elements.$popbox_bottom_push,
