@@ -149,16 +149,11 @@
         }
         return '';
     };
-    _static.elementPadding = function($object,dimension,include_margin) {
-        dimension = _static.param(dimension,'');
-        include_margin = _static.param(include_margin,false);
-        if (dimension == 'width') {
-            return $object.outerWidth(include_margin)-$object.width();
-        }
-        else if (dimension == 'height') {
-            return $object.outerHeight(include_margin)-$object.height();
-        }
-        return 0;
+    _static.elementPaddingWidth = function($object,include_margin) {
+        return ($object && $object.length) ? $object.outerWidth(!!_static.param(include_margin,false))-_static.getTrueWidth($object) : 0;
+    };
+    _static.elementPaddingHeight = function($object,include_margin) {
+        return ($object && $object.length) ? $object.outerHeight(!!_static.param(include_margin,false))-_static.getTrueHeight($object) : 0;
     };
     _static.transition = function($object,properties,duration,easing,complete){
         properties = _static.param(properties,{});
@@ -194,18 +189,22 @@
                     }
 
                     if (_static.isNumber(cur_property_val,true)) {
-                        cur_property_val = Math.round(cur_property_val*10)/10;
+                        cur_property_val = Math.round(cur_property_val);
                     }
 
                     if (_static.isNumber(new_property_val,true)) {
-                        new_property_val = Math.round(new_property_val*10)/10;
+                        new_property_val = Math.round(new_property_val);
                     }
 
                     if ($object.hasClass('popbox-popup')) {
+                        console.log("---");
                         console.log(cur_property_val);
                         console.log(_static.isNumber(cur_property_val));
                         console.log("current "+property+" "+cur_property_val);
                         console.log("new "+property+" "+new_property_val);
+                        console.log($object.css(property));
+                        console.log(properties[property]);
+                        console.log("---");
                     }
                     if (cur_property_val != new_property_val) {
                         property_difference = true;
@@ -215,19 +214,20 @@
 
             if (transitions.length && property_difference) {
 
-                $object.css('transition',transitions.join(', '));
-                $object.css(properties).addClass('popbox-animating');
-                //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
+                $object.css('transition',transitions.join(', ')).addClass('popbox-animating');
+
+                if (_static.isFunction(complete)) {
+                    _static.onTransitionEnd($object,complete);
+                }
+
+                $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                    $object.css('transition','').removeClass('popbox-animating');
+                    $(this).off('.popbox_auto_transition_end');
+                });
 
                 setTimeout(function(){
-                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
-                        $object.css('transition','').removeClass('popbox-animating');
-                        $(this).off('.popbox_auto_transition_end');
-                    });
-
-                    if (_static.isFunction(complete)) {
-                        _static.onTransitionEnd($object,complete);
-                    }
+                    $object.css(properties);
+                    //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
                 },1);
 
                 transitioning = true;
@@ -251,6 +251,12 @@
     };
     _static.offTransitionEnd = function($object) {
         $object.off('.popbox_transitionend');
+    };
+    _static.getTrueWidth = function($object) {
+        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
+    };
+    _static.getTrueHeight = function($object) {
+        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
     };
 
 
@@ -523,7 +529,7 @@
                 }
             });
 
-            if (self.properties.interface_image_cache_pending == 0 && self.properties.content_image_cache_pending == 0) {
+            if (self.properties.content_image_cache_pending == 0) {
                 return true;
             }
         }
@@ -534,6 +540,8 @@
     _private.prototype.applyDomSettings = function(){
         var self = this.self;
         if (self.isCreated()) {
+            console.log("power");
+            console.trace();
             self.elements.$popbox_loading.html(self.settings.loading);
             self.elements.$popbox_close.html(self.settings.close);
             self.elements.$popbox_title.html(self.settings.title);
@@ -792,28 +800,32 @@
             if (!self.elements.$popbox) {
                 self.create();
             }
+            else {
+                // is this necessary?
+                self._private.applyDomSettings();
+            }
 
             if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
 
             // show elements
             self._private.openOverlay();
             self.elements.$popbox_wrapper.css({
-                'visibility':'hidden'
+                //'visibility':'hidden'
             });
             self.elements.$popbox_popup.css({
-                'display':'block',
-                'visibility':'hidden'
+                'display':'block'
+                //'visibility':'hidden'
             });
             self.elements.$popbox.css({
                 'display':'block'
             });
 
-            // adjust
-            self.adjust(false);
-
             self.elements.$popbox_popup.css({
                 'visibility':'visible'
             });
+
+            // adjust
+            self.adjust(false);
 
             // prepare animation
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
@@ -835,7 +847,7 @@
             }
 
             self.elements.$popbox_wrapper.css({
-                'visibility':''
+                //'visibility':''
             });
 
             self.properties.is_open = true;
@@ -882,6 +894,7 @@
 
     Popbox.prototype.adjust = function(animate){
         var self = this;
+        // TODO: ADJUST and CHECKIMAGESLOADED need rewriting to work coherently. Remove adjust calls from checkImagesLoaded. Check the cache properties in this function instead.
         // TODO: whenever you do an adjust, always check all the images to see if they are complete or have a natural width set.
         // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
@@ -893,8 +906,8 @@
                 show_content = _static.param(show_content,false);
                 var window_width = $window.width(),
                     window_height = $window.height(),
-                    popbox_width_padding = _static.elementPadding(self.elements.$popbox_popup,'width'),
-                    popbox_height_padding = _static.elementPadding(self.elements.$popbox_popup,'height'),
+                    popbox_width_padding = _static.elementPaddingWidth(self.elements.$popbox_popup),
+                    popbox_height_padding = _static.elementPaddingHeight(self.elements.$popbox_popup),
                     max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*(self.settings.width_margin*2)) : window_width)-popbox_width_padding,
                     max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*(self.settings.height_margin*2)) : window_height)-popbox_height_padding,
                     max_popbox_screen_height = max_popbox_height,
@@ -902,6 +915,7 @@
                     new_popbox_height,
                     new_popbox_top,
                     new_popbox_left;
+                console.log("BAAAAAAAAAAAAAAAAA: "+self.elements.$popbox_popup.attr('style'));
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
                 }
@@ -924,8 +938,9 @@
                     'height':'auto'
                 });
 
-                new_popbox_width = self.elements.$popbox_container.width();
-                new_popbox_height = self.elements.$popbox_container.height();
+                new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
+                new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
+                console.log("MOOOOOO: "+new_popbox_width);
 
                 // size adjustment checks
                 if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
@@ -952,10 +967,10 @@
                 }
 
                 // round numbers
-                new_popbox_width = Math.round(new_popbox_width*10)/10;
-                new_popbox_height = Math.round(new_popbox_height*10)/10;
-                new_popbox_left = Math.round(new_popbox_left*10)/10;
-                new_popbox_top = Math.round(new_popbox_top*10)/10;
+                //new_popbox_width = Math.round(new_popbox_width*100)/100;
+                //new_popbox_height = Math.round(new_popbox_height*100)/100;
+                //new_popbox_left = Math.round(new_popbox_left*100)/100;
+                //new_popbox_top = Math.round(new_popbox_top*100)/100;
 
                 // cleanup
                 self.elements.$popbox_wrapper.css({
@@ -1022,6 +1037,8 @@
                 });
             }
             else {
+                console.log("check animate: "+animate);
+                console.log(self.isLoading());
                 if (!animate || self.isLoading()) {
                     adjust_elements(animate,true);
                 }
@@ -1036,6 +1053,7 @@
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
+        console.trace();
         if (self.isCreated()) {
             if (self.isLoading()){
                 if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();

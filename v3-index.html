@@ -10,18 +10,31 @@
         body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0;}
         a {}
         p {font-size:100%;}
+        #test {position:absolute; width:691px; height:524px; top:69.1999969482422px; left:249.377593994141px; transition: width 300ms cubic-bezier(0.455, 0.03, 0.515, 0.955), height 300ms cubic-bezier(0.455, 0.03, 0.515, 0.955), top 300ms cubic-bezier(0.455, 0.03, 0.515, 0.955), left 300ms cubic-bezier(0.455, 0.03, 0.515, 0.955);}
     </style>
 </head>
 <body>
 <a href="#" class="click-me-1">Quick Switch Content</a><br>
 <a href="#" class="click-me-2">Content with Image</a><br>
 <a href="#" class="click-me-3">Standard Image</a><br>
+<div id="test">Test</div>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <script type="text/javascript" src="js/jquery/jquery-1.8.3.min.js"></script>
 <script type="text/javascript" src="js/popbox3.js"></script>
 <script type="text/javascript" src="js/popbox3-animations.js"></script>
 <script type="text/javascript" src="js/popbox3-gallery.js"></script>
 <script type="text/javascript">
+
+    var test = document.getElementById('test');
+    test.addEventListener('transitionend',function(){
+        console.log("end");
+    });
+    setTimeout(function(){
+        test.style.width = '690.2448210922787px';
+        test.style.height = '523.6px';
+        test.style.top = '69.19999999999999px';
+        test.style.left = '249.37758945386065px';
+    },1500);
 
     var popbox1 = new $.Popbox({
         max_width:800,
@@ -69,7 +82,7 @@
         max_width:700,
         max_height:true,
         aspect_fit:true,
-        content:'test more content',
+        content:'<p>test more content</p>',
         animation:'zoom',
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });
@@ -77,11 +90,12 @@
     $('.click-me-3').on('click',function(e){
         e.preventDefault();
         popbox3.open();
-        setTimeout(function(){
+
+        /*setTimeout(function(){
             popbox3.update({
                 content:'<img src="images/test-image.jpg" />'
             });
-        },1000);
+        },1000);*/
     });
 
 </script>
