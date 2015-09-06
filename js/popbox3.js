@@ -196,22 +196,22 @@
                         new_property_val = Math.round(new_property_val);
                     }
 
-                    if ($object.hasClass('popbox-popup')) {
-                        console.log("---");
-                        console.log(cur_property_val);
-                        console.log(_static.isNumber(cur_property_val));
-                        console.log("current "+property+" "+cur_property_val);
-                        console.log("new "+property+" "+new_property_val);
-                        console.log($object.css(property));
-                        console.log(properties[property]);
-                        console.log("---");
+                    if ($object.hasClass('popbox-loading')) {
+                        //console.log("---");
+                        //console.log(cur_property_val);
+                        //console.log(_static.isNumber(cur_property_val));
+                        //console.log("current "+property+" "+cur_property_val);
+                        //console.log("new "+property+" "+new_property_val);
+                        //console.log($object.css(property));
+                        //console.log(properties[property]);
+                        //console.log("---");
                     }
                     if (cur_property_val != new_property_val) {
                         property_difference = true;
                     }
                 }
             }
-
+            console.log($object.attr('class'));
             if (transitions.length && property_difference) {
 
                 $object.css('transition',transitions.join(', ')).addClass('popbox-animating');
@@ -221,14 +221,24 @@
                 }
 
                 $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                    console.trace();
                     $object.css('transition','').removeClass('popbox-animating');
                     $(this).off('.popbox_auto_transition_end');
                 });
 
-                setTimeout(function(){
+                $object.css(properties);
+
+                if ($object.hasClass('popbox-loading')) {
+                    console.log("popbox animation: ");
+                    console.log($object.attr('style'));
+                    console.log(complete);
+                }
+                /*setTimeout(function(){
                     $object.css(properties);
+
+                    //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
                     //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                },1);
+                },1);*/
 
                 transitioning = true;
             }
@@ -245,12 +255,13 @@
     };
     _static.onTransitionEnd = function($object,func) {
         $object.off('.popbox_transition_end').on(_support.transition_end+'.popbox_transition_end',function(){
+            console.trace();
             if (_static.isFunction(func)) func();
             $(this).off('.popbox_transition_end');
         });
     };
     _static.offTransitionEnd = function($object) {
-        $object.off('.popbox_transitionend');
+        $object.off('.popbox_transition_end');
     };
     _static.getTrueWidth = function($object) {
         return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
@@ -507,6 +518,13 @@
                                 }
                             };
 
+                        if ($image.closest(self.elements.$popbox_content).length > 0) {
+                            self.properties.content_image_cache_pending++;
+                        }
+                        else {
+                            self.properties.interface_image_cache_pending++;
+                        }
+
                         proxy_image.onload = function(){
                             proxy_image_event();
                         };
@@ -515,13 +533,6 @@
                             proxy_image_event();
                         };
 
-                        if ($image.closest(self.elements.$popbox_content).length > 0) {
-                            self.properties.content_image_cache_pending++;
-                        }
-                        else {
-                            self.properties.interface_image_cache_pending++;
-                        }
-
                         proxy_image.src = image.src;
 
                         self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
@@ -529,7 +540,7 @@
                 }
             });
 
-            if (self.properties.content_image_cache_pending == 0) {
+            if (self.properties.content_image_cache_pending == 0 && self.properties.interface_image_cache_pending == 0) {
                 return true;
             }
         }
@@ -540,8 +551,8 @@
     _private.prototype.applyDomSettings = function(){
         var self = this.self;
         if (self.isCreated()) {
-            console.log("power");
-            console.trace();
+            //console.log("power");
+            //console.trace();
             self.elements.$popbox_loading.html(self.settings.loading);
             self.elements.$popbox_close.html(self.settings.close);
             self.elements.$popbox_title.html(self.settings.title);
@@ -899,9 +910,10 @@
         // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
         if (self.isCreated()) {
-            var images_loaded = self._private.checkImagesLoaded();
-            console.log(images_loaded);
+
             var adjust_elements = function(animate,show_content) {
+                console.log("ADJUST ELEMENTS");
+                console.trace();
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
                 var window_width = $window.width(),
@@ -915,7 +927,7 @@
                     new_popbox_height,
                     new_popbox_top,
                     new_popbox_left;
-                console.log("BAAAAAAAAAAAAAAAAA: "+self.elements.$popbox_popup.attr('style'));
+                //console.log("BAAAAAAAAAAAAAAAAA: "+self.elements.$popbox_popup.attr('style'));
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
                 }
@@ -940,7 +952,7 @@
 
                 new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
                 new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
-                console.log("MOOOOOO: "+new_popbox_width);
+                //console.log("MOOOOOO: "+new_popbox_width);
 
                 // size adjustment checks
                 if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
@@ -1031,15 +1043,18 @@
                     });
                 }
             };
-            if (!images_loaded && self.settings.wait_for_images) {
-                self.showLoading(function(){
-                    adjust_elements(true,false);
-                });
-            }
-            else {
-                console.log("check animate: "+animate);
-                console.log(self.isLoading());
-                if (!animate || self.isLoading()) {
+
+
+            self._private.checkImagesLoaded();
+
+            if (self.settings.wait_for_images) {
+                console.log(self.properties.content_image_cache_pending);
+                if (self.properties.content_image_cache_pending > 0) {
+                    self.showLoading(function(){
+                        adjust_elements(true,false);
+                    });
+                }
+                else if (!animate) {
                     adjust_elements(animate,true);
                 }
                 else {
@@ -1048,24 +1063,31 @@
                     });
                 }
             }
+            else {
+
+            }
         }
     };
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
+        console.log("SHOW LOADING");
         console.trace();
         if (self.isCreated()) {
             if (self.isLoading()){
+                console.log("nooo");
                 if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
             if (self.isOpen()) {
+                console.log("yes");
                 _static.transition(
                     self.elements.$popbox_wrapper,
                     {'opacity':'0'},
                     _speeds.fast,
                     'linear',
                     function(){
+                        console.log("next yes");
                         self.elements.$popbox_wrapper.css({
                             'visibility':'hidden'
                         });
@@ -1079,6 +1101,7 @@
                             _speeds.fast,
                             'linear',
                             function(){
+                                console.log("final yes");
                                 if (_static.isFunction(ready)) ready();
                             }
                         );
@@ -1101,20 +1124,24 @@
 
     Popbox.prototype.showContent = function(ready){
         var self = this;
-
+        console.log("SHOW CONTENT");
+        console.trace();
         if (self.isCreated()) {
             if (!self.isLoading()){
+                console.log("content already shown");
                 if (!self.elements.$popbox_popup.hasClass('popbox-animating') && !self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
 
             if (self.isOpen()) {
+                console.log(self.elements.$popbox_loading.css('opacity'));
                 _static.transition(
                     self.elements.$popbox_loading,
                     {'opacity':'0'},
                     _speeds.fast,
                     'linear',
                     function(){
+                        console.log("show content 1");
                         self.elements.$popbox_loading.css({
                             'display':'none'
                         });
