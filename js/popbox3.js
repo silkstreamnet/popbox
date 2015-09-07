@@ -214,6 +214,11 @@
             console.log($object.attr('class'));
             if (transitions.length && property_difference) {
 
+                if ($object.hasClass('popbox-loading')) {
+                    console.log("popbox animation: ");
+                    console.log($object.attr('style'));
+                }
+
                 $object.css('transition',transitions.join(', ')).addClass('popbox-animating');
 
                 if (_static.isFunction(complete)) {
@@ -231,7 +236,6 @@
                 if ($object.hasClass('popbox-loading')) {
                     console.log("popbox animation: ");
                     console.log($object.attr('style'));
-                    console.log(complete);
                 }
                 /*setTimeout(function(){
                     $object.css(properties);
