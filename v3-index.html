@@ -25,6 +25,8 @@
 <script type="text/javascript" src="js/popbox3-gallery.js"></script>
 <script type="text/javascript">
 
+    console.dir('a, b, c, "d, e, f", tes tg, h'.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)); // doesnt work with spaces between words
+
     var test = document.getElementById('test');
     test.addEventListener('transitionend',function(){
         console.log("end");

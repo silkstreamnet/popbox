@@ -138,6 +138,9 @@
         }
         return -1;
     };
+    _static.trim = function (string) {
+        return (_static.isString(string)) ? string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '') : string;
+    };
     _static.getInlineStyle = function($object,style)
     {
         var full_inline_style = _static.getAttributeString($object,'style');
@@ -166,6 +169,7 @@
             transitioning = false;
 
         if (_support.transition_end) {
+
             for (property in properties) {
                 if (properties.hasOwnProperty(property)) {
                     //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform, margin, padding
@@ -211,38 +215,68 @@
                     }
                 }
             }
+
+            //TODO need to split the transition string on commas excluding commas inside brackets like for cubic bezier
+
+            var existing_transitions = $object.css('transition').match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+            for (var j=0; j<existing_transitions.length; j++) {
+                var existing_transition = _static.trim(existing_transitions[j]),
+                    existing_update = false;
+
+                if (existing_transition && !existing_transition.match(/all 0(?:\.[0]+)?[^0-9]/)) {
+                    for (property in properties) {
+                        if (properties.hasOwnProperty(property)) {
+                            if (_static.isString(property,true) && existing_transitions[j].match(new RegExp(_static.regexEscape(property)))) {
+                                existing_update = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!existing_update) {
+                        transitions.push(existing_transition);
+                        property_difference = true;
+                    }
+                }
+            }
+
             console.log($object.attr('class'));
+            console.log($object.css('transition'));
+            console.dir(transitions);
+            console.log(property_difference);
             if (transitions.length && property_difference) {
 
-                if ($object.hasClass('popbox-loading')) {
-                    console.log("popbox animation: ");
-                    console.log($object.attr('style'));
-                }
+                var already_animating = $object.hasClass('popbox-animating');
 
-                $object.css('transition',transitions.join(', ')).addClass('popbox-animating');
+                $object.css('transition',transitions.join(', '));
+
+                if (!already_animating) {
+                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                        console.trace();
+                        $object.css('transition','').removeClass('popbox-animating');
+                        $object.off('.popbox_auto_transition_end');
+                    });
+                }
 
                 if (_static.isFunction(complete)) {
-                    _static.onTransitionEnd($object,complete);
+                    _static.onTransitionEnd($object,complete,!already_animating);
                 }
 
-                $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
-                    console.trace();
-                    $object.css('transition','').removeClass('popbox-animating');
-                    $(this).off('.popbox_auto_transition_end');
-                });
+                $object.css(properties).addClass('popbox-animating');
 
-                $object.css(properties);
+                console.log($object.css('transition'));
 
                 if ($object.hasClass('popbox-loading')) {
                     console.log("popbox animation: ");
                     console.log($object.attr('style'));
+                    console.log(complete);
                 }
                 /*setTimeout(function(){
-                    $object.css(properties);
+                 $object.css(properties);
 
-                    //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
-                    //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                },1);*/
+                 //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
+                 //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
+                 },1);*/
 
                 transitioning = true;
             }
@@ -257,14 +291,40 @@
             }
         }
     };
-    _static.onTransitionEnd = function($object,func) {
-        $object.off('.popbox_transition_end').on(_support.transition_end+'.popbox_transition_end',function(){
-            console.trace();
-            if (_static.isFunction(func)) func();
-            $(this).off('.popbox_transition_end');
-        });
+    _static.onTransitionEnd = function($object,complete,add_listener) {
+        add_listener = _static.param(add_listener,true);
+
+        if (add_listener) {
+            _static.offTransitionEnd($object);
+        }
+
+        // add function to list
+        var pre_functions = $object.data('popbox-transition-end-functions');
+        if (_static.isFunction(complete)) {
+            if (pre_functions) pre_functions.push(complete);
+            else pre_functions = [complete];
+            $object.data('popbox-transition-end-functions',pre_functions);
+        }
+
+        console.log("ADD LISTENER");
+
+        // add event listener if not already present
+        if (add_listener) {
+            $object.on(_support.transition_end+'.popbox_transition_end',function(){
+                console.trace();
+                var live_functions = $object.data('popbox-transition-end-functions');
+                console.dir(live_functions);
+                if (live_functions) {
+                    for (var i=0; i<live_functions.length; i++) {
+                        if (_static.isFunction(live_functions[i])) live_functions[i]();
+                    }
+                }
+                _static.offTransitionEnd($object);
+            });
+        }
     };
     _static.offTransitionEnd = function($object) {
+        $object.data('popbox-transition-end-functions',false);
         $object.off('.popbox_transition_end');
     };
     _static.getTrueWidth = function($object) {
