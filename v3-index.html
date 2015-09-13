@@ -26,6 +26,67 @@
 <script type="text/javascript">
 
     console.dir('a, b, c, "d, e, f", tes tg, h'.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)); // doesnt work with spaces between words
+    console.dir('a, b, c, "d, e, f", tes tg, h'.replace(/(["'(][^"')]*),([^"')]*["')])/g,'$1<%comma%>$2'));
+    var splitOutside = function(delimiter,string,container_start,container_end){
+        if (typeof container_start === 'undefined') container_start = '';
+        if (typeof container_end === 'undefined') container_end = container_start;
+        if (!(container_start instanceof Array)) container_start = [container_start];
+        if (!(container_end instanceof Array)) container_end = [container_end];
+
+        var results = [],
+            parts = string.split(delimiter),
+            inside = false,
+            current = 0,
+            container_start_i = container_start[current],
+            container_end_i = container_end[current];
+
+        for (var i=0; i<parts.length; i++) {
+
+            var part_handled = false;
+
+            for (var j=0; j<container_start.length; j++) {
+                container_start_i = container_start[j];
+                container_end_i = container_end[current];
+
+                var container_start_ie = container_start_i.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
+                    container_end_ie = container_end_i.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
+                    start_match = parts[i].match(new RegExp('['+container_start_ie+'][^'+container_end_ie+']*')),
+                    end_match = parts[i].match(new RegExp('[^'+container_start_ie+']*['+container_end_ie+']'));
+
+                //console.log("part: "+parts[i]);
+                //console.log("current: "+inside);
+                //console.log("start: ",start_match);
+                //console.log("end: ",end_match);
+
+                if (inside !== false) {
+                    if (j == current) {
+                        inside += parts[i];
+                        if (end_match) {
+                            results.push(inside);
+                            inside = false;
+                        }
+                        else {
+                            inside += delimiter;
+                        }
+                        part_handled = true;
+                    }
+                }
+                else if (start_match) {
+                    inside = parts[i]+delimiter;
+                    current = (j < container_end.length) ? j : 0;
+                    part_handled = true;
+                }
+            }
+
+            if (!part_handled) {
+                results.push(parts[i]);
+            }
+        }
+
+        return results;
+    };
+
+    console.dir(splitOutside(',','a,b,"c ,d", (e, a, f), p, q,r',['"','('],['"',')']));
 
     var test = document.getElementById('test');
     test.addEventListener('transitionend',function(){

@@ -152,6 +152,59 @@
         }
         return '';
     };
+    _static.splitOutside = function(delimiter,string,container_start,container_end){
+        if (typeof container_start === 'undefined') container_start = '';
+        if (typeof container_end === 'undefined') container_end = container_start;
+        if (!(container_start instanceof Array)) container_start = [container_start];
+        if (!(container_end instanceof Array)) container_end = [container_end];
+
+        var results = [],
+            parts = string.split(delimiter),
+            inside = false,
+            current = 0,
+            container_start_i = container_start[current],
+            container_end_i = container_end[current];
+
+        for (var i=0; i<parts.length; i++) {
+
+            var part_handled = false;
+
+            for (var j=0; j<container_start.length; j++) {
+                container_start_i = container_start[j];
+                container_end_i = container_end[current];
+
+                var container_start_ie = container_start_i.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
+                    container_end_ie = container_end_i.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
+                    start_match = parts[i].match(new RegExp('['+container_start_ie+'][^'+container_end_ie+']*')),
+                    end_match = parts[i].match(new RegExp('[^'+container_start_ie+']*['+container_end_ie+']'));
+
+                if (inside !== false) {
+                    if (j == current) {
+                        inside += parts[i];
+                        if (end_match) {
+                            results.push(inside);
+                            inside = false;
+                        }
+                        else {
+                            inside += delimiter;
+                        }
+                        part_handled = true;
+                    }
+                }
+                else if (start_match) {
+                    inside = parts[i]+delimiter;
+                    current = (j < container_end.length) ? j : 0;
+                    part_handled = true;
+                }
+            }
+
+            if (!part_handled) {
+                results.push(parts[i]);
+            }
+        }
+
+        return results;
+    };
     _static.elementPaddingWidth = function($object,include_margin) {
         return ($object && $object.length) ? $object.outerWidth(!!_static.param(include_margin,false))-_static.getTrueWidth($object) : 0;
     };
@@ -218,7 +271,10 @@
 
             //TODO need to split the transition string on commas excluding commas inside brackets like for cubic bezier
 
-            var existing_transitions = $object.css('transition').match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+            var existing_transitions = _static.splitOutside(',',$object.css('transition'),'(',')');
+            console.log("MOOOOOOOOOOOO");
+            console.log($object.css('transition'));
+            console.log(existing_transitions);
             for (var j=0; j<existing_transitions.length; j++) {
                 var existing_transition = _static.trim(existing_transitions[j]),
                     existing_update = false;
@@ -252,7 +308,10 @@
 
                 if (!already_animating) {
                     $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                        console.log($object.attr('class'));
+                        console.log($object.data('popbox-transition-end-functions')[0]);
                         console.trace();
+
                         $object.css('transition','').removeClass('popbox-animating');
                         $object.off('.popbox_auto_transition_end');
                     });
@@ -291,11 +350,10 @@
             }
         }
     };
-    _static.onTransitionEnd = function($object,complete,add_listener) {
-        add_listener = _static.param(add_listener,true);
+    _static.onTransitionEnd = function($object,complete,fresh_listener) {
 
-        if (add_listener) {
-            _static.offTransitionEnd($object);
+        if (_static.param(fresh_listener,true)) {
+            //_static.offTransitionEnd($object);
         }
 
         // add function to list
@@ -309,19 +367,17 @@
         console.log("ADD LISTENER");
 
         // add event listener if not already present
-        if (add_listener) {
-            $object.on(_support.transition_end+'.popbox_transition_end',function(){
-                console.trace();
-                var live_functions = $object.data('popbox-transition-end-functions');
-                console.dir(live_functions);
-                if (live_functions) {
-                    for (var i=0; i<live_functions.length; i++) {
-                        if (_static.isFunction(live_functions[i])) live_functions[i]();
-                    }
+        $object.off('.popbox_transition_end').on(_support.transition_end+'.popbox_transition_end',function(){
+            console.trace();
+            var live_functions = $object.data('popbox-transition-end-functions');
+            console.dir(live_functions);
+            if (live_functions) {
+                for (var i=0; i<live_functions.length; i++) {
+                    if (_static.isFunction(live_functions[i])) live_functions[i]();
                 }
-                _static.offTransitionEnd($object);
-            });
-        }
+            }
+            _static.offTransitionEnd($object);
+        });
     };
     _static.offTransitionEnd = function($object) {
         $object.data('popbox-transition-end-functions',false);
@@ -577,7 +633,7 @@
                                 else {
                                     self.properties.interface_image_cache_pending--;
                                     if (self.properties.interface_image_cache_pending == 0) {
-                                        self.adjust(true);
+                                        if (self.isLoading()) self.adjust(true);
                                     }
                                 }
                             };
@@ -1065,6 +1121,7 @@
                 });
 
                 if (animate) {
+                    _static.offTransitionEnd(self.elements.$popbox_popup);
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
@@ -1145,6 +1202,8 @@
             }
             if (self.isOpen()) {
                 console.log("yes");
+                _static.offTransitionEnd(self.elements.$popbox_loading);
+                _static.offTransitionEnd(self.elements.$popbox_wrapper);
                 _static.transition(
                     self.elements.$popbox_wrapper,
                     {'opacity':'0'},
@@ -1181,6 +1240,8 @@
                     'opacity':'1',
                     'display':'block'
                 });
+
+                if (_static.isFunction(ready)) ready();
             }
             self.properties.is_loading = true;
         }
@@ -1199,6 +1260,8 @@
 
             if (self.isOpen()) {
                 console.log(self.elements.$popbox_loading.css('opacity'));
+                _static.offTransitionEnd(self.elements.$popbox_loading);
+                _static.offTransitionEnd(self.elements.$popbox_wrapper);
                 _static.transition(
                     self.elements.$popbox_loading,
                     {'opacity':'0'},
@@ -1234,6 +1297,8 @@
                     'opacity':'1',
                     'visibility':'visible'
                 });
+
+                if (_static.isFunction(ready)) ready();
             }
             self.properties.is_loading = false;
         }
