@@ -272,9 +272,13 @@
             //TODO need to split the transition string on commas excluding commas inside brackets like for cubic bezier
 
             var existing_transitions = _static.splitOutside(',',$object.css('transition'),'(',')');
-            console.log("MOOOOOOOOOOOO");
-            console.log($object.css('transition'));
-            console.log(existing_transitions);
+            if ($object.hasClass('popbox-popup')) {
+                console.log("MOO ----------- TRANSITION START");
+                console.trace();
+                console.log($object.attr('class'));
+                console.log($object.css('transition'));
+                console.log(existing_transitions);
+            }
             for (var j=0; j<existing_transitions.length; j++) {
                 var existing_transition = _static.trim(existing_transitions[j]),
                     existing_update = false;
@@ -296,46 +300,67 @@
                 }
             }
 
-            console.log($object.attr('class'));
-            console.log($object.css('transition'));
-            console.dir(transitions);
-            console.log(property_difference);
+            //console.log($object.css('transition'));
+            //console.dir(transitions);
+            //console.log(property_difference);
             if (transitions.length && property_difference) {
 
-                var already_animating = $object.hasClass('popbox-animating');
+                //var already_animating = $object.hasClass('popbox-animating');
 
+                $object.off('.popbox_auto_transition_end');
                 $object.css('transition',transitions.join(', '));
 
-                if (!already_animating) {
-                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
-                        console.log($object.attr('class'));
-                        console.log($object.data('popbox-transition-end-functions')[0]);
-                        console.trace();
-
-                        $object.css('transition','').removeClass('popbox-animating');
-                        $object.off('.popbox_auto_transition_end');
-                    });
-                }
-
+                // add function to list
+                var pre_functions = $object.data('popbox-transition-end-functions');
                 if (_static.isFunction(complete)) {
-                    _static.onTransitionEnd($object,complete,!already_animating);
+                    if (pre_functions) pre_functions.push(complete);
+                    else pre_functions = [complete];
+                    $object.data('popbox-transition-end-functions',pre_functions);
                 }
 
-                $object.css(properties).addClass('popbox-animating');
+                $object.on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                    if ($object.hasClass('popbox-popup')) {
+                        console.log("MOO ----------- TRANSITION END");
+                        console.log($object.attr('class'));
+                        console.log($object.css('transition'));
+                        console.trace();
+                    }
+                    //console.log($object.data('popbox-transition-end-functions')[0]);
+                    //console.trace();
 
-                console.log($object.css('transition'));
+                    $object.off('.popbox_auto_transition_end');
+                    $object.css('transition','').removeClass('popbox-animating');
+
+                    var live_functions = $object.data('popbox-transition-end-functions');
+                    if ($object.hasClass('popbox-popup')) console.dir(live_functions);
+                    if (live_functions) {
+                        for (var i=0; i<live_functions.length; i++) {
+                            if (_static.isFunction(live_functions[i])) live_functions[i]();
+                        }
+                    }
+                });
+
+                //$object.css(properties).addClass('popbox-animating');
+                $object.addClass('popbox-animating');
+
 
                 if ($object.hasClass('popbox-loading')) {
-                    console.log("popbox animation: ");
-                    console.log($object.attr('style'));
-                    console.log(complete);
+                    //console.log("popbox animation: ");
+                    //console.log($object.attr('style'));
+                    //console.log(complete);
                 }
-                /*setTimeout(function(){
+
+                setTimeout(function(){
                  $object.css(properties);
 
                  //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
                  //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                 },1);*/
+                 },1);
+
+                if ($object.hasClass('popbox-popup')) {
+                    console.log("after new properties added");
+                    console.log($object.css('transition'));
+                }
 
                 transitioning = true;
             }
@@ -350,38 +375,8 @@
             }
         }
     };
-    _static.onTransitionEnd = function($object,complete,fresh_listener) {
-
-        if (_static.param(fresh_listener,true)) {
-            //_static.offTransitionEnd($object);
-        }
-
-        // add function to list
-        var pre_functions = $object.data('popbox-transition-end-functions');
-        if (_static.isFunction(complete)) {
-            if (pre_functions) pre_functions.push(complete);
-            else pre_functions = [complete];
-            $object.data('popbox-transition-end-functions',pre_functions);
-        }
-
-        console.log("ADD LISTENER");
-
-        // add event listener if not already present
-        $object.off('.popbox_transition_end').on(_support.transition_end+'.popbox_transition_end',function(){
-            console.trace();
-            var live_functions = $object.data('popbox-transition-end-functions');
-            console.dir(live_functions);
-            if (live_functions) {
-                for (var i=0; i<live_functions.length; i++) {
-                    if (_static.isFunction(live_functions[i])) live_functions[i]();
-                }
-            }
-            _static.offTransitionEnd($object);
-        });
-    };
-    _static.offTransitionEnd = function($object) {
+    _static.clearTransition = function($object) {
         $object.data('popbox-transition-end-functions',false);
-        $object.off('.popbox_transition_end');
     };
     _static.getTrueWidth = function($object) {
         return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
@@ -529,7 +524,7 @@
                 'display':'block',
                 'opacity':'0'
             });
-
+            _static.clearTransition(self.elements.$popbox_overlay);
             _static.transition(
                 self.elements.$popbox_overlay,
                 {'opacity':'1'},
@@ -547,8 +542,8 @@
         if (self.elements.$popbox_overlay) {
 
             if (self.elements.$popbox_overlay.data('is_open') === true) {
-                self.elements.$popbox_overlay.css({'opacity':'1'});
-
+                //self.elements.$popbox_overlay.css({'opacity':'1'});
+                _static.clearTransition(self.elements.$popbox_overlay);
                 _static.transition(
                     self.elements.$popbox_overlay,
                     {'opacity':'0'},
@@ -633,7 +628,7 @@
                                 else {
                                     self.properties.interface_image_cache_pending--;
                                     if (self.properties.interface_image_cache_pending == 0) {
-                                        if (self.isLoading()) self.adjust(true);
+                                        //if (self.isLoading()) self.adjust(true);
                                     }
                                 }
                             };
@@ -716,6 +711,8 @@
     Popbox.prototype.default_settings = {
         //width:false, //auto
         //height:false, //auto
+        min_width:100, // false = none, true = 100%, number = pixels
+        min_height:100, // false = none, true = 100%, number = pixels
         max_width:false, // false|true = 100%, number = pixels
         max_height:false, // false = none, true = 100%. if set, scroll inner is used
         container:false, //specify an alternate container to body
@@ -960,7 +957,7 @@
 
             // prepare animation
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('open'));
-
+            _static.clearTransition(self.elements.$popbox_popup);
             // do animation
             _static.transition(
                 self.elements.$popbox_popup,
@@ -994,6 +991,7 @@
             self.properties.is_open = false;
             // prepare animation
             self.elements.$popbox_popup.css(self._private.getAnimationStartProperties('close'));
+            _static.clearTransition(self.elements.$popbox_popup);
             // do animation
             _static.transition(
                 self.elements.$popbox_popup,
@@ -1042,6 +1040,8 @@
                     popbox_height_padding = _static.elementPaddingHeight(self.elements.$popbox_popup),
                     max_popbox_width = ((self.settings.width_margin > 0) ? window_width-(window_width*(self.settings.width_margin*2)) : window_width)-popbox_width_padding,
                     max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*(self.settings.height_margin*2)) : window_height)-popbox_height_padding,
+                    min_popbox_width = 0,
+                    min_popbox_height = 0,
                     max_popbox_screen_height = max_popbox_height,
                     new_popbox_width,
                     new_popbox_height,
@@ -1053,6 +1053,12 @@
                 }
                 if (_static.isNumber(self.settings.max_height,true) && max_popbox_height > self.settings.max_height) {
                     max_popbox_height = self.settings.max_height;
+                }
+                if (_static.isNumber(self.settings.min_width,true) && min_popbox_width < self.settings.min_width && self.settings.min_width < max_popbox_width) {
+                    min_popbox_width = self.settings.min_width;
+                }
+                if (_static.isNumber(self.settings.min_height,true) && min_popbox_height > self.settings.min_height) {
+                    min_popbox_height = self.settings.min_height;
                 }
                 self.elements.$popbox_wrapper.css({
                     'position':'absolute',
@@ -1067,7 +1073,9 @@
                     'top':'0px',
                     'left':'0px',
                     'width':'auto',
-                    'height':'auto'
+                    'height':'auto',
+                    'min-width':min_popbox_width+'px',
+                    'min-height':min_popbox_height+'px'
                 });
 
                 new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
@@ -1117,11 +1125,14 @@
                     'top':'',
                     'left':'',
                     'width':'',
-                    'height':''
+                    'height':'',
+                    'min-width':'',
+                    'min-height':''
                 });
 
                 if (animate) {
-                    _static.offTransitionEnd(self.elements.$popbox_popup);
+                    _static.clearTransition(self.elements.$popbox_bottom_push);
+                    _static.clearTransition(self.elements.$popbox_popup);
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
@@ -1169,14 +1180,14 @@
             self._private.checkImagesLoaded();
 
             if (self.settings.wait_for_images) {
-                console.log(self.properties.content_image_cache_pending);
+                //console.log(self.properties.content_image_cache_pending);
                 if (self.properties.content_image_cache_pending > 0) {
                     self.showLoading(function(){
                         adjust_elements(true,false);
                     });
                 }
                 else if (!animate) {
-                    adjust_elements(animate,true);
+                    adjust_elements(false,true);
                 }
                 else {
                     self.showLoading(function(){
@@ -1192,25 +1203,25 @@
 
     Popbox.prototype.showLoading = function(ready){
         var self = this;
-        console.log("SHOW LOADING");
-        console.trace();
+        //console.log("SHOW LOADING");
+        //console.trace();
         if (self.isCreated()) {
             if (self.isLoading()){
-                console.log("nooo");
+                //console.log("nooo");
                 if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
             if (self.isOpen()) {
-                console.log("yes");
-                _static.offTransitionEnd(self.elements.$popbox_loading);
-                _static.offTransitionEnd(self.elements.$popbox_wrapper);
+                //console.log("yes");
+                _static.clearTransition(self.elements.$popbox_loading);
+                _static.clearTransition(self.elements.$popbox_wrapper);
                 _static.transition(
                     self.elements.$popbox_wrapper,
                     {'opacity':'0'},
                     _speeds.fast,
                     'linear',
                     function(){
-                        console.log("next yes");
+                        //console.log("next yes");
                         self.elements.$popbox_wrapper.css({
                             'visibility':'hidden'
                         });
@@ -1224,7 +1235,7 @@
                             _speeds.fast,
                             'linear',
                             function(){
-                                console.log("final yes");
+                                //console.log("final yes");
                                 if (_static.isFunction(ready)) ready();
                             }
                         );
@@ -1249,26 +1260,26 @@
 
     Popbox.prototype.showContent = function(ready){
         var self = this;
-        console.log("SHOW CONTENT");
-        console.trace();
+        //console.log("SHOW CONTENT");
+        //console.trace();
         if (self.isCreated()) {
             if (!self.isLoading()){
-                console.log("content already shown");
+                //console.log("content already shown");
                 if (!self.elements.$popbox_popup.hasClass('popbox-animating') && !self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
 
             if (self.isOpen()) {
-                console.log(self.elements.$popbox_loading.css('opacity'));
-                _static.offTransitionEnd(self.elements.$popbox_loading);
-                _static.offTransitionEnd(self.elements.$popbox_wrapper);
+                //console.log(self.elements.$popbox_loading.css('opacity'));
+                _static.clearTransition(self.elements.$popbox_loading);
+                _static.clearTransition(self.elements.$popbox_wrapper);
                 _static.transition(
                     self.elements.$popbox_loading,
                     {'opacity':'0'},
                     _speeds.fast,
                     'linear',
                     function(){
-                        console.log("show content 1");
+                        //console.log("show content 1");
                         self.elements.$popbox_loading.css({
                             'display':'none'
                         });
