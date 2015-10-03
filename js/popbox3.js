@@ -1,6 +1,7 @@
 (function($,window){
 
     var $window = $(window),
+        $html = $('html'),
         $body = $('body'),
         _event_namespace = 'Popbox',
         _next_instance_id = 0,
@@ -206,10 +207,10 @@
         return results;
     };
     _static.elementPaddingWidth = function($object,include_margin) {
-        return ($object && $object.length) ? $object.outerWidth(!!_static.param(include_margin,false))-_static.getTrueWidth($object) : 0;
+        return ($object && $object.length) ? $object.outerWidth(!!_static.param(include_margin,false))-$object.width() : 0;
     };
     _static.elementPaddingHeight = function($object,include_margin) {
-        return ($object && $object.length) ? $object.outerHeight(!!_static.param(include_margin,false))-_static.getTrueHeight($object) : 0;
+        return ($object && $object.length) ? $object.outerHeight(!!_static.param(include_margin,false))-$object.height() : 0;
     };
     _static.transition = function($object,properties,duration,easing,complete){
         properties = _static.param(properties,{});
@@ -253,23 +254,11 @@
                         new_property_val = Math.round(new_property_val);
                     }
 
-                    if ($object.hasClass('popbox-loading')) {
-                        //console.log("---");
-                        //console.log(cur_property_val);
-                        //console.log(_static.isNumber(cur_property_val));
-                        //console.log("current "+property+" "+cur_property_val);
-                        //console.log("new "+property+" "+new_property_val);
-                        //console.log($object.css(property));
-                        //console.log(properties[property]);
-                        //console.log("---");
-                    }
                     if (cur_property_val != new_property_val) {
                         property_difference = true;
                     }
                 }
             }
-
-            //TODO need to split the transition string on commas excluding commas inside brackets like for cubic bezier
 
             var existing_transitions = _static.splitOutside(',',$object.css('transition'),'(',')');
             if ($object.hasClass('popbox-popup')) {
@@ -308,10 +297,6 @@
             //console.log(property_difference);
             if (transitions.length && property_difference) {
 
-                //var already_animating = $object.hasClass('popbox-animating');
-
-                //TODO transition end is being executed immediately after transition start, look at third example link, loading shrinks immediately, why?
-                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 1 ==================");
                 $object.off('.popbox_auto_transition_end');
 
                 // add function to list
@@ -322,12 +307,8 @@
                     $object.data('popbox-transition-end-functions',pre_functions);
                 }
 
-                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 2 ==================");
                 $object.css('transition',transitions.join(', '));
-                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 3 ==================");
                 $object.css(properties).addClass('popbox-animating');
-                //$object.addClass('popbox-animating');
-                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 4 ==================");
 
                 setTimeout(function(){
                     $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
@@ -354,24 +335,6 @@
                         }
                     });
                 },0);
-
-                if ($object.hasClass('popbox-loading')) {
-                    //console.log("popbox animation: ");
-                    //console.log($object.attr('style'));
-                    //console.log(complete);
-                }
-
-                /*setTimeout(function(){
-                 $object.css(properties);
-
-                 //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
-                 //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                 },1);*/
-
-                if ($object.hasClass('popbox-popup')) {
-                    console.log("after new properties added");
-                    console.log($object.css('transition'));
-                }
 
                 transitioning = true;
             }
@@ -432,7 +395,9 @@
             image_cache:{},
             interface_image_cache_pending:0,
             content_image_cache_pending:0,
-            instance_id:self.properties.instance_id
+            instance_id:self.properties.instance_id,
+            last_html_overflow:false,
+            last_html_margin_right:false
         };
         self.elements = {
             $popbox:null,
@@ -553,7 +518,6 @@
         if (self.elements.$popbox_overlay) {
 
             if (self.elements.$popbox_overlay.data('is_open') === true) {
-                //self.elements.$popbox_overlay.css({'opacity':'1'});
                 _static.clearTransition(self.elements.$popbox_overlay);
                 _static.transition(
                     self.elements.$popbox_overlay,
@@ -689,12 +653,10 @@
             }
 
             // checks
-            if (self.settings.title) {
-                self.elements.$popbox_title.css('display','block');
-            }
-            else {
-                self.elements.$popbox_title.css('display','none');
-            }
+            if (self.settings.close === false) self.elements.$popbox_close.css('display','none');
+            else self.elements.$popbox_close.css('display','block');
+            if (self.settings.title === false) self.elements.$popbox_title.css('display','none');
+            else self.elements.$popbox_title.css('display','block');
         }
     };
 
@@ -720,8 +682,8 @@
 
     Popbox.prototype.version = '3.0.0';
     Popbox.prototype.default_settings = {
-        //width:false, //auto
-        //height:false, //auto
+        width:false, // number = pixels to set, anything else is ignored
+        height:false, // number = pixels to set, anything else is ignored
         min_width:100, // false = none, true = 100%, number = pixels
         min_height:100, // false = none, true = 100%, number = pixels
         max_width:false, // false|true = 100%, number = pixels
@@ -743,16 +705,19 @@
         close_overlay_animation_speed:null,
         close_overlay_animation_ease:null,
         content:'',
-        close:'X', // TODO: if set to FALSE, set element to display none
-        title:'', // TODO: if set to FALSE, set element to display none
+        close:'X',
+        title:false,
+        hide_page_scroll:true,
+        hide_page_scroll_space:true,
         loading:'Loading',
         href:'', //can be used for none-anchor elements to grab content
+        mobile_fallback:false, //TODO needs doing (will be used if the website has forms in popboxes and is shown on mobile) (if true, use position absolute instead of fixed for popbox - doesn't matter about overlay)
         add_class:'',
         aspect_fit:false, // recommended for images and iframes - not for content
         cache:false,
         wait_for_images:true,
         width_margin:0.1,
-        height_margin:0.1,
+        height_margin:0.06,
         mode:false, //normal, can be 'gallery' if extension is available
         on_open:false,
         after_open:false,
@@ -789,7 +754,7 @@
             'class':'popbox',
             'css':{
                 'display':'none',
-                'position':'fixed',
+                'position':'fixed', // TODO need to support position absolute
                 'width':'100%',
                 'height':'100%',
                 'top':'0px',
@@ -940,11 +905,28 @@
                 self.create();
             }
             else {
-                // is this necessary?
                 self._private.applyDomSettings();
             }
 
             if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
+
+            // html body scrollbar
+            if (self.settings.hide_page_scroll) {
+                var old_body_width = $body.width();
+                if (self.properties.last_html_overflow === false) {
+                    self.properties.last_html_overflow = _static.getInlineStyle($html,'overflow');
+                }
+                $html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
+                var new_body_width = $body.width();
+                if (self.settings.hide_page_scroll_space) {
+                    if (self.properties.last_html_margin_right === false) {
+                        self.properties.last_html_margin_right = _static.getInlineStyle($html,'margin-right');
+                    }
+                    if (new_body_width > old_body_width) {
+                        $html.css('margin-right',(new_body_width-old_body_width)+'px');
+                    }
+                }
+            }
 
             // show elements
             self._private.openOverlay();
@@ -1013,6 +995,13 @@
                     self.elements.$popbox.css({
                         'display':'none'
                     });
+
+                    if (self.properties.last_html_overflow !== false) $html.css('overflow',self.properties.last_html_overflow);
+                    if (self.properties.last_html_margin_right !== false) $html.css('margin-right',self.properties.last_html_margin_right);
+                    self.properties.last_html_overflow = false;
+                    self.properties.last_html_margin_right = false;
+                    $html.removeClass('popbox-hide-page-scroll');
+
                     if (destroy || !self.settings.cache) {
                         self.destroy();
                     }
@@ -1025,17 +1014,17 @@
                             self.properties.disable_background_click_timer = false;
                         }
                     }
+
+                    if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
                 }
             );
             self._private.closeOverlay();
-            if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
         }
     };
 
     Popbox.prototype.adjust = function(animate){
         var self = this;
-        // TODO: ADJUST and CHECKIMAGESLOADED need rewriting to work coherently. Remove adjust calls from checkImagesLoaded. Check the cache properties in this function instead.
-        // TODO: whenever you do an adjust, always check all the images to see if they are complete or have a natural width set.
+
         // initiate another adjust when each image loads (use a 100ms wait in case images load in one after each other quickly)
         animate = _static.param(animate,true);
         if (self.isCreated()) {
@@ -1053,11 +1042,15 @@
                     max_popbox_height = ((self.settings.height_margin > 0) ? window_height-(window_height*(self.settings.height_margin*2)) : window_height)-popbox_height_padding,
                     min_popbox_width = 0,
                     min_popbox_height = 0,
+                    set_popbox_width = (_static.isNumber(self.settings.width)) ? self.settings.width+'px' : 'auto',
+                    set_popbox_height = (_static.isNumber(self.settings.height)) ? self.settings.height+'px' : 'auto',
                     max_popbox_screen_height = max_popbox_height,
                     new_popbox_width,
                     new_popbox_height,
                     new_popbox_top,
                     new_popbox_left;
+                console.log("POPBOX WIDTH PADDING");
+                console.log(popbox_width_padding);
                 //console.log("BAAAAAAAAAAAAAAAAA: "+self.elements.$popbox_popup.attr('style'));
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
@@ -1083,12 +1076,13 @@
                     'position':'absolute',
                     'top':'0px',
                     'left':'0px',
-                    'width':'auto',
-                    'height':'auto',
+                    'width':set_popbox_width,
+                    'height':set_popbox_height,
                     'min-width':min_popbox_width+'px',
                     'min-height':min_popbox_height+'px'
                 });
 
+                // not sure why we are using get true width? could just use outerWidth(true)?
                 new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
                 new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
                 //console.log("MOOOOOO: "+new_popbox_width);
@@ -1190,24 +1184,18 @@
 
             self._private.checkImagesLoaded();
 
-            if (self.settings.wait_for_images) {
-                //console.log(self.properties.content_image_cache_pending);
-                if (self.properties.content_image_cache_pending > 0) {
-                    self.showLoading(function(){
-                        adjust_elements(true,false);
-                    });
-                }
-                else if (!animate) {
-                    adjust_elements(false,true);
-                }
-                else {
-                    self.showLoading(function(){
-                        adjust_elements(true,true);
-                    });
-                }
+            if (self.settings.wait_for_images && self.properties.content_image_cache_pending > 0) {
+                self.showLoading(function(){
+                    adjust_elements(true,false);
+                });
+            }
+            else if (!animate) {
+                adjust_elements(false,true);
             }
             else {
-
+                self.showLoading(function(){
+                    adjust_elements(true,true);
+                });
             }
         }
     };
