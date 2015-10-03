@@ -307,6 +307,8 @@
 
                 //var already_animating = $object.hasClass('popbox-animating');
 
+                //TODO transition end is being executed immediately after transition start, look at third example link, loading shrinks immediately, why?
+
                 $object.off('.popbox_auto_transition_end');
                 $object.css('transition',transitions.join(', '));
 
