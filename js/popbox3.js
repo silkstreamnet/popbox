@@ -278,6 +278,9 @@
                 console.log($object.attr('class'));
                 console.log($object.css('transition'));
                 console.log(existing_transitions);
+                console.log($object.attr('style'));
+                console.log(properties);
+                console.log();
             }
             for (var j=0; j<existing_transitions.length; j++) {
                 var existing_transition = _static.trim(existing_transitions[j]),
@@ -308,9 +311,8 @@
                 //var already_animating = $object.hasClass('popbox-animating');
 
                 //TODO transition end is being executed immediately after transition start, look at third example link, loading shrinks immediately, why?
-
+                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 1 ==================");
                 $object.off('.popbox_auto_transition_end');
-                $object.css('transition',transitions.join(', '));
 
                 // add function to list
                 var pre_functions = $object.data('popbox-transition-end-functions');
@@ -320,31 +322,38 @@
                     $object.data('popbox-transition-end-functions',pre_functions);
                 }
 
-                $object.on(_support.transition_end+'.popbox_auto_transition_end',function(){
-                    if ($object.hasClass('popbox-popup')) {
-                        console.log("MOO ----------- TRANSITION END");
-                        console.log($object.attr('class'));
-                        console.log($object.css('transition'));
-                        console.trace();
-                    }
-                    //console.log($object.data('popbox-transition-end-functions')[0]);
-                    //console.trace();
+                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 2 ==================");
+                $object.css('transition',transitions.join(', '));
+                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 3 ==================");
+                $object.css(properties).addClass('popbox-animating');
+                //$object.addClass('popbox-animating');
+                if ($object.hasClass('popbox-popup'))console.log("WAHAHAHAHA - 4 ==================");
 
-                    $object.off('.popbox_auto_transition_end');
-                    $object.css('transition','').removeClass('popbox-animating');
-
-                    var live_functions = $object.data('popbox-transition-end-functions');
-                    if ($object.hasClass('popbox-popup')) console.dir(live_functions);
-                    if (live_functions) {
-                        for (var i=0; i<live_functions.length; i++) {
-                            if (_static.isFunction(live_functions[i])) live_functions[i]();
+                setTimeout(function(){
+                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                        if ($object.hasClass('popbox-popup')) {
+                            console.log("MOO ----------- TRANSITION END");
+                            console.log($object.attr('class'));
+                            console.log($object.css('transition'));
+                            console.log($object.attr('style'));
+                            console.trace();
                         }
-                    }
-                });
+                        //console.log($object.data('popbox-transition-end-functions')[0]);
+                        //console.trace();
 
-                //$object.css(properties).addClass('popbox-animating');
-                $object.addClass('popbox-animating');
+                        $object.off('.popbox_auto_transition_end');
+                        $object.css('transition','').removeClass('popbox-animating');
+                        //$object.removeClass('popbox-animating');
 
+                        var live_functions = $object.data('popbox-transition-end-functions');
+                        if ($object.hasClass('popbox-popup')) console.dir(live_functions);
+                        if (live_functions) {
+                            for (var i=0; i<live_functions.length; i++) {
+                                if (_static.isFunction(live_functions[i])) live_functions[i]();
+                            }
+                        }
+                    });
+                },0);
 
                 if ($object.hasClass('popbox-loading')) {
                     //console.log("popbox animation: ");
@@ -352,12 +361,12 @@
                     //console.log(complete);
                 }
 
-                setTimeout(function(){
+                /*setTimeout(function(){
                  $object.css(properties);
 
                  //TODO: is this too slow? is the adjust being kicked in before this and reverting opacity to 0?
                  //$object.each(function(){this.offsetWidth = this.offsetWidth;}); // repaint // commented out because repaint probably occurs due to property evaluation in loop above
-                 },1);
+                 },1);*/
 
                 if ($object.hasClass('popbox-popup')) {
                     console.log("after new properties added");
