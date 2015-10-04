@@ -282,12 +282,14 @@
                 }
             }
 
+            var pre_functions = $object.data('popbox-transition-end-functions');
+            var already_animating = $object.hasClass('popbox-animating');
+
             if (transitions.length && property_difference) {
 
                 $object.off('.popbox_auto_transition_end');
 
                 // add function to list
-                var pre_functions = $object.data('popbox-transition-end-functions');
                 if (_static.isFunction(complete)) {
                     if (pre_functions) pre_functions.push(complete);
                     else pre_functions = [complete];
@@ -298,7 +300,13 @@
                 $object.css(properties).addClass('popbox-animating');
 
                 setTimeout(function(){
+                    var lazy_timeout_catchup = false;
                     $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                        if (lazy_timeout_catchup !== false) {
+                            clearTimeout(lazy_timeout_catchup);
+                            lazy_timeout_catchup = false;
+                        }
+
                         $object.off('.popbox_auto_transition_end');
                         $object.css('transition','').removeClass('popbox-animating');
 
@@ -308,7 +316,10 @@
                                 if (_static.isFunction(live_functions[i])) live_functions[i]();
                             }
                         }
+
+                        _static.clearTransition($object);
                     });
+                    lazy_timeout_catchup = setTimeout(function(){$object.trigger('.popbox_auto_transition_end');lazy_timeout_catchup=false;},duration+100);
                 },0);
 
                 transitioning = true;
@@ -319,8 +330,18 @@
 
             $object.css(properties);
 
-            if (_static.isFunction(complete)) {
-                complete();
+            if (already_animating) {
+                // add function to list
+                if (_static.isFunction(complete)) {
+                    if (pre_functions) pre_functions.push(complete);
+                    else pre_functions = [complete];
+                    $object.data('popbox-transition-end-functions',pre_functions);
+                }
+            }
+            else {
+                if (_static.isFunction(complete)) {
+                    setTimeout(function(){complete();},0);
+                }
             }
         }
     };
@@ -800,16 +821,26 @@
             return false;
         });
 
+        var _complex_close_namespace = 'Popbox_complex_close';
         self.elements.$popbox.on('mousedown.'+_event_namespace,function(e1){
             if ($(e1.target).closest('.popbox-popup').length === 0) {
                 e1.preventDefault();
-                self.elements.$popbox.off('mouseup.'+_event_namespace).on('mouseup.'+_event_namespace,function(e2){
-                    self.elements.$popbox.off('mouseup.'+_event_namespace);
+                self.elements.$popbox.off('mouseup.'+_complex_close_namespace).on('mouseup.'+_complex_close_namespace,function(e2){
+                    self.elements.$popbox.off('.'+_complex_close_namespace);
                     if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
                         e2.preventDefault();
                         self.close();
                         return false;
                     }
+                });
+                self.elements.$popbox.off('mousemove.'+_complex_close_namespace).on('mousemove.'+_complex_close_namespace,function(e3){
+                    // check limit box
+                    if (e3.pageX < e1.pageX-5 || e3.pageX > e1.pageX+5 || e3.pageY < e1.pageY-5 || e3.pageY > e1.pageY+5) {
+                        self.elements.$popbox.off('.'+_complex_close_namespace);
+                    }
+                });
+                self.elements.$popbox.off('scroll.'+_complex_close_namespace).on('scroll.'+_complex_close_namespace,function(){
+                    self.elements.$popbox.off('.'+_complex_close_namespace);
                 });
                 return false;
             }
@@ -1000,8 +1031,8 @@
                     if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
                 }
             );
-            self._private.closeOverlay();
         }
+        self._private.closeOverlay();
     };
 
     Popbox.prototype.adjust = function(animate){
