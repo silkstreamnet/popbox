@@ -301,7 +301,8 @@
 
                 setTimeout(function(){
                     var lazy_timeout_catchup = false;
-                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(){
+                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(e){
+                        e.stopPropagation();
                         if (lazy_timeout_catchup !== false) {
                             clearTimeout(lazy_timeout_catchup);
                             lazy_timeout_catchup = false;
