@@ -5,13 +5,14 @@
         $body = $('body'),
         _event_namespace = 'Popbox',
         _next_instance_id = 0,
+        _next_transition_id = 0,
         _instances = {length:0},
         _static = {},
         _private = function(){},
         _support = {},
         _speeds = {
             '_default':300,
-            'fast':300,
+            'fast':2000,
             'medium':600,
             'slow':1000
         },
@@ -212,15 +213,19 @@
     _static.elementPaddingHeight = function($object,include_margin) {
         return ($object && $object.length) ? $object.outerHeight(!!_static.param(include_margin,false))-$object.height() : 0;
     };
-    _static.transition = function($object,properties,duration,easing,complete){
+    _static.transition = function($object,properties,duration,easing,complete,name){
         properties = _static.param(properties,{});
         duration = _static.param(duration,_speeds._default);
         easing = _static.param(easing,_eases._default);
+        name = (_static.isString(name,true)) ? name : false;
 
         var property,
             transitions = [],
             property_difference = false,
-            transitioning = false;
+            transitioning = false,
+            this_transition_id = _next_transition_id;
+
+        _next_transition_id++;
 
         if (_support.transition_end && duration > 25) {
 
@@ -289,35 +294,62 @@
                 $object.off('.popbox_auto_transition_end');
 
                 // add function to list
-                _static.transitionAddCallback($object,complete);
+                _static.transitionAddCallback($object,complete,name);
+                // if the event final is the same as the creator, FOR SPARTA
 
                 $object.css('transition',transitions.join(', '));
                 $object.css(properties).addClass('popbox-animating');
+                $object.data('popbox-transition-id',this_transition_id);
+
+                if ($object.hasClass('popbox-popup')) console.log("add: ",$object.attr('class'));
 
                 setTimeout(function(){
                     var lazy_timeout_catchup = false;
                     $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(e){
                         e.stopPropagation();
-                        if (lazy_timeout_catchup !== false) {
-                            clearTimeout(lazy_timeout_catchup);
-                            lazy_timeout_catchup = false;
+                        if ($object.hasClass('popbox-popup')) {
+                            console.log(this_transition_id);
+                            console.log($object.data('popbox-transition-id'));
                         }
-
-                        $object.off('.popbox_auto_transition_end');
-                        $object.css('transition','').removeClass('popbox-animating');
-
-                        var live_functions = $object.data('popbox-transition-end-functions');
-                        if (live_functions) {
-                            for (var i=0; i<live_functions.length; i++) {
-                                if ($object.hasClass('popbox-popup')) console.log(live_functions[i]);
-                                if (_static.isFunction(live_functions[i])) live_functions[i]();
+                        if ($object.data('popbox-transition-id') === this_transition_id) {
+                            if (lazy_timeout_catchup !== false) {
+                                clearTimeout(lazy_timeout_catchup);
+                                lazy_timeout_catchup = false;
                             }
-                        }
 
-                        _static.clearTransition($object);
+                            if ($object.hasClass('popbox-popup')) {
+                                console.log($object.css('transition'));
+                                console.log("haaaaaaaaaaaaaaaaaaaaaaa");
+                            }
+
+                            $object.off('.popbox_auto_transition_end');
+                            $object.css('transition','').removeClass('popbox-animating');
+                            if ($object.hasClass('popbox-popup')) {
+                                console.log("haaaaaaaaa33333333");
+                            }
+                            //TODO: WHAT THE HELL IS GOING ON HERE, ALL OF THE ABOVE IS SKIPPED?!?!?!?!?
+                            var live_functions = $object.data('popbox-transition-end-functions');
+                            if (live_functions) {
+                                for (var functions_name in live_functions) {
+                                    if (live_functions.hasOwnProperty(functions_name)) {
+                                        for (var i=0; i<live_functions[functions_name].length; i++) {
+                                            if ($object.hasClass('popbox-popup')) console.log(live_functions[functions_name][i]);
+                                            if (_static.isFunction(live_functions[functions_name][i])) live_functions[functions_name][i]();
+                                        }
+                                    }
+                                }
+                            }
+                            if ($object.hasClass('popbox-popup')) {
+                                console.log("haaaaaaaaa22222");
+                            }
+                            $object.data('popbox-transition-id',false);
+                            console.log("MAAAAGGGIIIIC",$object.attr('class'));
+                            console.log($object.hasClass('popbox-popup'));
+                            _static.clearTransition($object);
+                        }
                     });
-                    lazy_timeout_catchup = setTimeout(function(){$object.trigger('.popbox_auto_transition_end');lazy_timeout_catchup=false;},duration+100);
-                },0);
+                    //lazy_timeout_catchup = setTimeout(function(){$object.trigger('.popbox_auto_transition_end');lazy_timeout_catchup=false;},duration+100);
+                },50);
 
                 transitioning = true;
             }
@@ -329,7 +361,7 @@
 
             if (already_animating) {
                 // add function to list
-                _static.transitionAddCallback($object,complete);
+                _static.transitionAddCallback($object,complete,name);
             }
             else {
                 if (_static.isFunction(complete)) {
@@ -338,28 +370,50 @@
             }
         }
     };
-    _static.transitionAddCallback = function($object,callback) {
+    _static.transitionAddCallback = function($object,callback,name) {
+        name = (_static.isString(name,true)) ? name : '_default';
         if ($object.length && _static.isFunction(callback)) {
-            var pre_functions = $object.data('popbox-transition-end-functions');
+            var pre = $object.data('popbox-transition-end-functions');
             if ($object.hasClass('popbox-popup') && $object.hasClass('popbox-animating')) {
                 console.log("add: ",$object.attr('class'));
                 console.log("add: ",$object.css('transition'));
                 console.trace();
-                console.log("add: ",pre_functions);
+                console.log("add: ",name);
+                console.log("add: ",pre);
             }
-            if (pre_functions) pre_functions.push(callback);
-            else pre_functions = [callback];
+            if (pre && pre[name]) {
+                pre[name].push(callback);
+            }
+            else if (pre) {
+                pre[name] = [callback];
+            }
+            else {
+                pre = {};
+                pre[name] = [callback];
+            }
             if ($object.hasClass('popbox-popup') && $object.hasClass('popbox-animating')) console.log(callback);
-            $object.data('popbox-transition-end-functions',pre_functions);
+            $object.data('popbox-transition-end-functions',pre);
         }
     };
-    _static.clearTransition = function($object) {
+    _static.clearTransition = function($object,name) {
+        name = (_static.isString(name,true)) ? name : false;
+        if (name) {
+            var pre = $object.data('popbox-transition-end-functions');
+            if (pre && pre[name]) {
+                console.log(pre[name]);
+                delete pre[name];
+                $object.data('popbox-transition-end-functions',pre);
+            }
+        }
+        else {
+            $object.data('popbox-transition-end-functions',false);
+        }
         if ($object.hasClass('popbox-popup')) {
             console.log("clear: ",$object.attr('class'));
             console.trace();
-            console.log("clear: ",$object.data('popbox-transition-end-functions'));
+            console.log("clear: ",name);
+            console.dir($object.data('popbox-transition-end-functions'));
         }
-        $object.data('popbox-transition-end-functions',false);
     };
     _static.getTrueWidth = function($object) {
         return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
@@ -607,7 +661,8 @@
                                 if ($image.closest(self.elements.$popbox_content).length > 0) {
                                     self.properties.content_image_cache_pending--;
                                     if (self.properties.content_image_cache_pending == 0) {
-                                        self.adjust(true);
+                                        if (self.isChangingState()) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);},'test');
+                                        else self.adjust(true);
                                     }
                                 }
                                 else {
@@ -977,6 +1032,7 @@
                 self._private.getAnimationSpeed('open'),
                 self._private.getAnimationEase('open'),
                 function(){
+                    console.log("test");
                     self.properties.is_changing_state = false;
                 }
             );
@@ -1173,8 +1229,9 @@
 
                 if (animate) {
                     _static.clearTransition(self.elements.$popbox_bottom_push);
-                    _static.clearTransition(self.elements.$popbox_popup);
+                    _static.clearTransition(self.elements.$popbox_popup,'adjust');
 console.log("actual adjust");
+                    console.trace();
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
@@ -1200,7 +1257,8 @@ console.log("actual adjust");
                             /*self.elements.$popbox_bottom_push.css({
                                 'top':Math.floor(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-2)+'px'
                             });*/
-                        }
+                        },
+                        'adjust'
                     );
                 }
                 else {
