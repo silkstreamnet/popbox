@@ -55,7 +55,7 @@
         cache:true,
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });
-console.log($('click-me-1').css('transform'));
+
     $('.click-me-1').on('click',function(e){
         e.preventDefault();
         popbox1.update({
@@ -79,6 +79,7 @@ console.log($('click-me-1').css('transform'));
         content:'<p>test masses of content</p><img src="images/test-image-2.jpg" />',
         title:'test 2',
         animation:'zoom',
+        max_height:true,
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });
 
@@ -94,7 +95,8 @@ console.log($('click-me-1').css('transform'));
         content:'<p>test more content</p>',
         animation:'zoom',
         cache:true,
-        animation_speed:1200,
+        min_width:100,
+        min_height:100,
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });
 
@@ -107,7 +109,8 @@ console.log($('click-me-1').css('transform'));
     });
 
     var popbox4 = new $.Popbox({
-        content:'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p><img src="images/test-image-2.jpg" /></p>'
+        content:'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p><img src="images/test-image-2.jpg" /></p>',
+        max_height:true
     });
 
     $('.click-me-4').on('click',function(e){
@@ -122,8 +125,8 @@ console.log($('click-me-1').css('transform'));
         content:long_text,
         title:'chicken',
         animation:'zoom',
-        animation_speed:800,
-        overlay_animation_speed:800,
+        animation_speed:500,
+        overlay_animation_speed:500,
         cache:false,
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });

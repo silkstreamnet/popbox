@@ -12,7 +12,7 @@
         _support = {},
         _speeds = {
             '_default':300,
-            'fast':2000,
+            'fast':300,
             'medium':600,
             'slow':1000
         },
@@ -324,28 +324,22 @@
 
                             $object.off('.popbox_auto_transition_end');
                             $object.css('transition','').removeClass('popbox-animating');
-                            if ($object.hasClass('popbox-popup')) {
-                                console.log("haaaaaaaaa33333333");
-                            }
-                            //TODO: WHAT THE HELL IS GOING ON HERE, ALL OF THE ABOVE IS SKIPPED?!?!?!?!?
+
                             var live_functions = $object.data('popbox-transition-end-functions');
+                            if (live_functions) {
+                                live_functions = $.extend({},live_functions);
+                                $object.data('popbox-transition-id',false);
+                                _static.clearTransition($object);
+                            }
                             if (live_functions) {
                                 for (var functions_name in live_functions) {
                                     if (live_functions.hasOwnProperty(functions_name)) {
                                         for (var i=0; i<live_functions[functions_name].length; i++) {
-                                            if ($object.hasClass('popbox-popup')) console.log(live_functions[functions_name][i]);
                                             if (_static.isFunction(live_functions[functions_name][i])) live_functions[functions_name][i]();
                                         }
                                     }
                                 }
                             }
-                            if ($object.hasClass('popbox-popup')) {
-                                console.log("haaaaaaaaa22222");
-                            }
-                            $object.data('popbox-transition-id',false);
-                            console.log("MAAAAGGGIIIIC",$object.attr('class'));
-                            console.log($object.hasClass('popbox-popup'));
-                            _static.clearTransition($object);
                         }
                     });
                     //lazy_timeout_catchup = setTimeout(function(){$object.trigger('.popbox_auto_transition_end');lazy_timeout_catchup=false;},duration+100);
@@ -661,7 +655,7 @@
                                 if ($image.closest(self.elements.$popbox_content).length > 0) {
                                     self.properties.content_image_cache_pending--;
                                     if (self.properties.content_image_cache_pending == 0) {
-                                        if (self.isChangingState()) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);},'test');
+                                        if (self.isChangingState() && self.elements.$popbox_popup.hasClass('popbox-animating')) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);});
                                         else self.adjust(true);
                                     }
                                 }
@@ -1141,13 +1135,11 @@
                 if (_static.isNumber(self.settings.max_height,true) && max_popbox_height > self.settings.max_height) {
                     max_popbox_height = self.settings.max_height;
                 }
-                if (!self.settings.aspect_fit) {
-                    if (_static.isNumber(self.settings.min_width,true) && min_popbox_width < self.settings.min_width && self.settings.min_width < max_popbox_width) {
-                        min_popbox_width = self.settings.min_width;
-                    }
-                    if (_static.isNumber(self.settings.min_height,true) && min_popbox_height > self.settings.min_height) {
-                        min_popbox_height = self.settings.min_height;
-                    }
+                if (_static.isNumber(self.settings.min_width,true) && min_popbox_width < self.settings.min_width && self.settings.min_width < max_popbox_width) {
+                    min_popbox_width = self.settings.min_width;
+                }
+                if (_static.isNumber(self.settings.min_height,true) && min_popbox_height > self.settings.min_height) {
+                    min_popbox_height = self.settings.min_height;
                 }
 
                 self.elements.$popbox_wrapper.css({
@@ -1168,12 +1160,11 @@
                     'min-height':min_popbox_height+'px'
                 });
 
-                // TODO transform scale is causing the problem, need to evade it!
                 // not sure why we are using get true width? could just use outerWidth(true)? - reason why is that it gives a sub pixel number
-                //new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
-                //new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
-                new_popbox_width = self.elements.$popbox_container.outerWidth(true);
-                new_popbox_height = self.elements.$popbox_container.outerHeight(true);
+                new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
+                new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
+                //new_popbox_width = self.elements.$popbox_container.outerWidth(true);
+                //new_popbox_height = self.elements.$popbox_container.outerHeight(true);
 
                 if (self.settings.aspect_fit) {
                     if (new_popbox_width > max_popbox_width) {
@@ -1185,29 +1176,21 @@
                         new_popbox_height = max_popbox_height;
                     }
                 }
-                else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
+                if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
                     // apply inner overflow scroll
                     // TODO: please TEST
                     new_popbox_height = max_popbox_height;
-                    self.elements.$popbox_wrapper.css({
+                    self.elements.$popbox_content.css({
                         'height':new_popbox_height+'px',
                         'overflow-y':'scroll'
                     });
                 }
-
-                new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
-                new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
-
-                // offset adjustment checks
-                if (new_popbox_height > max_popbox_screen_height) {
-                    new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
+                else {
+                    self.elements.$popbox_content.css({
+                        'height':'',
+                        'overflow-y':''
+                    });
                 }
-
-                // round numbers
-                //new_popbox_width = Math.round(new_popbox_width*100)/100;
-                //new_popbox_height = Math.round(new_popbox_height*100)/100;
-                //new_popbox_left = Math.round(new_popbox_left*100)/100;
-                //new_popbox_top = Math.round(new_popbox_top*100)/100;
 
                 // cleanup
                 self.elements.$popbox_wrapper.css({
@@ -1217,6 +1200,7 @@
                     'width':'',
                     'height':''
                 });
+                // cleanup
                 self.elements.$popbox_container.css({
                     'position':'',
                     'top':'',
@@ -1227,11 +1211,18 @@
                     'min-height':''
                 });
 
+                new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
+                new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
+
+                // offset adjustment checks
+                if (new_popbox_height > max_popbox_screen_height) {
+                    new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
+                }
+
                 if (animate) {
-                    _static.clearTransition(self.elements.$popbox_bottom_push);
+                    //_static.clearTransition(self.elements.$popbox_bottom_push);
                     _static.clearTransition(self.elements.$popbox_popup,'adjust');
-console.log("actual adjust");
-                    console.trace();
+
                     _static.transition(
                         self.elements.$popbox_bottom_push,
                         {
