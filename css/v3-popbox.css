@@ -3,6 +3,8 @@
  *	v3.00
  */
 
+
+/*** Popbox Customise ***/
 .popbox-overlay {
     cursor:default;
     background:rgba(0,0,0,0.3);
@@ -17,21 +19,10 @@
     z-index:9991;
 }
 
-.popbox img {
-    max-width:100%;
-    height:auto;
-    max-height:100%;
-}
-
-.popbox iframe, .popbox object, .popbox embed {
-    max-width:100%;
-}
-
 .popbox-popup {
     background:#fff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     z-index:9992;
-    padding:30px;
 }
 
 .popbox-loading {
@@ -50,26 +41,46 @@
 }
 
 .popbox .popbox-close {
-    padding:15px;
-    background:#ccc;
+    padding:10px;
+    margin:-10px 0 0 0;
+    background:transparent;
     display:block;
     position:absolute;
     top:0;
-    right:0;
+    left:100%;
     text-decoration:none;
-    color:#000;
+    color:#555;
+    font-weight:bold;
+    font-size:1.2em;
 }
 
 .popbox .popbox-close:hover {
-    background:#bbb;
+    color:#333;
 }
 
 .popbox .popbox-title {
     padding:15px 30px;
     background:#ccc;
-    margin: -30px -30px 0 -30px;
 }
 
 .popbox .popbox-content {
-    padding:20px;
+    padding:10px;
+}
+
+
+/*** Popbox Rendering Defaults ***/
+.popbox img, .popbox iframe, .popbox object, .popbox embed {
+    width:auto;
+    max-width:100%;
+}
+
+.popbox-aspect-fit img, .popbox-aspect-fit iframe, .popbox-aspect-fit object, .popbox-aspect-fit embed {
+    height:auto;
+    max-height:100%;
+    display:block;
+}
+
+.popbox-calculating img, .popbox-calculating iframe, .popbox-calculating object, .popbox-calculating embed {
+    max-width:none;
+    max-height:none;
 }
