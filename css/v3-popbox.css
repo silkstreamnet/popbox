@@ -41,8 +41,8 @@
 }
 
 .popbox .popbox-close {
-    padding:10px;
-    margin:-10px 0 0 0;
+    padding:15px;
+    margin:0;
     background:transparent;
     display:block;
     position:absolute;
@@ -52,6 +52,7 @@
     color:#555;
     font-weight:bold;
     font-size:1.2em;
+    line-height:20px;
 }
 
 .popbox .popbox-close:hover {
@@ -59,16 +60,24 @@
 }
 
 .popbox .popbox-title {
-    padding:15px 30px;
+    padding:15px;
     background:#ccc;
+    line-height:20px;
+    font-size:1em;
 }
 
 .popbox .popbox-content {
-    padding:10px;
+    padding:15px;
 }
 
 
 /*** Popbox Rendering Defaults ***/
+.popbox, .popbox *, .popbox-overlay, .popbox-overlay * {
+    -moz-box-sizing:content-box;
+    -webkit-box-sizing:content-box;
+    box-sizing:content-box;
+}
+
 .popbox img, .popbox iframe, .popbox object, .popbox embed {
     width:auto;
     max-width:100%;
@@ -78,9 +87,4 @@
     height:auto;
     max-height:100%;
     display:block;
-}
-
-.popbox-calculating img, .popbox-calculating iframe, .popbox-calculating object, .popbox-calculating embed {
-    max-width:none;
-    max-height:none;
 }

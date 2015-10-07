@@ -1,80 +1,81 @@
 (function($,window){
 
-    var $window = $(window),
-        $html = $('html'),
-        $body = $('body'),
-        _event_namespace = 'Popbox',
-        _next_instance_id = 0,
-        _next_transition_id = 0,
-        _instances = {length:0},
-        _static = {},
-        _private = function(){},
-        _support = {},
-        _speeds = {
-            '_default':300,
-            'fast':300,
-            'medium':600,
-            'slow':1000
-        },
-        _eases = {
-            '_default':       'ease',
-            'in':             'ease-in',
-            'out':            'ease-out',
-            'in-out':         'ease-in-out',
-            'snap':           'cubic-bezier(0,1,.5,1)',
-            // Penner equations
-            'easeInCubic':    'cubic-bezier(.550,.055,.675,.190)',
-            'easeOutCubic':   'cubic-bezier(.215,.61,.355,1)',
-            'easeInOutCubic': 'cubic-bezier(.645,.045,.355,1)',
-            'easeInCirc':     'cubic-bezier(.6,.04,.98,.335)',
-            'easeOutCirc':    'cubic-bezier(.075,.82,.165,1)',
-            'easeInOutCirc':  'cubic-bezier(.785,.135,.15,.86)',
-            'easeInExpo':     'cubic-bezier(.95,.05,.795,.035)',
-            'easeOutExpo':    'cubic-bezier(.19,1,.22,1)',
-            'easeInOutExpo':  'cubic-bezier(1,0,0,1)',
-            'easeInQuad':     'cubic-bezier(.55,.085,.68,.53)',
-            'easeOutQuad':    'cubic-bezier(.25,.46,.45,.94)',
-            'easeInOutQuad':  'cubic-bezier(.455,.03,.515,.955)',
-            'easeInQuart':    'cubic-bezier(.895,.03,.685,.22)',
-            'easeOutQuart':   'cubic-bezier(.165,.84,.44,1)',
-            'easeInOutQuart': 'cubic-bezier(.77,0,.175,1)',
-            'easeInQuint':    'cubic-bezier(.755,.05,.855,.06)',
-            'easeOutQuint':   'cubic-bezier(.23,1,.32,1)',
-            'easeInOutQuint': 'cubic-bezier(.86,0,.07,1)',
-            'easeInSine':     'cubic-bezier(.47,0,.745,.715)',
-            'easeOutSine':    'cubic-bezier(.39,.575,.565,1)',
-            'easeInOutSine':  'cubic-bezier(.445,.05,.55,.95)',
-            'easeInBack':     'cubic-bezier(.6,-.28,.735,.045)',
-            'easeOutBack':    'cubic-bezier(.175, .885,.32,1.275)',
-            'easeInOutBack':  'cubic-bezier(.68,-.55,.265,1.55)'
-        },
-        transition_end_event_names = {
-            'transition':       'transitionend',
-            'MozTransition':    'transitionend',
-            'OTransition':      'oTransitionEnd',
-            'WebkitTransition': 'webkitTransitionEnd',
-            'msTransition':     'MSTransitionEnd'
-        },
-        test_div = document.createElement('div');
+    var _private = function(){},
+        _static = {
+            $window:$(window),
+            $html:$('html'),
+            $body:$('body'),
+            _event_namespace:'Popbox',
+            _next_instance_id:0,
+            _next_transition_id:0,
+            _instances:{length:0},
+            _support:{},
+            _speeds:{
+                '_default':300,
+                'fast':300,
+                'medium':600,
+                'slow':1000
+            },
+            _eases:{
+                '_default':       'ease',
+                'in':             'ease-in',
+                'out':            'ease-out',
+                'in-out':         'ease-in-out',
+                'snap':           'cubic-bezier(0,1,.5,1)',
+                // Penner equations
+                'easeInCubic':    'cubic-bezier(.550,.055,.675,.190)',
+                'easeOutCubic':   'cubic-bezier(.215,.61,.355,1)',
+                'easeInOutCubic': 'cubic-bezier(.645,.045,.355,1)',
+                'easeInCirc':     'cubic-bezier(.6,.04,.98,.335)',
+                'easeOutCirc':    'cubic-bezier(.075,.82,.165,1)',
+                'easeInOutCirc':  'cubic-bezier(.785,.135,.15,.86)',
+                'easeInExpo':     'cubic-bezier(.95,.05,.795,.035)',
+                'easeOutExpo':    'cubic-bezier(.19,1,.22,1)',
+                'easeInOutExpo':  'cubic-bezier(1,0,0,1)',
+                'easeInQuad':     'cubic-bezier(.55,.085,.68,.53)',
+                'easeOutQuad':    'cubic-bezier(.25,.46,.45,.94)',
+                'easeInOutQuad':  'cubic-bezier(.455,.03,.515,.955)',
+                'easeInQuart':    'cubic-bezier(.895,.03,.685,.22)',
+                'easeOutQuart':   'cubic-bezier(.165,.84,.44,1)',
+                'easeInOutQuart': 'cubic-bezier(.77,0,.175,1)',
+                'easeInQuint':    'cubic-bezier(.755,.05,.855,.06)',
+                'easeOutQuint':   'cubic-bezier(.23,1,.32,1)',
+                'easeInOutQuint': 'cubic-bezier(.86,0,.07,1)',
+                'easeInSine':     'cubic-bezier(.47,0,.745,.715)',
+                'easeOutSine':    'cubic-bezier(.39,.575,.565,1)',
+                'easeInOutSine':  'cubic-bezier(.445,.05,.55,.95)',
+                'easeInBack':     'cubic-bezier(.6,-.28,.735,.045)',
+                'easeOutBack':    'cubic-bezier(.175, .885,.32,1.275)',
+                'easeInOutBack':  'cubic-bezier(.68,-.55,.265,1.55)'
+            },
+            _transition_end_event_names:{
+                'transition':       'transitionend',
+                'MozTransition':    'transitionend',
+                'OTransition':      'oTransitionEnd',
+                'WebkitTransition': 'webkitTransitionEnd',
+                'msTransition':     'MSTransitionEnd'
+            },
+            _test_div:document.createElement('div')
+        };
 
     function getVendorPropertyName(prop) {
-        if (prop in test_div.style) return prop;
+        if (prop in _static._test_div.style) return prop;
 
         var prefixes = ['Moz', 'Webkit', 'O', 'ms'];
         var prop_ = prop.charAt(0).toUpperCase() + prop.substr(1);
 
         for (var i=0; i<prefixes.length; ++i) {
             var vendorProp = prefixes[i] + prop_;
-            if (vendorProp in test_div.style) { return vendorProp; }
+            if (vendorProp in _static._test_div.style) { return vendorProp; }
         }
     }
 
-    _support.transition         = getVendorPropertyName('transition');
-    _support.transform          = getVendorPropertyName('transform');
-    _support.transform_origin   = getVendorPropertyName('transformOrigin');
-    _support.transition_end     = transition_end_event_names[_support.transition] || null;
+    _static._support.transition         = getVendorPropertyName('transition');
+    _static._support.transform          = getVendorPropertyName('transform');
+    _static._support.transform_origin   = getVendorPropertyName('transformOrigin');
+    _static._support.transition_end     = _static._transition_end_event_names[_static._support.transition] || null;
 
-    test_div = null;
+    _static._test_div = null;
 
     _static.param = function(parameter,_default) {
         return (typeof parameter !== 'undefined' ? parameter : _default);
@@ -215,28 +216,30 @@
     };
     _static.transition = function($object,properties,duration,easing,complete,name){
         properties = _static.param(properties,{});
-        duration = _static.param(duration,_speeds._default);
-        easing = _static.param(easing,_eases._default);
+        duration = _static.param(duration,_static._speeds._default);
+        easing = _static.param(easing,_static._eases._default);
         name = (_static.isString(name,true)) ? name : false;
 
         var property,
             transitions = [],
             property_difference = false,
             transitioning = false,
-            this_transition_id = _next_transition_id;
+            this_transition_id = _static._next_transition_id;
 
-        _next_transition_id++;
+        _static._next_transition_id++;
 
-        if (_support.transition_end && duration > 25) {
+        if (_static._support.transition_end && duration > 25) {
 
             for (property in properties) {
                 if (properties.hasOwnProperty(property)) {
                     //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform, margin, padding
+                    //TODO this code does not support check for 12em vs 12px, this will be treated as not different but popbox doesn't animate anything other than pixels anyway...
                     transitions.push(property+' '+duration+'ms '+easing);
 
                     // round number values to 1 decimal place for comparison
                     var cur_property_val = $object.css(property),
-                        new_property_val = properties[property];
+                        new_property_val = properties[property],
+                        size_properties = ['width','height','top','right','bottom','left'];
 
                     if (_static.isString(cur_property_val,true)) {
                         cur_property_val = cur_property_val.trim();
@@ -252,14 +255,19 @@
                     }
 
                     if (_static.isNumber(cur_property_val,true)) {
-                        cur_property_val = Math.ceil(cur_property_val);
+                        cur_property_val = Math.ceil(cur_property_val*(_static.indexOf(property,size_properties) > -1 ? 1 : 100));
                     }
 
                     if (_static.isNumber(new_property_val,true)) {
-                        new_property_val = Math.ceil(new_property_val);
+                        new_property_val = Math.ceil(new_property_val*(_static.indexOf(property,size_properties) > -1 ? 1 : 100));
                     }
 
-                    if (cur_property_val != new_property_val) {
+                    if (_static.isNumber(cur_property_val) && _static.isNumber(new_property_val)) {
+                        if (cur_property_val-new_property_val > 1 || new_property_val-cur_property_val > 1) {
+                            property_difference = true;
+                        }
+                    }
+                    else if (cur_property_val != new_property_val) {
                         property_difference = true;
                     }
                 }
@@ -288,10 +296,7 @@
             }
 
             var already_animating = $object.hasClass('popbox-animating');
-            console.log($object.attr('style'));
-            console.log($object.css('left'));
-            console.log(properties);
-            console.log(property_difference);
+
             if (transitions.length && property_difference) {
 
                 $object.off('.popbox_auto_transition_end');
@@ -306,8 +311,7 @@
 
                 setTimeout(function(){
                     var lazy_timeout_catchup = false;
-                    console.log("add listener");
-                    $object.off('.popbox_auto_transition_end').on(_support.transition_end+'.popbox_auto_transition_end',function(e){
+                    $object.off('.popbox_auto_transition_end').on(_static._support.transition_end+'.popbox_auto_transition_end',function(e){
                         e.stopPropagation();
                         if ($object.data('popbox-transition-id') === this_transition_id) {
                             if (lazy_timeout_catchup !== false) {
@@ -481,7 +485,7 @@
         var self = this.self;
         // add close button to overlay?
 
-        var $container = (self.settings.container) ? $(self.settings.container) : $body,
+        var $container = (self.settings.container) ? $(self.settings.container) : _static.$body,
             $existing_popbox_overlay = $container.children('.popbox-overlay');
 
         if ($existing_popbox_overlay.length) {
@@ -502,12 +506,12 @@
             }).data('is_open',false).appendTo($container);
         }
 
-        self.elements.$popbox_overlay.off('click.'+_event_namespace).on('click.'+_event_namespace,function(e){
+        self.elements.$popbox_overlay.off('click.'+_static._event_namespace).on('click.'+_static._event_namespace,function(e){
             e.preventDefault();
-            for (var i in _instances) {
-                if (_instances.hasOwnProperty(i)) {
-                    if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                        _instances[i].close();
+            for (var i in _static._instances) {
+                if (_static._instances.hasOwnProperty(i)) {
+                    if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
+                        _static._instances[i].close();
                     }
                 }
             }
@@ -517,7 +521,7 @@
 
     _private.prototype.destroyOverlay = function(){
         var self = this.self;
-        if (_instances.length <= 0 && self.elements.$popbox_overlay) {
+        if (_static._instances.length <= 0 && self.elements.$popbox_overlay) {
             self.elements.$popbox_overlay.remove();
             self.elements.$popbox_overlay = null;
         }
@@ -590,12 +594,12 @@
 
     _private.prototype.getAnimationSpeed = function(type){
         var self = this.self;
-        return self.settings[type+'_animation_speed'] || self.settings.animation_speed || _speeds._default;
+        return self.settings[type+'_animation_speed'] || self.settings.animation_speed || _static._speeds._default;
     };
 
     _private.prototype.getAnimationEase = function(type){
         var self = this.self;
-        return self.settings[type+'_animation_ease'] || self.settings.animation_ease || _eases._default;
+        return self.settings[type+'_animation_ease'] || self.settings.animation_ease || _static._eases._default;
     };
 
     _private.prototype.getOverlayAnimationSpeed = function(type){
@@ -703,7 +707,7 @@
 
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
         self.properties = {
-            instance_id:_next_instance_id
+            instance_id:_static._next_instance_id
         };
         self.elements = {
             $popbox_overlay:null
@@ -712,7 +716,7 @@
         self._private.reset();
         self._private.applyMode();
 
-        _next_instance_id++;
+        _static._next_instance_id++;
     };
 
     Popbox.prototype.version = '3.0.0';
@@ -725,16 +729,16 @@
         max_height:false, // false = none, true = 100%. if set, scroll inner is used
         container:false, //specify an alternate container to body
         animation:'fade',
-        animation_speed:_speeds._default,
-        animation_ease:_eases._default,
+        animation_speed:_static._speeds._default,
+        animation_ease:_static._eases._default,
         open_animation:null,
         open_animation_speed:null,
         open_animation_ease:null,
         close_animation:null,
         close_animation_speed:null,
         close_animation_ease:null,
-        overlay_animation_speed:_speeds._default, // set to true to match the relevant popup animation speed
-        overlay_animation_ease:_eases._default,
+        overlay_animation_speed:_static._speeds._default, // set to true to match the relevant popup animation speed
+        overlay_animation_ease:_static._eases._default,
         open_overlay_animation_speed:null,
         open_overlay_animation_ease:null,
         close_overlay_animation_speed:null,
@@ -744,6 +748,7 @@
         title:false,
         hide_page_scroll:true,
         hide_page_scroll_space:true,
+        content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
         loading:'Loading',
         href:'', //can be used for none-anchor elements to grab content
         mobile_fallback:false, //TODO needs doing (will be used if the website has forms in popboxes and is shown on mobile) (if true, use position absolute instead of fixed for popbox - doesn't matter about overlay)
@@ -783,7 +788,7 @@
         self.destroy();
         self._private.createOverlay();
 
-        var $container = (self.settings.container) ? $(self.settings.container) : $body;
+        var $container = (self.settings.container) ? $(self.settings.container) : _static.$body;
 
         self.elements.$popbox = $('<div/>',{
             'class':'popbox',
@@ -855,14 +860,14 @@
         self._private.applyDomSettings();
 
         // events
-        self.elements.$popbox_close.on('click.'+_event_namespace,function(e){
+        self.elements.$popbox_close.on('click.'+_static._event_namespace,function(e){
             e.preventDefault();
             self.close();
             return false;
         });
 
         var _complex_close_namespace = 'Popbox_complex_close';
-        self.elements.$popbox.on('mousedown.'+_event_namespace,function(e1){
+        self.elements.$popbox.on('mousedown.'+_static._event_namespace,function(e1){
             if ($(e1.target).closest('.popbox-popup').length === 0) {
                 e1.preventDefault();
                 self.elements.$popbox.off('mouseup.'+_complex_close_namespace).on('mouseup.'+_complex_close_namespace,function(e2){
@@ -888,8 +893,8 @@
 
         self.elements.$popbox.appendTo($container);
 
-        _instances[self.properties.instance_id] = self;
-        _instances.length++;
+        _static._instances[self.properties.instance_id] = self;
+        _static._instances.length++;
     };
 
     Popbox.prototype.destroy = function(){
@@ -899,9 +904,9 @@
             self.elements.$popbox.remove();
             self.elements.$popbox = null;
 
-            if (_static.isSet(_instances[self.properties.instance_id])) {
-                delete _instances[self.properties.instance_id];
-                _instances.length--;
+            if (_static.isSet(_static._instances[self.properties.instance_id])) {
+                delete _static._instances[self.properties.instance_id];
+                _static._instances.length--;
             }
 
             self._private.closeOverlay();
@@ -956,18 +961,18 @@
 
             // html body scrollbar
             if (self.settings.hide_page_scroll) {
-                var old_body_width = $body.width();
+                var old_body_width = _static.$body.width();
                 if (self.properties.last_html_overflow === false) {
-                    self.properties.last_html_overflow = _static.getInlineStyle($html,'overflow');
+                    self.properties.last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
                 }
-                $html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
-                var new_body_width = $body.width();
+                _static.$html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
+                var new_body_width = _static.$body.width();
                 if (self.settings.hide_page_scroll_space) {
                     if (self.properties.last_html_margin_right === false) {
-                        self.properties.last_html_margin_right = _static.getInlineStyle($html,'margin-right');
+                        self.properties.last_html_margin_right = _static.getInlineStyle(_static.$html,'margin-right');
                     }
                     if (new_body_width > old_body_width) {
-                        $html.css('margin-right',(new_body_width-old_body_width)+'px');
+                        _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
                     }
                 }
             }
@@ -1053,11 +1058,11 @@
                         'display':'none'
                     });
 
-                    if (self.properties.last_html_overflow !== false) $html.css('overflow',self.properties.last_html_overflow);
-                    if (self.properties.last_html_margin_right !== false) $html.css('margin-right',self.properties.last_html_margin_right);
+                    if (self.properties.last_html_overflow !== false) _static.$html.css('overflow',self.properties.last_html_overflow);
+                    if (self.properties.last_html_margin_right !== false) _static.$html.css('margin-right',self.properties.last_html_margin_right);
                     self.properties.last_html_overflow = false;
                     self.properties.last_html_margin_right = false;
-                    $html.removeClass('popbox-hide-page-scroll');
+                    _static.$html.removeClass('popbox-hide-page-scroll');
 
                     if (destroy || !self.settings.cache) {
                         self.destroy();
@@ -1089,8 +1094,8 @@
             var adjust_elements = function(animate,show_content) {
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
-                var window_width = $window.width(),
-                    window_height = $window.height(),
+                var window_width = _static.$window.width(),
+                    window_height = _static.$window.height(),
                     popbox_width_padding = _static.elementPaddingWidth(self.elements.$popbox_popup),
                     popbox_height_padding = _static.elementPaddingHeight(self.elements.$popbox_popup),
                     content_width_padding = _static.elementPaddingWidth(self.elements.$popbox_content,true),
@@ -1107,6 +1112,9 @@
                     new_popbox_top,
                     new_popbox_left;
 
+                if (self.settings.aspect_fit) self.elements.$popbox.addClass('popbox-aspect-fit');
+                else self.elements.$popbox.removeClass('popbox-aspect-fit');
+
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
                 }
@@ -1120,6 +1128,10 @@
                     min_popbox_height = self.settings.min_height;
                 }
 
+                self.elements.$popbox_content.css({
+                    'height':'',
+                    'overflow-y':''
+                });
                 self.elements.$popbox_wrapper.css({
                     'position':'absolute',
                     'top':'0px',
@@ -1137,18 +1149,13 @@
                     'min-height':min_popbox_height+'px'
                 });
 
-                self.elements.$popbox.addClass('popbox-calculating');
-
                 // not sure why we are using get true width? could just use outerWidth(true)? - reason why is that it gives a sub pixel number
                 new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
                 new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
                 //new_popbox_width = self.elements.$popbox_container.outerWidth(true);
                 //new_popbox_height = self.elements.$popbox_container.outerHeight(true);
 
-                self.elements.$popbox.removeClass('popbox-calculating');
-
                 if (self.settings.aspect_fit) {
-                    self.elements.$popbox.addClass('popbox-aspect-fit');
                     if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
                         var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
                             new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
@@ -1162,10 +1169,6 @@
                         }
                     }
                 }
-                else
-                {
-                    self.elements.$popbox.removeClass('popbox-aspect-fit');
-                }
 
                 if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
                     // apply inner overflow scroll
@@ -1173,15 +1176,37 @@
                     // need to check top offset and reduce height if neccessary
                     // need to use content_bottom_offset (jquery selector, array of jquery selectors or a value in pixels), will also automatically check margin-bottom as a minimum bottom offset
                     new_popbox_height = max_popbox_height;
+                    // deduct content padding and margin (when using content-box)
+                    var new_content_height = new_popbox_height-content_height_padding,
+                        content_additional_offset = self.settings.content_additional_offset;
+                    // deduct content offset top
+                    new_content_height -= self.elements.$popbox_content.offset().top-self.elements.$popbox_popup.offset().top;
+
+                    if (_static.isNumber(content_additional_offset)) {
+                        new_content_height += content_additional_offset;
+                    }
+                    else {
+                        content_additional_offset = [content_additional_offset];
+                    }
+
+                    if (content_additional_offset instanceof Array) {
+                        for (var p=0; p<content_additional_offset.length; p++) {
+                            if (_static.isString(content_additional_offset[p],true)) {
+                                var content_additional_offset_value = 0;
+                                $(content_additional_offset[p]).each(function(){
+                                    var $content_additional_offset_item = $(this),
+                                        cur_value = ($content_additional_offset_item.offset().top+$content_additional_offset_item.outerHeight(true)) - (self.elements.$popbox_content.offset().top+self.elements.$popbox_content.outerHeight(true));
+                                    if (cur_value > 0 && cur_value > content_additional_offset_value) {
+                                        content_additional_offset_value = cur_value;
+                                    }
+                                });
+                            }
+                        }
+                    }
+
                     self.elements.$popbox_content.css({
-                        'height':new_popbox_height+'px',
+                        'height':new_content_height+'px',
                         'overflow-y':'scroll'
-                    });
-                }
-                else {
-                    self.elements.$popbox_content.css({
-                        'height':'',
-                        'overflow-y':''
                     });
                 }
 
@@ -1211,8 +1236,7 @@
                 if (new_popbox_height > max_popbox_screen_height) {
                     new_popbox_top = (self.settings.height_margin > 0) ? window_height*self.settings.height_margin : 0;
                 }
-                console.log("adjust");
-                console.log(animate);
+
                 if (animate) {
                     //_static.clearTransition(self.elements.$popbox_bottom_push);
                     _static.clearTransition(self.elements.$popbox_popup,'adjust');
@@ -1222,8 +1246,8 @@
                         {
                             'top':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-2)+'px'
                         },
-                        _speeds.fast,
-                        _eases.easeInOutQuad
+                        _static._speeds.fast,
+                        _static._eases.easeInOutQuad
                     );
                     _static.transition(
                         self.elements.$popbox_popup,
@@ -1233,10 +1257,9 @@
                             'top':new_popbox_top+'px',
                             'left':new_popbox_left+'px'
                         },
-                        _speeds.fast,
-                        _eases.easeInOutQuad,
+                        _static._speeds.fast,
+                        _static._eases.easeInOutQuad,
                         function(){
-                            console.log("show");
                             if (show_content) self.showContent();
 
                             // fail safe in case padding changes on popbox - does not actually work probably due to position top giving back a wrong number, probably not needed
@@ -1285,6 +1308,7 @@
         var self = this;
         if (self.isCreated()) {
             if (self.isLoading()){
+                //TODO might need to add something to add the ready function to transition complete if already animating then the else would be for not animating and just run ready.
                 if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
                 return;
             }
@@ -1294,7 +1318,7 @@
                 _static.transition(
                     self.elements.$popbox_wrapper,
                     {'opacity':'0'},
-                    _speeds.fast,
+                    _static._speeds.fast,
                     'linear',
                     function(){
                         self.elements.$popbox_wrapper.css({
@@ -1307,7 +1331,7 @@
                         _static.transition(
                             self.elements.$popbox_loading,
                             {'opacity':'1'},
-                            _speeds.fast,
+                            _static._speeds.fast,
                             'linear',
                             function(){
                                 if (_static.isFunction(ready)) ready();
@@ -1346,7 +1370,7 @@
                 _static.transition(
                     self.elements.$popbox_loading,
                     {'opacity':'0'},
-                    _speeds.fast,
+                    _static._speeds.fast,
                     'linear',
                     function(){
                         self.elements.$popbox_loading.css({
@@ -1359,7 +1383,7 @@
                         _static.transition(
                             self.elements.$popbox_wrapper,
                             {'opacity':'1'},
-                            _speeds.fast,
+                            _static._speeds.fast,
                             'linear',
                             function(){
                                 if (_static.isFunction(ready)) ready();
@@ -1405,41 +1429,18 @@
     };
 
     // global events
-    $window.on('resize.'+_event_namespace,function(){
-        if (_instances.length > 0) {
-            for (var i in _instances) {
-                if (_instances.hasOwnProperty(i)) {
-                    if (_instances[i] instanceof Popbox && _instances[i].isOpen()) {
-                        _instances[i].adjust(false);
+    _static.$window.on('resize.'+_static._event_namespace,function(){
+        if (_static._instances.length > 0) {
+            for (var i in _static._instances) {
+                if (_static._instances.hasOwnProperty(i)) {
+                    if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
+                        _static._instances[i].adjust(false);
                     }
                 }
             }
         }
     });
 
-    $.fn.PopBox = function(settings) {
-        settings = _static.param(settings,{});
-        var $elements = $(this);
-        if ($elements.length) {
-            $elements.each(function() {
-                var $element = $(this),
-                    _popbox = new PopBox(settings);
-                $element.on('click.'+_event_namespace,function(e){
-                    e.preventDefault();
-                    // update data settings
-                    // process video or image link
-                    // display popup
-                    return false;
-                });
-                // bind created popbox to element
-                $element.data('Popbox',_popbox);
-            });
-        }
-        return this;
-    };
-
     $.Popbox = Popbox;
-
-    $('.create-popbox').PopBox();
 
 })(jQuery,window);
