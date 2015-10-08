@@ -21,6 +21,7 @@
 <a href="#" class="click-me-3">Standard Image</a><br>
 <a href="#" class="click-me-4">Long Content with image</a><br>
 <a href="#" class="click-me-5">Test switch content 2s</a><br>
+<a href="#" class="click-me-6">iFrame Test</a><br>
 <br><br><br><br><br><br><br><br>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p>
@@ -142,6 +143,18 @@
                 content:long_text
             });
         },2000);
+    });
+
+    var popbox6 = new $.Popbox({
+        content:'<iframe src="//player.vimeo.com/video/99528701" width="840" height="470" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>',
+        animation:'zoom',
+        aspect_fit:true,
+        loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
+    });
+
+    $('.click-me-6').on('click',function(e){
+        e.preventDefault();
+        popbox6.open();
     });
 
 </script>

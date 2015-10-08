@@ -234,6 +234,7 @@
                 if (properties.hasOwnProperty(property)) {
                     //TODO jquery converts required prefix for css3, but the property pushed to transition needs to be retrieved e.g. transform, margin, padding
                     //TODO this code does not support check for 12em vs 12px, this will be treated as not different but popbox doesn't animate anything other than pixels anyway...
+                    //TODO if possible, need to shorten this to only work for what is needed (pixel comparisons).
                     transitions.push(property+' '+duration+'ms '+easing);
 
                     // round number values to 1 decimal place for comparison
@@ -1136,7 +1137,7 @@
                     'position':'absolute',
                     'top':'0px',
                     'left':'0px',
-                    'width':max_popbox_width+'px',
+                    'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
                     'height':'auto'
                 });
                 self.elements.$popbox_container.css({
@@ -1155,27 +1156,9 @@
                 //new_popbox_width = self.elements.$popbox_container.outerWidth(true);
                 //new_popbox_height = self.elements.$popbox_container.outerHeight(true);
 
-                if (self.settings.aspect_fit) {
-                    if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-                        var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
-                            new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
-                        if (new_ratio > max_ratio) {
-                            new_popbox_width = ((new_popbox_width-content_width_padding) * ((max_popbox_height-content_height_padding) / (new_popbox_height-content_height_padding)))+content_width_padding;
-                            new_popbox_height = max_popbox_height;
-                        }
-                        else {
-                            new_popbox_height = ((new_popbox_height-content_height_padding) * ((max_popbox_width-content_width_padding) / (new_popbox_width-content_width_padding)))+content_height_padding;
-                            new_popbox_width = max_popbox_width;
-                        }
-                    }
-                }
+                var set_content_height = function(scroll){
+                    scroll = scroll || false;
 
-                if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
-                    // apply inner overflow scroll
-                    // TODO: please do following...
-                    // need to check top offset and reduce height if neccessary
-                    // need to use content_bottom_offset (jquery selector, array of jquery selectors or a value in pixels), will also automatically check margin-bottom as a minimum bottom offset
-                    new_popbox_height = max_popbox_height;
                     // deduct content padding and margin (when using content-box)
                     var new_content_height = new_popbox_height-content_height_padding,
                         content_additional_offset = self.settings.content_additional_offset;
@@ -1205,9 +1188,31 @@
                     }
 
                     self.elements.$popbox_content.css({
-                        'height':new_content_height+'px',
-                        'overflow-y':'scroll'
+                        'height':(scroll) ? Math.floor(new_content_height)+'px' : new_content_height+'px',
+                        'overflow-y':(scroll) ? 'scroll' : 'hidden'
                     });
+                };
+
+                if (self.settings.aspect_fit) {
+                    if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
+                        var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
+                            new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
+                        if (new_ratio > max_ratio) {
+                            new_popbox_width = ((new_popbox_width-content_width_padding) * ((max_popbox_height-content_height_padding) / (new_popbox_height-content_height_padding)))+content_width_padding;
+                            new_popbox_height = max_popbox_height;
+                        }
+                        else {
+                            new_popbox_height = ((new_popbox_height-content_height_padding) * ((max_popbox_width-content_width_padding) / (new_popbox_width-content_width_padding)))+content_height_padding;
+                            new_popbox_width = max_popbox_width;
+                        }
+
+                        set_content_height(false);
+                    }
+                }
+                else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
+                    // apply inner overflow scroll
+                    new_popbox_height = max_popbox_height;
+                    set_content_height(true);
                 }
 
                 // cleanup

@@ -79,12 +79,10 @@
 }
 
 .popbox img, .popbox iframe, .popbox object, .popbox embed {
-    width:auto;
     max-width:100%;
 }
 
 .popbox-aspect-fit img, .popbox-aspect-fit iframe, .popbox-aspect-fit object, .popbox-aspect-fit embed {
-    height:auto;
     max-height:100%;
     display:block;
 }
