@@ -1,1 +1,4 @@
 === v3.0.0 ===
+- creation, completely re-engineered
+- animations are now purely css3, fallback is no animation (IE9 and below)
+- open and close animations are now highly customisable in javascript

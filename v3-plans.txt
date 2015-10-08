@@ -1,10 +1,9 @@
 VERSION 3 PLANS
 To do
-- Add extension support to the plugin. Separate gallery functionality and extensive future animations to their own extension scripts.
-- Take out awkward clone calculation and rely strictly on naturalWidth and naturalHeight from loaded image. If not supported, don't expect miracles.
-- Native url content handling. Support popbox content switch. Support form submissions.
-- Add addEventListener method to popbox class.
-- CSS3 transition complete events are unreliable, need a timeout slightly longer than animation time to make sure it isn't stuck.
+- Add animation extension support.
+- Add gallery extension support.
+- Add native url content handling (ajax) extension support. Support form submissions.
+- Add addEventListener method to popbox class. (need to store events in their own area, use the change to transition events as example)
 
 Done
 - Change function definition convention for private functions to var function plus camelCase.
@@ -13,5 +12,8 @@ Done
 - Target jQuery 1.7+
 - Support CSS3 transitions over javascript animation.
 - Change applyDataSettings method to applyDataToSettings.
+- CSS3 transition complete events are unreliable, need a timeout slightly longer than animation time to make sure it isn't stuck.
+- Take out awkward clone calculation and rely strictly on naturalWidth and naturalHeight from loaded image. If not supported, don't expect miracles.
+- Add extension support to the plugin. Separate gallery functionality and extensive future animations to their own extension scripts.
 
 Dropped
