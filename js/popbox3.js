@@ -99,31 +99,6 @@
         var val = $object.attr(attr);
         return (typeof val === 'undefined' || val === false || val === '') ? '' : val;
     };
-    _static.applyDataToSettings = function($object,defaults,settings,stage) {
-        stage = param(stage,'');
-
-        for (var property in defaults) {
-            if (defaults.hasOwnProperty(property)) {
-                var data_property = stage+property.toLowerCase().replace('_','-');
-
-                if (typeof defaults[property] === 'object') {
-                    if (typeof settings[property] !== 'object') settings[p] = {};
-                    _static.applyDataToSettings($object,defaults[p],settings[p],data_property+'-');
-                }
-                else {
-                    var data = $object.data(data_property);
-                    if (typeof data !== 'undefined') {
-                        var data_float = parseFloat(data);
-                        if (data == 'true') data = !0;
-                        else if (data == 'false') data = !1;
-                        else if (data_float == data) data = data_float;
-
-                        settings[p] = data;
-                    }
-                }
-            }
-        }
-    };
     _static.indexOf = function(value,array,strict) {
         strict = strict || false;
 
@@ -404,7 +379,19 @@
     _static.getTrueHeight = function($object) {
         return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
     };
-
+    _static.onTouchClick = function($object,selector,handler,prevent_default){
+        if ($object.length) {
+            var tap_click_namespace = 'Popbox_tap_click';
+            $object.on('mousedown.'+tap_click_namespace+' touchstart.'+tap_click_namespace,selector,function(e){
+                var $subobject = $(this);
+                if (prevent_default) e.preventDefault();
+                $subobject.on('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace,function(e2){
+                    if (prevent_default) e2.preventDefault();
+                    if (_static.isFunction(handler)) handler(e2);
+                });
+            });
+        }
+    };
 
 
     _private.prototype.reset = function() {
@@ -514,8 +501,7 @@
             }).data('is_open',false).appendTo($container);
         }
 
-        self.elements.$popbox_overlay.off('click.'+_static._event_namespace).on('click.'+_static._event_namespace,function(e){
-            e.preventDefault();
+        _static.onTouchClick(self.elements.$popbox_overlay,null,function(){
             for (var i in _static._instances) {
                 if (_static._instances.hasOwnProperty(i)) {
                     if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
@@ -524,8 +510,7 @@
                 }
             }
             self._private.closeOverlay();
-            return false;
-        });
+        },true);
     };
 
     _private.prototype.destroyOverlay = function(){
@@ -883,13 +868,13 @@
         });
 
         var _complex_close_namespace = 'Popbox_complex_close';
-        self.elements.$popbox.on('mousedown.'+_static._event_namespace+',touchstart.'+_static._event_namespace,function(e1){
+        self.elements.$popbox.on('mousedown.'+_static._event_namespace+' touchstart.'+_static._event_namespace,function(e1){
             var e1pageX = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageX : e1.pageX,
                 e1pageY = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageY : e1.pageY;
             if ((e1.originalEvent.touches || e1.which == 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
                 e1.preventDefault();
                 self.elements.$popbox.off('.'+_complex_close_namespace);
-                self.elements.$popbox.on('mouseup.'+_complex_close_namespace+',touchend.'+_complex_close_namespace,function(e2){
+                self.elements.$popbox.on('mouseup.'+_complex_close_namespace+' touchend.'+_complex_close_namespace,function(e2){
                     if (e2.originalEvent.touches || e2.which == 1) {
                         self.elements.$popbox.off('.'+_complex_close_namespace);
                         if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
@@ -899,7 +884,7 @@
                         }
                     }
                 });
-                self.elements.$popbox.on('mousemove.'+_complex_close_namespace+',touchmove.'+_complex_close_namespace,function(e3){
+                self.elements.$popbox.on('mousemove.'+_complex_close_namespace+' touchmove.'+_complex_close_namespace,function(e3){
                     // check limit box
                     // TODO if the container can be changed to a div instead of body then this will need updating to support the offset of that div
                     var e3pageX = (e3.originalEvent.touches && e3.originalEvent.touches[0]) ? e3.originalEvent.touches[0].pageX : e3.pageX,
