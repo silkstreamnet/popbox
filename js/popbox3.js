@@ -312,8 +312,7 @@
 
                 setTimeout(function(){
                     var lazy_timeout_catchup = false;
-                    $object.off('.popbox_auto_transition_end').on(_static._support.transition_end+'.popbox_auto_transition_end',function(e){
-                        e.stopPropagation();
+                    var transition_end = function(){
                         if ($object.data('popbox-transition-id') === this_transition_id) {
                             if (lazy_timeout_catchup !== false) {
                                 clearTimeout(lazy_timeout_catchup);
@@ -339,8 +338,15 @@
                                 }
                             }
                         }
+                    };
+
+                    // standard event
+                    $object.off('.popbox_auto_transition_end').on(_static._support.transition_end+'.popbox_auto_transition_end',function(e){
+                        e.stopPropagation();
+                        transition_end();
                     });
-                    lazy_timeout_catchup = setTimeout(function(){$object.trigger('.popbox_auto_transition_end');lazy_timeout_catchup=false;},duration+100);
+                    // fallback check
+                    lazy_timeout_catchup = setTimeout(function(){lazy_timeout_catchup=false;transition_end();},duration+50);
                 },0);
 
                 transitioning = true;
@@ -445,12 +451,12 @@
             $popbox_overlay:self.elements.$popbox_overlay, // not part of individual popbox
             $popbox_loading:null,
             $popbox_popup:null,
+            $popbox_empty:null,
             $popbox_wrapper:null,
             $popbox_container:null,
             $popbox_title:null,
             $popbox_close:null,
-            $popbox_content:null,
-            $popbox_bottom_push:null
+            $popbox_content:null
         };
     };
 
@@ -697,6 +703,11 @@
             else self.elements.$popbox_close.css('display','block');
             if (self.settings.title === false) self.elements.$popbox_title.css('display','none');
             else self.elements.$popbox_title.css('display','block');
+
+            if (_static.isNumber(self.settings.z_index,true)) {
+                self.elements.$popbox.css('z-index',self.settings.z_index);
+                self.elements.$popbox_popup.css('z-index',self.settings.z_index+1);
+            }
         }
     };
 
@@ -759,6 +770,7 @@
         wait_for_images:true,
         width_margin:0.1,
         height_margin:0.06,
+        z_index:99900, // should be a number greater than 0, otherwise z-index will not be set at all.
         mode:false, //normal, can be 'gallery' if extension is available
         on_open:false,
         after_open:false,
@@ -805,14 +817,15 @@
             }
         });
 
-        self.elements.$popbox_bottom_push = $('<div/>',{
-            'class':'popbox-bottom-push',
+        self.elements.$popbox_empty = $('<div/>',{
+            'class':'popbox-empty',
             'css':{
+                'display':'block',
                 'position':'absolute',
-                'top':'0px',
-                'left':'0px',
-                'height':'1px',
-                'width':'1px'
+                'top':'0',
+                'left':'0',
+                'width':'100%',
+                'height':'100%'
             }
         }).appendTo(self.elements.$popbox);
 
@@ -868,24 +881,35 @@
         });
 
         var _complex_close_namespace = 'Popbox_complex_close';
-        self.elements.$popbox.on('mousedown.'+_static._event_namespace,function(e1){
-            if ($(e1.target).closest('.popbox-popup').length === 0) {
+        self.elements.$popbox.on('mousedown.'+_static._event_namespace+',touchstart.'+_static._event_namespace,function(e1){
+            var e1pageX = e1.pageX || e1.originalEvent.touches[0].pageX,
+                e1pageY = e1.pageY || e1.originalEvent.touches[0].pageY;
+            if (e1.which == 1 && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
                 e1.preventDefault();
-                self.elements.$popbox.off('mouseup.'+_complex_close_namespace).on('mouseup.'+_complex_close_namespace,function(e2){
-                    self.elements.$popbox.off('.'+_complex_close_namespace);
-                    if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
-                        e2.preventDefault();
-                        self.close();
-                        return false;
+                self.elements.$popbox.off('.'+_complex_close_namespace);
+                self.elements.$popbox.on('mouseup.'+_complex_close_namespace+',touchend.'+_static._event_namespace,function(e2){
+                    if (e2.which == 1) {
+                        self.elements.$popbox.off('.'+_complex_close_namespace);
+                        if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
+                            e2.preventDefault();
+                            self.close();
+                            return false;
+                        }
                     }
                 });
-                self.elements.$popbox.off('mousemove.'+_complex_close_namespace).on('mousemove.'+_complex_close_namespace,function(e3){
+                self.elements.$popbox.on('mousemove.'+_complex_close_namespace+',touchmove.'+_static._event_namespace,function(e3){
                     // check limit box
-                    if (e3.pageX < e1.pageX-5 || e3.pageX > e1.pageX+5 || e3.pageY < e1.pageY-5 || e3.pageY > e1.pageY+5) {
+                    // TODO if the container can be changed to a div instead of body then this will need updating to support the offset of that div
+                    var e3pageX = e3.pageX || e3.originalEvent.touches[0].pageX,
+                        e3pageY = e3.pageY || e3.originalEvent.touches[0].pageY;
+                    if (e3pageX < e1pageX-5 ||
+                        e3pageX > e1pageX+5 ||
+                        e3pageY < e1pageY-5 ||
+                        e3pageY > e1pageY+5) {
                         self.elements.$popbox.off('.'+_complex_close_namespace);
                     }
                 });
-                self.elements.$popbox.off('scroll.'+_complex_close_namespace).on('scroll.'+_complex_close_namespace,function(){
+                self.elements.$popbox.on('scroll.'+_complex_close_namespace,function(){
                     self.elements.$popbox.off('.'+_complex_close_namespace);
                 });
                 return false;
@@ -980,12 +1004,8 @@
 
             // show elements
             self._private.openOverlay();
-            self.elements.$popbox_wrapper.css({
-                //'visibility':'hidden'
-            });
             self.elements.$popbox_popup.css({
                 'display':'block'
-                //'visibility':'hidden'
             });
             self.elements.$popbox.css({
                 'display':'block'
@@ -1020,10 +1040,6 @@
                     self.properties.disable_background_click_timer = false;
                 },self._private.getAnimationSpeed('open')+1000);
             }
-
-            self.elements.$popbox_wrapper.css({
-                //'visibility':''
-            });
 
             self.properties.is_open = true;
 
@@ -1150,11 +1166,9 @@
                     'min-height':min_popbox_height+'px'
                 });
 
-                // not sure why we are using get true width? could just use outerWidth(true)? - reason why is that it gives a sub pixel number
-                new_popbox_width = _static.getTrueWidth(self.elements.$popbox_container);
-                new_popbox_height = _static.getTrueHeight(self.elements.$popbox_container);
-                //new_popbox_width = self.elements.$popbox_container.outerWidth(true);
-                //new_popbox_height = self.elements.$popbox_container.outerHeight(true);
+                // use true width to get overhang (stops text wrapping)
+                new_popbox_width = Math.ceil(_static.getTrueWidth(self.elements.$popbox_container)*100)/100;
+                new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
 
                 var set_content_height = function(scroll){
                     scroll = scroll || false;
@@ -1243,13 +1257,12 @@
                 }
 
                 if (animate) {
-                    //_static.clearTransition(self.elements.$popbox_bottom_push);
                     _static.clearTransition(self.elements.$popbox_popup,'adjust');
 
                     _static.transition(
-                        self.elements.$popbox_bottom_push,
+                        self.elements.$popbox_empty,
                         {
-                            'top':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-2)+'px'
+                            'height':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-1)+'px'
                         },
                         _static._speeds.fast,
                         _static._eases.easeInOutQuad
@@ -1266,11 +1279,6 @@
                         _static._eases.easeInOutQuad,
                         function(){
                             if (show_content) self.showContent();
-
-                            // fail safe in case padding changes on popbox - does not actually work probably due to position top giving back a wrong number, probably not needed
-                            /*self.elements.$popbox_bottom_push.css({
-                                'top':Math.floor(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-2)+'px'
-                            });*/
                         },
                         'adjust'
                     );
@@ -1284,8 +1292,8 @@
                         'left':new_popbox_left+'px'
                     });
 
-                    self.elements.$popbox_bottom_push.css({
-                        'top':Math.floor(self.elements.$popbox_popup.outerHeight(false)+(self.elements.$popbox_popup.position().top*2)-2)+'px'
+                    self.elements.$popbox_empty.css({
+                        'height':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-1)+'px'
                     });
                 }
             };
