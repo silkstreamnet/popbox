@@ -508,7 +508,8 @@
                     'top':'0',
                     'right':'0',
                     'bottom':'0',
-                    'left':'0'
+                    'left':'0',
+                    'cursor':'pointer'
                 }
             }).data('is_open',false).appendTo($container);
         }
@@ -522,6 +523,7 @@
                     }
                 }
             }
+            self._private.closeOverlay();
             return false;
         });
     };
@@ -882,13 +884,13 @@
 
         var _complex_close_namespace = 'Popbox_complex_close';
         self.elements.$popbox.on('mousedown.'+_static._event_namespace+',touchstart.'+_static._event_namespace,function(e1){
-            var e1pageX = e1.pageX || e1.originalEvent.touches[0].pageX,
-                e1pageY = e1.pageY || e1.originalEvent.touches[0].pageY;
-            if (e1.which == 1 && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
+            var e1pageX = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageX : e1.pageX,
+                e1pageY = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageY : e1.pageY;
+            if ((e1.originalEvent.touches || e1.which == 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
                 e1.preventDefault();
                 self.elements.$popbox.off('.'+_complex_close_namespace);
-                self.elements.$popbox.on('mouseup.'+_complex_close_namespace+',touchend.'+_static._event_namespace,function(e2){
-                    if (e2.which == 1) {
+                self.elements.$popbox.on('mouseup.'+_complex_close_namespace+',touchend.'+_complex_close_namespace,function(e2){
+                    if (e2.originalEvent.touches || e2.which == 1) {
                         self.elements.$popbox.off('.'+_complex_close_namespace);
                         if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
                             e2.preventDefault();
@@ -897,11 +899,11 @@
                         }
                     }
                 });
-                self.elements.$popbox.on('mousemove.'+_complex_close_namespace+',touchmove.'+_static._event_namespace,function(e3){
+                self.elements.$popbox.on('mousemove.'+_complex_close_namespace+',touchmove.'+_complex_close_namespace,function(e3){
                     // check limit box
                     // TODO if the container can be changed to a div instead of body then this will need updating to support the offset of that div
-                    var e3pageX = e3.pageX || e3.originalEvent.touches[0].pageX,
-                        e3pageY = e3.pageY || e3.originalEvent.touches[0].pageY;
+                    var e3pageX = (e3.originalEvent.touches && e3.originalEvent.touches[0]) ? e3.originalEvent.touches[0].pageX : e3.pageX,
+                        e3pageY = (e3.originalEvent.touches && e3.originalEvent.touches[0]) ? e3.originalEvent.touches[0].pageY : e3.pageY;
                     if (e3pageX < e1pageX-5 ||
                         e3pageX > e1pageX+5 ||
                         e3pageY < e1pageY-5 ||
@@ -1014,6 +1016,8 @@
             self.elements.$popbox_popup.css({
                 'visibility':'visible'
             });
+
+            self.showContent();
 
             // adjust
             self.adjust(false);
