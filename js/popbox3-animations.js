@@ -60,14 +60,18 @@
         // zoom big / zoom small
         'fold':{
             'open':[{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'rotateX(60deg)'
             },{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'rotateX(0deg)'
             }],
             'close':[{
-                'opacity':'1'
+                'opacity':'1',
+                'transform':'rotateX(0deg)'
             },{
-                'opacity':'0'
+                'opacity':'0',
+                'transform':'rotateX(60deg)'
             }]
         }
     };

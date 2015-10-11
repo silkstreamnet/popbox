@@ -379,15 +379,29 @@
     _static.getTrueHeight = function($object) {
         return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
     };
+    _static.offTouchClick = function($object) {
+        if ($object.length) {
+            $object.off('.Popbox_touch_click');
+        }
+    };
     _static.onTouchClick = function($object,selector,handler,prevent_default){
         if ($object.length) {
-            var tap_click_namespace = 'Popbox_tap_click';
-            $object.on('mousedown.'+tap_click_namespace+' touchstart.'+tap_click_namespace,selector,function(e){
+            var touch_click_namespace = 'Popbox_touch_click';
+            if (prevent_default) {
+                $object.on('click.'+touch_click_namespace,function(e){
+                    e.preventDefault();
+                    return false;
+                });
+            }
+            $object.on('mousedown.'+touch_click_namespace+' touchstart.'+touch_click_namespace,selector,function(e){
                 var $subobject = $(this);
                 if (prevent_default) e.preventDefault();
-                $subobject.off('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace).on('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace,function(e2){
-                    if (prevent_default) e2.preventDefault();
+                $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
                     if (_static.isFunction(handler)) handler(e2);
+                    if (prevent_default) {
+                        e2.preventDefault();
+                        return false;
+                    }
                 });
             });
         }
@@ -736,8 +750,8 @@
         close_animation:null,
         close_animation_speed:null,
         close_animation_ease:null,
-        overlay_animation_speed:_static._speeds._default, // set to true to match the relevant popup animation speed
-        overlay_animation_ease:_static._eases._default,
+        overlay_animation_speed:null, // set to true to match the relevant popup animation speed
+        overlay_animation_ease:null,
         open_overlay_animation_speed:null,
         open_overlay_animation_ease:null,
         close_overlay_animation_speed:null,

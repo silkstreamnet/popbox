@@ -17,8 +17,8 @@
             if (defaults.hasOwnProperty(property)) {
                 var data_property = stage+property.toLowerCase().replace('_','-');
 
-                if (typeof defaults[property] === 'object') {
-                    if (typeof settings[property] !== 'object') settings[property] = {};
+                if (typeof defaults[property] === 'object' && defaults[property] !== null) {
+                    if (typeof settings[property] !== 'object' || settings[property] === null) settings[property] = {};
                     _static.applyDataToSettings($object,defaults[property],settings[property],data_property+'-');
                 }
                 else {
@@ -45,6 +45,7 @@
             $elements.each(function() {
                 var $element = $(this);
 
+                _static.offTouchClick($element);
                 _static.onTouchClick($element,null,function(){
                     var _popbox, new_settings = $.extend(true,{},settings);
                     _static.applyDataToSettings($element,$.Popbox.prototype.default_settings,new_settings);
@@ -111,7 +112,7 @@
 
                     if (auto_run) _popbox = new $.Popbox(auto_settings);
                     else _popbox = new $.Popbox(new_settings);
-
+console.log(new_settings);
                     _popbox.open();
 
                     // bind created popbox to element
