@@ -11,15 +11,15 @@
     var _static = $.Popbox.prototype._static;
 
     _static.applyDataToSettings = function($object,defaults,settings,stage) {
-        stage = param(stage,'');
+        stage = _static.param(stage,'');
 
         for (var property in defaults) {
             if (defaults.hasOwnProperty(property)) {
                 var data_property = stage+property.toLowerCase().replace('_','-');
 
                 if (typeof defaults[property] === 'object') {
-                    if (typeof settings[property] !== 'object') settings[p] = {};
-                    _static.applyDataToSettings($object,defaults[p],settings[p],data_property+'-');
+                    if (typeof settings[property] !== 'object') settings[property] = {};
+                    _static.applyDataToSettings($object,defaults[property],settings[property],data_property+'-');
                 }
                 else {
                     var data = $object.data(data_property);
@@ -38,7 +38,7 @@
 
     $.Popbox.prototype.default_settings.auto_setup = true;
 
-    $.fn.PopBox = function(settings) {
+    $.fn.Popbox = function(settings) {
         settings = _static.param(settings,{});
         var $elements = $(this);
         if ($elements.length) {
@@ -47,7 +47,7 @@
 
                 _static.onTouchClick($element,null,function(){
                     var _popbox, new_settings = $.extend(true,{},settings);
-                    _static.applyDataToSettings($element,$.PopBox.prototype.default_settings,new_settings);
+                    _static.applyDataToSettings($element,$.Popbox.prototype.default_settings,new_settings);
 
                     var href = new_settings.href || $element.attr('href'),
                         auto = new_settings.auto_setup,
@@ -109,8 +109,8 @@
                             }
                     }
 
-                    if (auto_run) _popbox = new PopBox(auto_settings);
-                    else _popbox = new PopBox(new_settings);
+                    if (auto_run) _popbox = new $.Popbox(auto_settings);
+                    else _popbox = new $.Popbox(new_settings);
 
                     _popbox.open();
 
@@ -122,6 +122,6 @@
         return this;
     };
 
-    $('.auto-popbox').Popbox();
+    $('.open-popbox').Popbox();
 
 })(jQuery,window);

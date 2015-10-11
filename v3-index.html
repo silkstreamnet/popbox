@@ -22,6 +22,11 @@
 <a href="#" class="click-me-4">Long Content with image</a><br>
 <a href="#" class="click-me-5">Test switch content 2s</a><br>
 <a href="#" class="click-me-6">iFrame Test</a><br>
+<a href="#" class="click-me-7">Selector Test</a><br>
+<br><br>
+Possible classes for popbox3-ajax.js<br>
+popbox-form<br>
+popbox-link<br>
 <br><br><br><br><br><br><br><br>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p>
@@ -43,6 +48,7 @@
 <script type="text/javascript" src="js/jquery/jquery-2.1.0.min.js"></script>
 <script type="text/javascript" src="js/popbox3.js"></script>
 <script type="text/javascript" src="js/popbox3-animations.js"></script>
+<script type="text/javascript" src="js/popbox3-selector.js"></script>
 <script type="text/javascript" src="js/popbox3-gallery.js"></script>
 <script type="text/javascript">
 
@@ -156,6 +162,10 @@
     $('.click-me-6').on('click',function(e){
         e.preventDefault();
         popbox6.open();
+    });
+
+    $('.click-me-7').Popbox({
+        content:'cow'
     });
 
 </script>

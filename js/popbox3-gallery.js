@@ -7,7 +7,7 @@
         return;
     }
 
-    var extend_settings = {
+    var extend_default_settings = {
         gallery:{ // mode must be set to gallery for this to be used
             loading:'<div>Loading...</div>',
             error:'<div>There was an error loading the image.</div>',
@@ -29,6 +29,6 @@
 
     };
 
-    $.extend(true,$.Popbox.prototype.default_settings,extend_settings);
+    $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
 })(jQuery,window);

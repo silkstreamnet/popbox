@@ -385,7 +385,7 @@
             $object.on('mousedown.'+tap_click_namespace+' touchstart.'+tap_click_namespace,selector,function(e){
                 var $subobject = $(this);
                 if (prevent_default) e.preventDefault();
-                $subobject.on('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace,function(e2){
+                $subobject.off('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace).on('mouseup.'+tap_click_namespace+' touchend.'+tap_click_namespace,function(e2){
                     if (prevent_default) e2.preventDefault();
                     if (_static.isFunction(handler)) handler(e2);
                 });
