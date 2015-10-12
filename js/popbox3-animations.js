@@ -61,17 +61,17 @@
         'fold':{
             'open':[{
                 'opacity':'0',
-                'transform':'rotateX(5deg)'
+                'transform':'rotateX(5deg) scale(0.9)'
             },{
                 'opacity':'1',
-                'transform':'rotateX(0deg)'
+                'transform':'rotateX(0deg) scale(1)'
             }],
             'close':[{
                 'opacity':'1',
-                'transform':'rotateX(0deg)'
+                'transform':'rotateX(0deg) scale(1)'
             },{
                 'opacity':'0',
-                'transform':'rotateX(5deg)'
+                'transform':'rotateX(5deg) scale(0.9)'
             }]
         }
     };
