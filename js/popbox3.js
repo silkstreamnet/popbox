@@ -1044,7 +1044,7 @@
                 self.properties.disable_background_click_timer = setTimeout(function(){
                     self.properties.disable_background_click = false;
                     self.properties.disable_background_click_timer = false;
-                },self._private.getAnimationSpeed('open')+1000);
+                },self._private.getAnimationSpeed('open')+200);
             }
 
             self.properties.is_open = true;
