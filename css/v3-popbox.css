@@ -17,9 +17,9 @@
 
 .popbox {
     z-index:99900;
-    -moz-perspective: 400px;
-    -webkit-perspective: 400px;
-    perspective:400px;
+    -moz-perspective: 600px;
+    -webkit-perspective: 600px;
+    perspective: 600px;
 }
 
 .popbox-popup {
@@ -71,6 +71,10 @@
 }
 
 .popbox .popbox-content {
+    padding:15px;
+}
+
+.popbox-aspect-fit .popbox-content {
     padding:0;
 }
 

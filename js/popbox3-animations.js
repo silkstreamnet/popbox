@@ -61,7 +61,7 @@
         'fold':{
             'open':[{
                 'opacity':'0',
-                'transform':'rotateX(60deg)'
+                'transform':'rotateX(5deg)'
             },{
                 'opacity':'1',
                 'transform':'rotateX(0deg)'
@@ -71,7 +71,7 @@
                 'transform':'rotateX(0deg)'
             },{
                 'opacity':'0',
-                'transform':'rotateX(60deg)'
+                'transform':'rotateX(5deg)'
             }]
         }
     };

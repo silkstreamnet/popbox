@@ -112,7 +112,7 @@
 
                     if (auto_run) _popbox = new $.Popbox(auto_settings);
                     else _popbox = new $.Popbox(new_settings);
-console.log(new_settings);
+
                     _popbox.open();
 
                     // bind created popbox to element

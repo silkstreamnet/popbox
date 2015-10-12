@@ -699,6 +699,9 @@
                 self.elements.$popbox.addClass(self.settings.add_class);
             }
 
+            if (self.settings.aspect_fit) self.elements.$popbox.addClass('popbox-aspect-fit');
+            else self.elements.$popbox.removeClass('popbox-aspect-fit');
+
             // checks
             if (self.settings.close === false) self.elements.$popbox_close.css('display','none');
             else self.elements.$popbox_close.css('display','block');
@@ -1114,6 +1117,7 @@
             var adjust_elements = function(animate,show_content) {
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
+
                 var window_width = _static.$window.width(),
                     window_height = _static.$window.height(),
                     popbox_width_padding = _static.elementPaddingWidth(self.elements.$popbox_popup),
@@ -1131,9 +1135,6 @@
                     new_popbox_height,
                     new_popbox_top,
                     new_popbox_left;
-
-                if (self.settings.aspect_fit) self.elements.$popbox.addClass('popbox-aspect-fit');
-                else self.elements.$popbox.removeClass('popbox-aspect-fit');
 
                 if (_static.isNumber(self.settings.max_width,true) && max_popbox_width > self.settings.max_width) {
                     max_popbox_width = self.settings.max_width;
@@ -1230,6 +1231,9 @@
                     // apply inner overflow scroll
                     new_popbox_height = max_popbox_height;
                     set_content_height(true);
+                }
+                else {
+                    set_content_height(false);
                 }
 
                 // cleanup
