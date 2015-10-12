@@ -766,7 +766,6 @@
         hide_page_scroll_space:true,
         content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
         loading:'Loading',
-        href:'', //can be used for none-anchor elements to grab content
         mobile_fallback:false, //TODO needs doing (will be used if the website has forms in popboxes and is shown on mobile) (if true, use position absolute instead of fixed for popbox - doesn't matter about overlay)
         add_class:'',
         aspect_fit:false, // recommended for images and iframes - not for content

@@ -8,5 +8,6 @@
         return;
     }
 
+    $.Popbox.prototype.default_settings.href = ''; //can be used for none-anchor elements to grab content
 
 })(jQuery,window);
