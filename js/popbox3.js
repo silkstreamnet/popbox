@@ -1178,7 +1178,8 @@
                     'top':'0px',
                     'left':'0px',
                     'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
-                    'height':'auto'
+                    'height':'1px',
+                    'overflow':'hidden'
                 });
                 self.elements.$popbox_container.css({
                     'position':'absolute',
@@ -1257,23 +1258,25 @@
                 }
 
                 // cleanup
-                self.elements.$popbox_wrapper.css({
-                    'position':'',
-                    'top':'',
-                    'left':'',
-                    'width':'',
-                    'height':''
-                });
-                // cleanup
-                self.elements.$popbox_container.css({
-                    'position':'',
-                    'top':'',
-                    'left':'',
-                    'width':'',
-                    'height':'',
-                    'min-width':'',
-                    'min-height':''
-                });
+                var cleanup = function(){
+                    self.elements.$popbox_wrapper.css({
+                        'position':'',
+                        'top':'',
+                        'left':'',
+                        'width':'',
+                        'height':'',
+                        'overflow':''
+                    });
+                    self.elements.$popbox_container.css({
+                        'position':'',
+                        'top':'',
+                        'left':'',
+                        'width':'',
+                        'height':'',
+                        'min-width':'',
+                        'min-height':''
+                    });
+                };
 
                 new_popbox_left = (window_width-(new_popbox_width+popbox_width_padding))/2;
                 new_popbox_top = (window_height-(new_popbox_height+popbox_height_padding))/2;
@@ -1305,12 +1308,15 @@
                         _static._speeds.fast,
                         _static._eases.easeInOutQuad,
                         function(){
+                            cleanup();
                             if (show_content) self.showContent();
                         },
                         'adjust'
                     );
                 }
                 else {
+
+                    cleanup();
 
                     self.elements.$popbox_popup.css({
                         'width':new_popbox_width+'px',
