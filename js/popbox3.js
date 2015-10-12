@@ -89,6 +89,12 @@
     _static.isFunction = function(func) {
         return typeof func === "function";
     };
+    _static.isPlainObject = function(obj) {
+        return typeof obj === "object" && obj != null && !(obj instanceof Array);
+    };
+    _static.isArray = function(arr) {
+        return typeof arr === "object" && arr instanceof Array;
+    };
     _static.isNumber = function(number,required) {
         return typeof number === "number" && (!_static.param(required,false) || number > 0);
     };
@@ -443,13 +449,13 @@
             image_cache:{},
             interface_image_cache_pending:0,
             content_image_cache_pending:0,
-            instance_id:self.properties.instance_id,
             last_html_overflow:false,
-            last_html_margin_right:false
+            last_html_margin_right:false,
+            instance_id:self.properties.instance_id,
+            events:self.properties.events
         };
         self.elements = {
             $popbox:null,
-            $popbox_overlay:self.elements.$popbox_overlay, // not part of individual popbox
             $popbox_loading:null,
             $popbox_popup:null,
             $popbox_empty:null,
@@ -457,7 +463,8 @@
             $popbox_container:null,
             $popbox_title:null,
             $popbox_close:null,
-            $popbox_content:null
+            $popbox_content:null,
+            $popbox_overlay:self.elements.$popbox_overlay // not part of individual popbox
         };
     };
 
@@ -722,8 +729,11 @@
         self._private.self = self;
 
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
+
+        //defaults for pass through values
         self.properties = {
-            instance_id:_static._next_instance_id
+            instance_id:_static._next_instance_id,
+            events:{}
         };
         self.elements = {
             $popbox_overlay:null
@@ -943,8 +953,11 @@
         }
     };
 
-    Popbox.prototype.update = function(settings){
+    Popbox.prototype.update = function(settings,adjust,animate){
         var self = this;
+
+        adjust = _static.param(adjust,true);
+        animate = _static.param(animate,true);
 
         if (_static.isSet(settings.mode)) {
             if (!self.isOpen()) {
@@ -960,13 +973,17 @@
         $.extend(true,self.settings,_static.param(settings,{}));
 
         if (self.isCreated()) {
-            if (self.isOpen()) {
-                self.showLoading(function(){
+            if (self.isOpen() && adjust) {
+                if (animate) {
+                    self.showLoading(function(){
+                        self._private.applyDomSettings();
+                        self.adjust(true);
+                    });
+                }
+                else {
                     self._private.applyDomSettings();
-
-                    // perform an adjust
-                    self.adjust();
-                });
+                    self.adjust(false);
+                }
             }
             else {
                 self._private.applyDomSettings();
@@ -986,6 +1003,7 @@
             }
 
             if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
+            self.triggerEventListener('on_open');
 
             // html body scrollbar
             if (self.settings.hide_page_scroll) {
@@ -1049,6 +1067,7 @@
             self.properties.is_open = true;
 
             if (_static.isFunction(self.settings.after_open)) self.settings.after_open();
+            self.triggerEventListener('after_open');
         }
     };
 
@@ -1056,6 +1075,7 @@
         var self = this;
         if (self.isOpen()) {
             if (_static.isFunction(self.settings.on_close)) self.settings.on_close();
+            self.triggerEventListener('on_close');
             self.properties.is_open = false;
 
             // clear all animation functions (they can animate but do not trigger their complete function)
@@ -1100,6 +1120,7 @@
                     }
 
                     if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
+                    self.triggerEventListener('after_close');
                 }
             );
         }
@@ -1313,7 +1334,7 @@
                 });
             }
             else if (!animate) {
-                adjust_elements(animate,true);
+                adjust_elements(false,true);
             }
             else {
                 self.showLoading(function(){
@@ -1445,6 +1466,64 @@
     Popbox.prototype.isCreated = function(){
         var self = this;
         return !!self.elements.$popbox;
+    };
+
+    Popbox.prototype.addEventListener = function(event,handler){
+        var self = this;
+        var event_parts = event.split('.',2);
+        if (event_parts.length) {
+            var event_type = event_parts[0], event_name = (event_parts[1]) ? event_parts[1] : '_default';
+            if (!_static.isPlainObject(self.properties.events[event_type])) self.properties.events[event_type] = {};
+            if (!_static.isArray(self.properties.events[event_type][event_name])) self.properties.events[event_type][event_name] = [];
+            self.properties.events[event_type][event_name].push(handler);
+        }
+    };
+
+    Popbox.prototype.removeEventListener = function(event,handler){
+        var self = this;
+        var event_parts = event.split('.',2);
+        if (event_parts.length) {
+            var event_type = event_parts[0], event_name = (event_parts[1]) ? event_parts[1] : false;
+            if (_static.isPlainObject(self.properties.events[event_type])) {
+                for (var current_event_name in self.properties.events[event_type]) {
+                    if (self.properties.events[event_type].hasOwnProperty(current_event_name)
+                        && _static.isArray(self.properties.events[event_type][current_event_name])
+                        && (event_name === false || event_name === current_event_name)) {
+                        if (_static.isFunction(handler)) {
+                            for (var i=0; i<self.properties.events[event_type][current_event_name].length; i++) {
+                                if (self.properties.events[event_type][current_event_name][i] === handler) {
+                                    self.properties.events[event_type][current_event_name].splice(i,1);
+                                    i--;
+                                }
+                            }
+                        }
+                        else self.properties.events[event_type][current_event_name] = [];
+                    }
+                }
+            }
+        }
+    };
+
+    Popbox.prototype.triggerEventListener = function(event,handler){
+        var self = this;
+        var event_parts = event.split('.',2);
+        if (event_parts.length) {
+            var event_type = event_parts[0], event_name = (event_parts[1]) ? event_parts[1] : false;
+            if (_static.isPlainObject(self.properties.events[event_type])) {
+                for (var current_event_name in self.properties.events[event_type]) {
+                    if (self.properties.events[event_type].hasOwnProperty(current_event_name)
+                        && _static.isArray(self.properties.events[event_type][current_event_name])
+                        && (event_name === false || event_name === current_event_name)) {
+                        for (var i=0; i<self.properties.events[event_type][current_event_name].length; i++) {
+                            if (_static.isFunction(self.properties.events[event_type][current_event_name][i])
+                                && (!_static.isFunction(handler) || self.properties.events[event_type][current_event_name][i] === handler)) {
+                                self.properties.events[event_type][current_event_name][i]();
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
 
     // global events

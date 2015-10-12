@@ -138,6 +138,10 @@ popbox-link<br>
         loading:'<img src="images/loading.gif" width="32" height="32" alt="" />'
     });
 
+    popbox5.addEventListener('on_open',function(){
+        console.log("on_open event listener test");
+    });
+
     $('.click-me-5').on('click',function(e){
         e.preventDefault();
         popbox5.update({

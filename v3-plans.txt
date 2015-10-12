@@ -1,8 +1,7 @@
 VERSION 3 PLANS
 To do
 - Add gallery extension support.
-- Add native url content handling (ajax) extension support. Support form submissions.
-- Add addEventListener method to popbox class. (need to store events in their own area, use the change to transition events as example)
+- Add native url content handling (ajax) extension support.
 - Add fallback for content with forms for mobile devices. (issue with mobile device auto scroll on field focus)
 
 Done
@@ -16,5 +15,6 @@ Done
 - Take out awkward clone calculation and rely strictly on naturalWidth and naturalHeight from loaded image. If not supported, don't expect miracles.
 - Add extension support to the plugin. Separate gallery functionality and extensive future animations to their own extension scripts.
 - Add animation extension support.
+- Add addEventListener method to popbox class. (need to store events in their own area, use the change to transition events as example)
 
 Dropped
