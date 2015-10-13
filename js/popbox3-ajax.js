@@ -13,7 +13,7 @@
     var extend_default_settings = {
         ajax:{
             url:'', // the url for the ajax call
-            reload:false, // resend ajax call every time popbox opens
+            cache:false, // cache ajax call determines whether to run just once or every time popbox is opened
             data:'', // data to send with the ajax call
             selector:'', // get content directly from selected items in the html returned
             set_content:true // set the content of popbox to the returned value from the call
@@ -21,6 +21,13 @@
         }
     };
 
+    $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
+
     // add a "timeout" option to the jquery ajax call? http://api.jquery.com/jquery.ajax/
+
+    $.Popbox.prototype.hooks['on_open'].push(function(){
+        // ajax call to retrieve content from url provided
+        // store whether this has run, only run more than once on open if cache is false
+    });
 
 })(jQuery,window);

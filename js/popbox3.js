@@ -722,6 +722,17 @@
         }
     };
 
+    _private.prototype.triggerHook = function(name){
+        var self = this.self;
+        if (_static.isPlainObject(self.hooks) && _static.isArray(self.hooks[name])) {
+            for (var i=0; i<self.hooks[name].length; i++) {
+                if (_static.isFunction(self.hooks[name][i])) {
+                    self.hooks[name][i]();
+                }
+            }
+        }
+    };
+
     var Popbox = function(settings){
         var self = this;
 
@@ -804,6 +815,12 @@
                 'opacity':'0'
             }]
         }
+    };
+    Popbox.prototype.hooks = {
+        on_open:[],
+        after_open:[],
+        on_close:[],
+        after_close:[]
     };
     Popbox.prototype._static = _static;
     Popbox.prototype._private = {};
@@ -953,11 +970,10 @@
         }
     };
 
-    Popbox.prototype.update = function(settings,adjust,animate){
+    Popbox.prototype.update = function(settings,animate_adjust){
         var self = this;
 
-        adjust = _static.param(adjust,true);
-        animate = _static.param(animate,true);
+        animate_adjust = _static.param(animate_adjust,true);
 
         if (_static.isSet(settings.mode)) {
             if (!self.isOpen()) {
@@ -973,8 +989,8 @@
         $.extend(true,self.settings,_static.param(settings,{}));
 
         if (self.isCreated()) {
-            if (self.isOpen() && adjust) {
-                if (animate) {
+            if (self.isOpen()) {
+                if (animate_adjust) {
                     self.showLoading(function(){
                         self._private.applyDomSettings();
                         self.adjust(true);
@@ -995,15 +1011,17 @@
         var self = this;
 
         if (!self.isOpen()) {
+
+            self._private.triggerHook('on_open');
+            if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
+            self.triggerEventListener('on_open');
+
             if (!self.elements.$popbox) {
                 self.create();
             }
             else {
                 self._private.applyDomSettings();
             }
-
-            if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
-            self.triggerEventListener('on_open');
 
             // html body scrollbar
             if (self.settings.hide_page_scroll) {
@@ -1031,11 +1049,9 @@
             self.elements.$popbox.css({
                 'display':'block'
             });
-
             self.elements.$popbox_popup.css({
                 'visibility':'visible'
             });
-
             self.showContent();
 
             // adjust
@@ -1066,6 +1082,7 @@
 
             self.properties.is_open = true;
 
+            self._private.triggerHook('after_open');
             if (_static.isFunction(self.settings.after_open)) self.settings.after_open();
             self.triggerEventListener('after_open');
         }
@@ -1074,8 +1091,10 @@
     Popbox.prototype.close = function(destroy){
         var self = this;
         if (self.isOpen()) {
+            self._private.triggerHook('on_close');
             if (_static.isFunction(self.settings.on_close)) self.settings.on_close();
             self.triggerEventListener('on_close');
+
             self.properties.is_open = false;
 
             // clear all animation functions (they can animate but do not trigger their complete function)
@@ -1119,6 +1138,7 @@
                         }
                     }
 
+                    self._private.triggerHook('after_close');
                     if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
                     self.triggerEventListener('after_close');
                 }

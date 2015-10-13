@@ -11,11 +11,14 @@
         gallery:{ // mode must be set to gallery for this to be used
             loading:'<div>Loading...</div>',
             error:'<div>There was an error loading the image.</div>',
-            name:'',
+            name:'', // class to get images, either is the image or the first image inside
             next:'<span>&#x25B6;</span>',
             prev:'<span>&#x25C0;</span>'
         }
     };
+
+    // put the next and previous buttons in the popbox
+    // replace the main content with the error
 
     $.Popbox.prototype.modes.gallery = {
         _private:{}
