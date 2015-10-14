@@ -28,10 +28,6 @@
 
     };
 
-    $.Popbox.prototype.modes.gallery.adjust = function(){
-
-    };
-
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
 })(jQuery,window);

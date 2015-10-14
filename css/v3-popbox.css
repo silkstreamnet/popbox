@@ -6,8 +6,7 @@
 
 /*** Popbox Customise ***/
 .popbox-overlay {
-    cursor:default;
-    background:rgba(0,0,0,0.3);
+    background:rgba(0,0,0,0.4);
     z-index:99800;
 }
 

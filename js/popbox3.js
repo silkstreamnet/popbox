@@ -507,17 +507,15 @@
             self.elements.$popbox_overlay = $existing_popbox_overlay;
         }
         else {
-            self.elements.$popbox_overlay = $('<a/>',{
+            self.elements.$popbox_overlay = $('<div/>',{
                 'class':'popbox-overlay',
-                'href':'javascript:void(0);',
                 'css':{
                     'display':'none',
                     'position':'fixed',
                     'top':'0',
                     'right':'0',
                     'bottom':'0',
-                    'left':'0',
-                    'cursor':'pointer'
+                    'left':'0'
                 }
             }).data('is_open',false).appendTo($container);
         }
@@ -719,6 +717,27 @@
                 self.elements.$popbox.css('z-index',self.settings.z_index);
                 self.elements.$popbox_popup.css('z-index',self.settings.z_index+1);
             }
+
+            var user_agent_checks = {
+                'mobile':navigator.userAgent.match(/(iPad|iPhone|iPod|Android)/g),
+                'ios':navigator.userAgent.match(/(iPad|iPhone|iPod)/g),
+                'android':navigator.userAgent.match(/(Android)/g)
+            };
+
+            if (self.settings.absolute === true || (_static.isString(self.settings.absolute) && user_agent_checks[self.settings.absolute])) {
+                self.elements.$popbox.css({
+                    'position':'absolute',
+                    'overflow-y':'visible',
+                    'overflow-x':'visible'
+                });
+            }
+            else {
+                self.elements.$popbox.css({
+                    'position':'fixed',
+                    'overflow-y':'scroll',
+                    'overflow-x':'hidden'
+                });
+            }
         }
     };
 
@@ -787,7 +806,7 @@
         hide_page_scroll_space:true,
         content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
         loading:'Loading',
-        mobile_fallback:false, //TODO needs doing (will be used if the website has forms in popboxes and is shown on mobile) (if true, use position absolute instead of fixed for popbox - doesn't matter about overlay)
+        absolute:'mobile', //TODO needs doing (will be used if the website has forms in popboxes and is shown on mobile) (if true, use position absolute instead of fixed for popbox - doesn't matter about overlay)
         add_class:'',
         aspect_fit:false, // recommended for images and iframes - not for content
         cache:false,
@@ -1013,7 +1032,6 @@
         if (!self.isOpen()) {
 
             self._private.triggerHook('on_open');
-            if (_static.isFunction(self.settings.on_open)) self.settings.on_open();
             self.triggerEventListener('on_open');
 
             if (!self.elements.$popbox) {
@@ -1023,20 +1041,25 @@
                 self._private.applyDomSettings();
             }
 
-            // html body scrollbar
-            if (self.settings.hide_page_scroll) {
-                var old_body_width = _static.$body.width();
-                if (self.properties.last_html_overflow === false) {
-                    self.properties.last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
-                }
-                _static.$html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
-                var new_body_width = _static.$body.width();
-                if (self.settings.hide_page_scroll_space) {
-                    if (self.properties.last_html_margin_right === false) {
-                        self.properties.last_html_margin_right = _static.getInlineStyle(_static.$html,'margin-right');
+            if (self.elements.$popbox.css('position') == 'absolute') {
+                self.elements.$popbox.css('top',_static.$window.scrollTop()+'px');
+            }
+            else {
+                // html body scrollbar
+                if (self.settings.hide_page_scroll) {
+                    var old_body_width = _static.$body.width();
+                    if (self.properties.last_html_overflow === false) {
+                        self.properties.last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
                     }
-                    if (new_body_width > old_body_width) {
-                        _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
+                    _static.$html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
+                    var new_body_width = _static.$body.width();
+                    if (self.settings.hide_page_scroll_space) {
+                        if (self.properties.last_html_margin_right === false) {
+                            self.properties.last_html_margin_right = _static.getInlineStyle(_static.$html,'margin-right');
+                        }
+                        if (new_body_width > old_body_width) {
+                            _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
+                        }
                     }
                 }
             }
@@ -1083,7 +1106,6 @@
             self.properties.is_open = true;
 
             self._private.triggerHook('after_open');
-            if (_static.isFunction(self.settings.after_open)) self.settings.after_open();
             self.triggerEventListener('after_open');
         }
     };
@@ -1092,7 +1114,6 @@
         var self = this;
         if (self.isOpen()) {
             self._private.triggerHook('on_close');
-            if (_static.isFunction(self.settings.on_close)) self.settings.on_close();
             self.triggerEventListener('on_close');
 
             self.properties.is_open = false;
@@ -1139,7 +1160,6 @@
                     }
 
                     self._private.triggerHook('after_close');
-                    if (_static.isFunction(self.settings.after_close)) self.settings.after_close();
                     self.triggerEventListener('after_close');
                 }
             );
@@ -1535,6 +1555,9 @@
         var event_parts = event.split('.',2);
         if (event_parts.length) {
             var event_type = event_parts[0], event_name = (event_parts[1]) ? event_parts[1] : false;
+            if (_static.isFunction(self.settings[event_type])) {
+                self.settings[event_type]();
+            }
             if (_static.isPlainObject(self.properties.events[event_type])) {
                 for (var current_event_name in self.properties.events[event_type]) {
                     if (self.properties.events[event_type].hasOwnProperty(current_event_name)
