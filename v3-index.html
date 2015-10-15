@@ -23,6 +23,8 @@
 <a href="#" class="click-me-5">Test switch content 2s</a><br>
 <a href="#" class="click-me-6">iFrame Test</a><br>
 <a href="#" class="click-me-7">Selector Test</a><br>
+<a href="#" class="click-me-gallery-1">Gallery 1 Item 1</a><br>
+<a href="#" class="click-me-gallery-1">Gallery 1 Item 2</a><br>
 <br><br>
 Possible classes for popbox3-ajax.js<br>
 popbox-form<br>
@@ -172,6 +174,15 @@ popbox-link<br>
         content:long_text,
         animation:'fold',
         animation_speed:500
+    });
+
+    var popbox_gallery1 = new $.Popbox({
+        mode:'gallery'
+    });
+
+    $('.click-me-gallery-1').on('click',function(e){
+        e.preventDefault();
+        popbox_gallery1.open();
     });
 
 </script>

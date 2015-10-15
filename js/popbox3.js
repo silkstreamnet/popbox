@@ -417,6 +417,8 @@
     _private.prototype.reset = function() {
         var self = this.self;
 
+        self._private.triggerHook('on_reset');
+
         if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
             var mode_data = self.modes[self.settings.mode],
                 method;
@@ -466,6 +468,8 @@
             $popbox_content:null,
             $popbox_overlay:self.elements.$popbox_overlay // not part of individual popbox
         };
+
+        self._private.triggerHook('after_reset');
     };
 
     _private.prototype.applyMode = function(){
@@ -695,6 +699,9 @@
     _private.prototype.applyDomSettings = function(){
         var self = this.self;
         if (self.isCreated()) {
+
+            self._private.triggerHook('on_update_dom');
+
             self.elements.$popbox_loading.html(self.settings.loading);
             self.elements.$popbox_close.html(self.settings.close);
             self.elements.$popbox_title.html(self.settings.title);
@@ -738,6 +745,8 @@
                     'overflow-x':'hidden'
                 });
             }
+
+            self._private.triggerHook('after_update_dom');
         }
     };
 
@@ -746,7 +755,7 @@
         if (_static.isPlainObject(self.hooks) && _static.isArray(self.hooks[name])) {
             for (var i=0; i<self.hooks[name].length; i++) {
                 if (_static.isFunction(self.hooks[name][i])) {
-                    self.hooks[name][i]();
+                    self.hooks[name][i].call(self);
                 }
             }
         }
@@ -820,6 +829,8 @@
         on_close:false,
         after_close:false
     };
+    Popbox.prototype._static = _static;
+    Popbox.prototype._private = {};
     Popbox.prototype.modes = {}; // override prototype functions
     Popbox.prototype.animations = {
         'fade':{
@@ -835,19 +846,20 @@
             }]
         }
     };
-    Popbox.prototype.hooks = {
-        on_open:[],
-        after_open:[],
-        on_close:[],
-        after_close:[]
+    Popbox.prototype.hooks = {};
+    _static.addHook = function(hook,handler){
+        if (!_static.isArray(Popbox.prototype.hooks[hook])) Popbox.prototype.hooks[hook] = [];
+        Popbox.prototype.hooks[hook].push(handler);
     };
-    Popbox.prototype._static = _static;
-    Popbox.prototype._private = {};
+
 
     Popbox.prototype.create = function(){
         var self = this;
 
         self.destroy();
+
+        self._private.triggerHook('on_create');
+
         self._private.createOverlay();
 
         var $container = (self.settings.container) ? $(self.settings.container) : _static.$body;
@@ -969,12 +981,17 @@
 
         _static._instances[self.properties.instance_id] = self;
         _static._instances.length++;
+
+        self._private.triggerHook('after_create');
     };
 
     Popbox.prototype.destroy = function(){
         var self = this;
 
         if (self.elements.$popbox) {
+
+            self._private.triggerHook('on_destroy');
+
             self.elements.$popbox.remove();
             self.elements.$popbox = null;
 
@@ -986,6 +1003,8 @@
             self._private.closeOverlay();
             self._private.reset();
             self._private.applyMode();
+
+            self._private.triggerHook('after_destroy');
         }
     };
 
@@ -1550,7 +1569,7 @@
         }
     };
 
-    Popbox.prototype.triggerEventListener = function(event,handler){
+    Popbox.prototype.triggerEventListener = function(event,handler,params){
         var self = this;
         var event_parts = event.split('.',2);
         if (event_parts.length) {
@@ -1566,7 +1585,7 @@
                         for (var i=0; i<self.properties.events[event_type][current_event_name].length; i++) {
                             if (_static.isFunction(self.properties.events[event_type][current_event_name][i])
                                 && (!_static.isFunction(handler) || self.properties.events[event_type][current_event_name][i] === handler)) {
-                                self.properties.events[event_type][current_event_name][i]();
+                                self.properties.events[event_type][current_event_name][i].apply(self,params);
                             }
                         }
                     }

@@ -4,7 +4,7 @@
  */
 
 
-/*** Popbox Customise ***/
+/*** Default ***/
 .popbox-overlay {
     background:rgba(0,0,0,0.4);
     z-index:99800;
@@ -77,6 +77,33 @@
     padding:0;
 }
 
+/*** Gallery ***/
+.popbox-gallery-next, .popbox-gallery-prev {
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:50%;
+}
+
+.popbox-gallery-next span, .popbox-gallery-prev span {
+    position:absolute;
+    top:0;
+    bottom:0;
+    margin: auto 0;
+    padding:0 5%;
+    height:32px;
+    line-height:32px;
+}
+
+.popbox-gallery-next, .popbox-gallery-next span {
+    text-align:right;
+    right:0;
+}
+
+.popbox-gallery-prev, .popbox-gallery-prev span {
+    text-align:left;
+    left:0;
+}
 
 /*** Popbox Rendering Defaults ***/
 .popbox, .popbox *, .popbox-overlay, .popbox-overlay * {
