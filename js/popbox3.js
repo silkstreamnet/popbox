@@ -403,11 +403,9 @@
                 var $subobject = $(this);
                 if (prevent_default) e.preventDefault();
                 $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
-                    if (_static.isFunction(handler)) handler(e2);
-                    if (prevent_default) {
-                        e2.preventDefault();
-                        return false;
-                    }
+                    if (prevent_default) e2.preventDefault();
+                    if (_static.isFunction(handler)) handler.call(e2);
+                    if (prevent_default) return false;
                 });
             });
         }
@@ -524,6 +522,7 @@
             }).data('is_open',false).appendTo($container);
         }
 
+        _static.offTouchClick(self.elements.$popbox_overlay);
         _static.onTouchClick(self.elements.$popbox_overlay,null,function(){
             for (var i in _static._instances) {
                 if (_static._instances.hasOwnProperty(i)) {
@@ -750,12 +749,16 @@
         }
     };
 
-    _private.prototype.triggerHook = function(name){
+    _private.prototype.triggerHook = function(name,params){
         var self = this.self;
+        if (!_static.isArray(params)) {
+            if (_static.isSet(params)) params = [params];
+            else params = [];
+        }
         if (_static.isPlainObject(self.hooks) && _static.isArray(self.hooks[name])) {
             for (var i=0; i<self.hooks[name].length; i++) {
                 if (_static.isFunction(self.hooks[name][i])) {
-                    self.hooks[name][i].call(self);
+                    self.hooks[name][i].apply(self,params);
                 }
             }
         }
@@ -766,6 +769,8 @@
 
         self._private = new _private();
         self._private.self = self;
+
+        self._private.triggerHook('on_initialize');
 
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
 
@@ -782,6 +787,8 @@
         self._private.applyMode();
 
         _static._next_instance_id++;
+
+        self._private.triggerHook('after_initialize');
     };
 
     Popbox.prototype.version = '3.0.0';
@@ -816,7 +823,7 @@
         content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
         loading:'Loading',
         absolute:'mobile',
-        add_class:'',
+        add_class:'', // supports multiple space separated classes
         aspect_fit:false, // recommended for images and iframes - not for content
         cache:false,
         wait_for_images:true,
@@ -830,7 +837,7 @@
         after_close:false
     };
     Popbox.prototype._static = _static;
-    Popbox.prototype._private = {};
+    Popbox.prototype._private = _private;
     Popbox.prototype.modes = {}; // override prototype functions
     Popbox.prototype.animations = {
         'fade':{
@@ -851,7 +858,6 @@
         if (!_static.isArray(Popbox.prototype.hooks[hook])) Popbox.prototype.hooks[hook] = [];
         Popbox.prototype.hooks[hook].push(handler);
     };
-
 
     Popbox.prototype.create = function(){
         var self = this;
@@ -935,11 +941,9 @@
         self._private.applyDomSettings();
 
         // events
-        self.elements.$popbox_close.on('click.'+_static._event_namespace,function(e){
-            e.preventDefault();
+        _static.onTouchClick(self.elements.$popbox_close,null,function(){
             self.close();
-            return false;
-        });
+        },true);
 
         var _complex_close_namespace = 'Popbox_complex_close';
         self.elements.$popbox.on('mousedown.'+_static._event_namespace+' touchstart.'+_static._event_namespace,function(e1){
