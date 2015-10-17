@@ -396,7 +396,6 @@
             if (prevent_default) {
                 $object.on('click.'+touch_click_namespace,function(e){
                     e.preventDefault();
-                    return false;
                 });
             }
             $object.on('mousedown.'+touch_click_namespace+' touchstart.'+touch_click_namespace,selector,function(e){
@@ -406,8 +405,7 @@
                     $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
                         if (e.originalEvent.touches || e.which == 1) {
                             if (prevent_default) e2.preventDefault();
-                            if (_static.isFunction(handler)) handler.call(e2);
-                            if (prevent_default) return false;
+                            if (_static.isFunction(handler)) handler.call(this,e2);
                         }
                     });
                 }

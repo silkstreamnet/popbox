@@ -20,6 +20,8 @@
 
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
+    //TODO error handling
+
     var gallery = function(){};
     gallery.prototype.updateItems = function(){
         var popbox = this.self;
@@ -27,9 +29,9 @@
         // get image file links
         if (popbox.settings.gallery.selector) {
 
-            //TODO bind click events if applicable to selector elements
+            var $items = $(popbox.settings.gallery.selector);
 
-            $(popbox.settings.gallery.selector).each(function(){
+            $items.each(function(){
                 // check for src or href (href first)
                 var $item = $(this),
                     href = $item.attr('href'),
@@ -53,6 +55,19 @@
 
                 if (link && _static.indexOf(link,popbox.properties.gallery.items,true) < 0) popbox.properties.gallery.items.push(link);
             });
+
+            if (popbox.settings.gallery.clickable) {
+                _static.offTouchClick($items);
+                _static.onTouchClick($items,null,function(){
+                    var $item = $(this),
+                        href = $item.attr('href'),
+                        src = $item.attr('src');
+                    popbox.gallery.updateItems();
+                    if (href) popbox.gallery.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
+                    else if (src) popbox.gallery.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
+                    popbox.open();
+                },true);
+            }
         }
     };
     gallery.prototype.goTo = function(new_item_index){
@@ -109,9 +124,13 @@
 
     _static.addHook('on_open',function(){
         var popbox = this;
-        //TODO check if image is already in the content and exists in the gallery, if not in gallery ignore and override it with goTo
         popbox.gallery.updateItems();
-        popbox.gallery.goTo();
+        var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
+            existing_img_index = -1;
+        if ($existing_img.length) {
+            existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
+        }
+        popbox.gallery.goTo(existing_img_index);
     });
 
     _static.addHook('after_update',function(){
