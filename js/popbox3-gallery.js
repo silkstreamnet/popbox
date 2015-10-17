@@ -11,6 +11,7 @@
         extend_default_settings = {
             gallery:{ // mode must be set to gallery for this to be used
                 selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
+                clickable:true, // whether to apply a click/touch to selector items
                 error:'<div>There was an error loading the image.</div>',
                 next:'<span>&#x25B6;</span>',
                 prev:'<span>&#x25C0;</span>'
@@ -24,51 +25,55 @@
         var popbox = this.self;
 
         // get image file links
-        if (popbox.settings.selector) {
-            $(popbox.settings.selector).each(function(){
+        if (popbox.settings.gallery.selector) {
+
+            //TODO bind click events if applicable to selector elements
+
+            $(popbox.settings.gallery.selector).each(function(){
                 // check for src or href (href first)
                 var $item = $(this),
                     href = $item.attr('href'),
                     src = $item.attr('src'),
                     link = false;
-
                 if (href) link = href;
                 else if (src) link = src;
                 else {
                     // get sub items
                     $item.find('a[href]').each(function(){
-                        popbox.properties.gallery.items.push($(this).attr('href'));
+                        var sublink = $(this).attr('href');
+                        if (sublink && _static.indexOf(sublink,popbox.properties.gallery.items,true) < 0)
+                            popbox.properties.gallery.items.push(sublink);
                     });
                     $item.find('img[src]').each(function(){
-                        popbox.properties.gallery.items.push($(this).attr('src'));
+                        var sublink = $(this).attr('src');
+                        if (sublink && _static.indexOf(sublink,popbox.properties.gallery.items,true) < 0)
+                            popbox.properties.gallery.items.push(sublink);
                     });
                 }
 
-                if (link) popbox.properties.gallery.items.push(link);
+                if (link && _static.indexOf(link,popbox.properties.gallery.items,true) < 0) popbox.properties.gallery.items.push(link);
             });
         }
     };
     gallery.prototype.goTo = function(new_item_index){
         var popbox = this.self;
 
-        new_item_index = (_static.isNumber(new_item_index)) ? new_item_index : 0;
+        new_item_index = (_static.isNumber(new_item_index)) ? new_item_index : popbox.properties.gallery.current_index;
 
-        if (popbox.isCreated()) {
-            if (popbox.properties.gallery.items.length > 0) {
+        if (popbox.properties.gallery.items.length > 0) {
 
-                if (new_item_index > popbox.properties.gallery.items.length-1) {
-                    new_item_index = 0;
-                }
-                else if (new_item_index < 0) {
-                    new_item_index = (popbox.properties.gallery.items.length > 0) ? popbox.properties.gallery.items.length-1 : 0;
-                }
-
-                popbox.properties.gallery.current_index = new_item_index;
-
-                popbox.update({
-                    content:'<img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" />'
-                },true);
+            if (new_item_index > popbox.properties.gallery.items.length-1) {
+                new_item_index = 0;
             }
+            else if (new_item_index < 0) {
+                new_item_index = (popbox.properties.gallery.items.length > 0) ? popbox.properties.gallery.items.length-1 : 0;
+            }
+
+            popbox.properties.gallery.current_index = new_item_index;
+
+            popbox.update({
+                content:'<img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" />'
+            },true);
         }
     };
     gallery.prototype.next = function(){
@@ -88,6 +93,12 @@
         popbox.gallery.self = popbox;
     });
 
+    _static.addHook('after_initialize',function(new_settings){
+        var popbox = this;
+        if (popbox.settings.mode == 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) popbox.settings.aspect_fit = true;
+        popbox.gallery.updateItems();
+    });
+
     _static.addHook('after_reset',function(){
         var popbox = this;
         popbox.properties.gallery = {
@@ -96,9 +107,11 @@
         };
     });
 
-    _static.addHook('after_open',function(){
+    _static.addHook('on_open',function(){
         var popbox = this;
+        //TODO check if image is already in the content and exists in the gallery, if not in gallery ignore and override it with goTo
         popbox.gallery.updateItems();
+        popbox.gallery.goTo();
     });
 
     _static.addHook('after_update',function(){
@@ -110,14 +123,16 @@
         }
 
         popbox.gallery.updateItems();
+        popbox.gallery.goTo();
     });
 
     _static.addHook('after_update_dom',function(){
         var popbox = this;
 
-        if (popbox.settings.mode === 'gallery') {
+        var show_btns = false;
 
-            if (popbox.properties.gallery.items.length > 0) {
+        if (popbox.settings.mode === 'gallery') {
+            if (popbox.properties.gallery.items.length > 1) {
                 // put the next and previous buttons in the popbox
                 if (!popbox.elements.$popbox_gallery_next) {
                     popbox.elements.$popbox_gallery_next = $('<a/>',{
@@ -141,9 +156,12 @@
                 _static.onTouchClick(popbox.elements.$popbox_gallery_prev,null,function(){
                     popbox.gallery.prev();
                 },true);
+
+                show_btns = true;
             }
         }
-        else {
+
+        if (!show_btns) {
             // remove the next and previous buttons from the popbox if they exist
             if (popbox.elements.$popbox_gallery_next) popbox.elements.$popbox_gallery_next.remove();
             if (popbox.elements.$popbox_gallery_prev) popbox.elements.$popbox_gallery_prev.remove();

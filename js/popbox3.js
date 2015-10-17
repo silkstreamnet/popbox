@@ -400,13 +400,17 @@
                 });
             }
             $object.on('mousedown.'+touch_click_namespace+' touchstart.'+touch_click_namespace,selector,function(e){
-                var $subobject = $(this);
-                if (prevent_default) e.preventDefault();
-                $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
-                    if (prevent_default) e2.preventDefault();
-                    if (_static.isFunction(handler)) handler.call(e2);
-                    if (prevent_default) return false;
-                });
+                if (e.originalEvent.touches || e.which == 1) {
+                    var $subobject = $(this);
+                    if (prevent_default) e.preventDefault();
+                    $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
+                        if (e.originalEvent.touches || e.which == 1) {
+                            if (prevent_default) e2.preventDefault();
+                            if (_static.isFunction(handler)) handler.call(e2);
+                            if (prevent_default) return false;
+                        }
+                    });
+                }
             });
         }
     };
@@ -751,10 +755,7 @@
 
     _private.prototype.triggerHook = function(name,params){
         var self = this.self;
-        if (!_static.isArray(params)) {
-            if (_static.isSet(params)) params = [params];
-            else params = [];
-        }
+        params = (_static.isArray(params)) ? params : [];
         if (_static.isPlainObject(self.hooks) && _static.isArray(self.hooks[name])) {
             for (var i=0; i<self.hooks[name].length; i++) {
                 if (_static.isFunction(self.hooks[name][i])) {
@@ -770,7 +771,7 @@
         self._private = new _private();
         self._private.self = self;
 
-        self._private.triggerHook('on_initialize');
+        self._private.triggerHook('on_initialize',[settings]);
 
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
 
@@ -788,7 +789,7 @@
 
         _static._next_instance_id++;
 
-        self._private.triggerHook('after_initialize');
+        self._private.triggerHook('after_initialize',[settings]);
     };
 
     Popbox.prototype.version = '3.0.0';
@@ -828,7 +829,7 @@
         cache:false,
         wait_for_images:true,
         width_margin:0.1,
-        height_margin:0.06,
+        height_margin:0.08,
         z_index:99900, // should be a number greater than 0, otherwise z-index will not be set at all.
         mode:false, //normal, can be 'gallery' if extension is available
         on_open:false,

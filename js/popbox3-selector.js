@@ -68,7 +68,7 @@
                                 /^(?:http:|https:)?\/\/player\.vimeo\.com\/video\/([a-zA-Z0-9_\-]+)/ //embedurl
                             ],
                             image:[
-                                /^(?:http:|https:)?\/\/[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/, //remote image
+                                /^(?:http:|https:)?\/\/[a-zA-Z0-9_\-\./]+(?:\.jpe?g|\.png|\.gif)(?:.+)?/, //remote image
                                 /^[a-zA-Z0-9_\-\./]+(?:\.jpg|\.png|\.gif)(?:.+)?/ //remote image
                             ]
                         };
