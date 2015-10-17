@@ -419,25 +419,6 @@
 
         self._private.triggerHook('on_reset');
 
-        if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
-            var mode_data = self.modes[self.settings.mode],
-                method;
-
-            for (method in mode_data) {
-                if (mode_data.hasOwnProperty(method) && _static.isSet(self[method])) {
-                    delete self[method];
-                }
-            }
-
-            if (_static.isSet(mode_data._private)){
-                for (method in mode_data._private) {
-                    if (mode_data._private.hasOwnProperty(method) && _static.isSet(self._private[method])) {
-                        delete self._private[method];
-                    }
-                }
-            }
-        }
-
         if (self.properties.disable_background_click_timer !== false) {
             clearTimeout(self.properties.disable_background_click_timer);
         }
@@ -470,34 +451,6 @@
         };
 
         self._private.triggerHook('after_reset');
-    };
-
-    _private.prototype.applyMode = function(){
-        var self = this.self;
-
-        // check if mode exists and has override methods
-        if (_static.isString(self.settings.mode) && _static.isSet(self.modes[self.settings.mode])) {
-            var mode_data = self.modes[self.settings.mode],
-                method;
-
-            for (method in mode_data) {
-                if (mode_data.hasOwnProperty(method) && _static.isFunction(mode_data[method])) {
-                    self[method] = mode_data[method];
-                }
-            }
-
-            if (_static.isSet(mode_data._private)){
-                for (method in mode_data._private) {
-                    if (mode_data._private.hasOwnProperty(method) && _static.isFunction(mode_data._private[method])) {
-                        self._private[method] = mode_data._private[method];
-                    }
-                }
-
-                if (_static.isFunction(mode_data._private.initiate)) {
-                    mode_data._private.initiate();
-                }
-            }
-        }
     };
 
     _private.prototype.createOverlay = function(){
@@ -783,7 +736,6 @@
         };
 
         self._private.reset();
-        self._private.applyMode();
 
         _static._next_instance_id++;
 
@@ -837,7 +789,6 @@
     };
     Popbox.prototype._static = _static;
     Popbox.prototype._private = _private;
-    Popbox.prototype.modes = {}; // override prototype functions
     Popbox.prototype.animations = {
         'fade':{
             'open':[{
@@ -1005,7 +956,6 @@
 
             self._private.closeOverlay();
             self._private.reset();
-            self._private.applyMode();
 
             self._private.triggerHook('after_destroy');
         }
@@ -1015,17 +965,6 @@
         var self = this;
 
         animate_adjust = _static.param(animate_adjust,true);
-
-        if (_static.isSet(settings.mode)) {
-            if (!self.isOpen()) {
-                // erase existing mode functions
-                self.destroy();
-                self._private.reset();
-                self.settings.mode = settings.mode || false;
-                self._private.applyMode();
-            }
-            delete settings.mode;
-        }
 
         $.extend(true,self.settings,_static.param(settings,{}));
 
@@ -1200,7 +1139,7 @@
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
 
-                var window_width = _static.$window.width(),
+                var window_width = self.elements.$popbox_empty.width(), //_static.$window.width(),
                     window_height = _static.$window.height(),
                     popbox_width_padding = _static.elementPaddingWidth(self.elements.$popbox_popup),
                     popbox_height_padding = _static.elementPaddingHeight(self.elements.$popbox_popup),

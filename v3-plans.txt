@@ -5,6 +5,7 @@ To do
 - Add fallback for content with forms for mobile devices. (issue with mobile device auto scroll on field focus)
 - Add smooth popbox switching. (if one popbox is opened when another is already opened)
 - Make sure different containers other than body work.
+- Currently completely broken in IE8. Work out fix?
 
 Done
 - Change function definition convention for private functions to var function plus camelCase.
