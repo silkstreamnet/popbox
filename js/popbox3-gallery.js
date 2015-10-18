@@ -136,7 +136,6 @@
         popbox.update({
             content:popbox.settings.gallery.error
         },false);
-        console.log("moo");
     });
 
     _static.addHook('after_update',function(){
