@@ -380,10 +380,12 @@
         }
     };
     _static.getTrueWidth = function($object) {
-        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
+        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().right-$object.get(0).getBoundingClientRect().left : 0; // support for IE8
+        //return ($object && $object.length) ? $object.get(0).getBoundingClientRect().width : 0;
     };
     _static.getTrueHeight = function($object) {
-        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
+        return ($object && $object.length) ? $object.get(0).getBoundingClientRect().bottom-$object.get(0).getBoundingClientRect().top : 0; // support for IE8
+        //return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
     };
     _static.offTouchClick = function($object) {
         if ($object.length) {
@@ -430,6 +432,7 @@
             disable_background_click:false,
             disable_background_click_timer:false,
             image_cache:{},
+            image_errors:0,
             interface_image_cache_pending:0,
             content_image_cache_pending:0,
             last_html_overflow:false,
@@ -587,6 +590,7 @@
 
     _private.prototype.checkImagesLoaded = function(){
         var self = this.self;
+
         if (self.isCreated()) {
 
             var $images = self.elements.$popbox.find('img');
@@ -596,15 +600,11 @@
                     $image = $(this);
 
                 if (image.src) {
-
-                    if (image.complete && _static.isSet(image.naturalWidth)) {
-                        if (_static.isNumber(image.naturalWidth,true)) {
-                            //self.adjust(true);
-                        }
-                    }
-                    else if (!self.properties.image_cache[image.src]) {
+                    var image_ready = ((image.complete && _static.isSet(image.naturalWidth)) || image.readyState === 4 || image.readyState === 'complete');
+                    if (!image_ready && !self.properties.image_cache[image.src]) {
                         var proxy_image = new Image(),
-                            proxy_image_event = function(){
+                            proxy_image_event = function(error){
+                                if (error) self.properties.image_errors++;
                                 if ($image.closest(self.elements.$popbox_content).length > 0) {
                                     self.properties.content_image_cache_pending--;
                                     if (self.properties.content_image_cache_pending == 0) {
@@ -627,20 +627,26 @@
                             self.properties.interface_image_cache_pending++;
                         }
 
+                        proxy_image.src = '';
+
                         proxy_image.onload = function(){
                             proxy_image_event();
                         };
 
                         proxy_image.onerror = function(){
-                            proxy_image_event();
+                            proxy_image_event(true);
                         };
-
-                        proxy_image.src = image.src;
 
                         self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
                     }
                 }
             });
+
+            for (var image_cache_src in self.properties.image_cache) {
+                if (self.properties.image_cache.hasOwnProperty(image_cache_src) && self.properties.image_cache[image_cache_src].proxy.src != image_cache_src) {
+                    self.properties.image_cache[image_cache_src].proxy.src = image_cache_src;
+                }
+            }
 
             if (self.properties.content_image_cache_pending == 0 && self.properties.interface_image_cache_pending == 0) {
                 return true;
@@ -824,7 +830,7 @@
             'class':'popbox',
             'css':{
                 'display':'none',
-                'position':'fixed', // TODO need to support position absolute
+                'position':'fixed',
                 'width':'100%',
                 'height':'100%',
                 'top':'0px',
@@ -1175,7 +1181,7 @@
                     'overflow-y':''
                 });
                 self.elements.$popbox_wrapper.css({
-                    'position':'absolute',
+                    'position':'relative',
                     'top':'0px',
                     'left':'0px',
                     'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
@@ -1189,7 +1195,8 @@
                     'width':set_popbox_width,
                     'height':set_popbox_height,
                     'min-width':min_popbox_width+'px',
-                    'min-height':min_popbox_height+'px'
+                    'min-height':min_popbox_height+'px',
+                    'max-width':'100%'
                 });
 
                 // use true width to get overhang (stops text wrapping)
@@ -1275,7 +1282,8 @@
                         'width':'',
                         'height':'',
                         'min-width':'',
-                        'min-height':''
+                        'min-height':'',
+                        'max-width':''
                     });
                 };
 
@@ -1513,6 +1521,7 @@
 
     Popbox.prototype.triggerEventListener = function(event,handler,params){
         var self = this;
+        params = (_static.isArray(params)) ? params : [];
         var event_parts = event.split('.',2);
         if (event_parts.length) {
             var event_type = event_parts[0], event_name = (event_parts[1]) ? event_parts[1] : false;
