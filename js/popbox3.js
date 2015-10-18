@@ -599,51 +599,63 @@
                     $image = $(this);
 
                 if (image.src) {
-                    var image_ready = ((image.complete && _static.isSet(image.naturalWidth)) || image.readyState === 4 || image.readyState === 'complete');
-                    if (!image_ready || !self.properties.image_cache[image.src]) {
-                        var proxy_image = new Image(),
-                            proxy_image_event = function(){
-                                if ($image.closest(self.elements.$popbox_content).length > 0) {
-                                    self.properties.content_image_cache_pending--;
-                                    if (self.properties.content_image_cache_pending == 0) {
-                                        if (self.isChangingState() && self.elements.$popbox_popup.hasClass('popbox-animating')) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);});
-                                        else self.adjust(true);
-                                    }
-                                }
-                                else {
-                                    self.properties.interface_image_cache_pending--;
-                                    if (self.properties.interface_image_cache_pending == 0) {
-                                        //if (self.isLoading()) self.adjust(true);
-                                    }
-                                }
-                            };
+                    var image_ready = ((image.complete && _static.isNumber(image.naturalWidth,false)) || image.readyState === 4 || image.readyState === 'complete');
+                    //var image_ready = (image.complete || image.readyState === 4 || image.readyState === 'complete');
+                    if (!image_ready && !self.properties.image_cache[image.src]) {
+                        self.properties.image_cache[image.src] = {origin:image,$origin:$image,proxy:false};
+                    }
+                }
+            });
 
-                        if ($image.closest(self.elements.$popbox_content).length > 0) {
+            var proxy_image_event = function($image){
+                if ($image.closest(self.elements.$popbox_content).length > 0) {
+                    self.properties.content_image_cache_pending--;
+                    if (self.properties.content_image_cache_pending == 0) {
+                        if (self.isChangingState() && self.elements.$popbox_popup.hasClass('popbox-animating')) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);});
+                        else self.adjust(true);
+                    }
+                }
+                else {
+                    self.properties.interface_image_cache_pending--;
+                    if (self.properties.interface_image_cache_pending == 0) {
+                        //if (self.isLoading()) self.adjust(true);
+                    }
+                }
+            };
+
+            for (var image_cache_src in self.properties.image_cache) {
+                if (self.properties.image_cache.hasOwnProperty(image_cache_src) && !self.properties.image_cache[image_cache_src].proxy) {
+                    (function(image_cache_src){
+                        var proxy_image = new Image();
+
+                        if (self.properties.image_cache[image_cache_src].$origin.closest(self.elements.$popbox_content).length > 0) {
                             self.properties.content_image_cache_pending++;
                         }
                         else {
                             self.properties.interface_image_cache_pending++;
                         }
 
-                        proxy_image.src = '';
+                        self.properties.image_cache[image_cache_src].proxy = proxy_image;
 
                         proxy_image.onload = function(){
-                            proxy_image_event();
+                            if (self.properties.image_cache[image_cache_src].proxy !== true) {
+                                self.properties.image_cache[image_cache_src].proxy = true;
+                                proxy_image_event(self.properties.image_cache[image_cache_src].$origin);
+                                self._private.triggerHook('on_image_load',[image_cache_src]);
+                            }
                         };
 
                         proxy_image.onerror = function(){
-                            proxy_image_event();
-                            self._private.triggerHook('on_image_error');
+                            if (self.properties.image_cache[image_cache_src].proxy !== true) {
+                                self.properties.image_cache[image_cache_src].proxy = true;
+                                proxy_image_event(self.properties.image_cache[image_cache_src].$origin);
+                                self._private.triggerHook('on_image_error',[image_cache_src]);
+                            }
                         };
 
-                        self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
-                    }
-                }
-            });
+                        proxy_image.src = image_cache_src;
 
-            for (var image_cache_src in self.properties.image_cache) {
-                if (self.properties.image_cache.hasOwnProperty(image_cache_src) && self.properties.image_cache[image_cache_src].proxy.src != image_cache_src) {
-                    self.properties.image_cache[image_cache_src].proxy.src = image_cache_src;
+                    })(image_cache_src);
                 }
             }
 

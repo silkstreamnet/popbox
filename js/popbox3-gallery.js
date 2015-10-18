@@ -122,20 +122,28 @@
 
     _static.addHook('on_open',function(){
         var popbox = this;
-        popbox.gallery.updateItems();
-        var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
-            existing_img_index = -1;
-        if ($existing_img.length) {
-            existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
+        if (popbox.settings.mode == 'gallery') {
+            popbox.gallery.updateItems();
+            var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
+                existing_img_index = -1;
+            if ($existing_img.length) {
+                existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
+            }
+            popbox.gallery.goTo(existing_img_index);
         }
-        popbox.gallery.goTo(existing_img_index);
     });
 
-    _static.addHook('on_image_error',function(){
+    _static.addHook('on_image_error',function(image_cache_src){
         var popbox = this;
-        popbox.update({
-            content:popbox.settings.gallery.error
-        },false);
+        if (popbox.settings.mode == 'gallery') {
+            popbox.update({
+                content:popbox.settings.gallery.error
+            },false);
+
+            if (popbox.properties.image_cache[image_cache_src]) {
+                delete popbox.properties.image_cache[image_cache_src];
+            }
+        }
     });
 
     _static.addHook('after_update',function(){
@@ -146,8 +154,10 @@
             popbox.properties.gallery.current_index = 0;
         }
 
-        popbox.gallery.updateItems();
-        popbox.gallery.goTo();
+        if (popbox.settings.mode == 'gallery') {
+            popbox.gallery.updateItems();
+            popbox.gallery.goTo();
+        }
     });
 
     _static.addHook('after_update_dom',function(){
@@ -193,7 +203,5 @@
             popbox.elements.$popbox_gallery_prev = false;
         }
     });
-
-    // replace the main content with the error
 
 })(jQuery,window);

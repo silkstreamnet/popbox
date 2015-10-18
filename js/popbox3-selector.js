@@ -1,5 +1,4 @@
 (function($,window){
-
     var minimum_required_popbox_version = '3.0.0'.split('.');
     var popbox_version = (typeof $.Popbox === "undefined" || typeof $.Popbox.prototype.version === "undefined") ? false : $.Popbox.prototype.version.split('.');
 
