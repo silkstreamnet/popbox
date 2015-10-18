@@ -125,3 +125,7 @@
 .popbox-gallery-prev, .popbox-gallery-prev span {
     left:0;
 }
+
+.popbox-gallery-error {
+    padding:15px;
+}

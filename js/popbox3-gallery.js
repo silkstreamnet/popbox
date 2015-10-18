@@ -12,15 +12,13 @@
             gallery:{ // mode must be set to gallery for this to be used
                 selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
                 clickable:true, // whether to apply a click/touch to selector items
-                error:'<div>There was an error loading the image.</div>',
+                error:'<div class="popbox-gallery-error">There was an error loading the image.</div>',
                 next:'<span>&#x25B6;</span>',
                 prev:'<span>&#x25C0;</span>'
             }
         };
 
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
-
-    //TODO error handling
 
     var gallery = function(){};
     gallery.prototype.updateItems = function(){
@@ -131,6 +129,14 @@
             existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
         }
         popbox.gallery.goTo(existing_img_index);
+    });
+
+    _static.addHook('on_image_error',function(){
+        var popbox = this;
+        popbox.update({
+            content:popbox.settings.gallery.error
+        },false);
+        console.log("moo");
     });
 
     _static.addHook('after_update',function(){

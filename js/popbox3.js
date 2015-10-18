@@ -432,7 +432,6 @@
             disable_background_click:false,
             disable_background_click_timer:false,
             image_cache:{},
-            image_errors:0,
             interface_image_cache_pending:0,
             content_image_cache_pending:0,
             last_html_overflow:false,
@@ -601,10 +600,9 @@
 
                 if (image.src) {
                     var image_ready = ((image.complete && _static.isSet(image.naturalWidth)) || image.readyState === 4 || image.readyState === 'complete');
-                    if (!image_ready && !self.properties.image_cache[image.src]) {
+                    if (!image_ready || !self.properties.image_cache[image.src]) {
                         var proxy_image = new Image(),
-                            proxy_image_event = function(error){
-                                if (error) self.properties.image_errors++;
+                            proxy_image_event = function(){
                                 if ($image.closest(self.elements.$popbox_content).length > 0) {
                                     self.properties.content_image_cache_pending--;
                                     if (self.properties.content_image_cache_pending == 0) {
@@ -634,7 +632,8 @@
                         };
 
                         proxy_image.onerror = function(){
-                            proxy_image_event(true);
+                            proxy_image_event();
+                            self._private.triggerHook('on_image_error');
                         };
 
                         self.properties.image_cache[image.src] = {origin:image,proxy:proxy_image};
