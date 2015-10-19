@@ -11,6 +11,30 @@
     var extend_animations = {
         'slide_up':{
             'open':[{
+                'transform':'translateY(2000px)'
+            },{
+                'transform':'translateY(0px)'
+            }],
+            'close':[{
+                'transform':'translateY(0px)'
+            },{
+                'transform':'translateY(-2000px)'
+            }]
+        },
+        'slide_down':{
+            'open':[{
+                'transform':'translateY(-2000px)'
+            },{
+                'transform':'translateY(0px)'
+            }],
+            'close':[{
+                'transform':'translateY(0px)'
+            },{
+                'transform':'translateY(2000px)'
+            }]
+        },
+        'float_up':{
+            'open':[{
                 'opacity':'0',
                 'transform':'translateY(100px)'
             },{
@@ -25,7 +49,7 @@
                 'transform':'translateY(-100px)'
             }]
         },
-        'slide_down':{
+        'float_down':{
             'open':[{
                 'opacity':'0',
                 'transform':'translateY(-100px)'
