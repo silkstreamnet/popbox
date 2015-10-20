@@ -1010,7 +1010,7 @@
         if (!self.isOpen()) {
 
             self._private.triggerHook('on_open');
-            self.triggerEventListener('on_open');
+            self.trigger('on_open');
 
             if (!self.elements.$popbox) {
                 self.create();
@@ -1084,7 +1084,7 @@
             self.properties.is_open = true;
 
             self._private.triggerHook('after_open');
-            self.triggerEventListener('after_open');
+            self.trigger('after_open');
         }
     };
 
@@ -1092,7 +1092,7 @@
         var self = this;
         if (self.isOpen()) {
             self._private.triggerHook('on_close');
-            self.triggerEventListener('on_close');
+            self.trigger('on_close');
 
             self.properties.is_open = false;
 
@@ -1138,7 +1138,7 @@
                     }
 
                     self._private.triggerHook('after_close');
-                    self.triggerEventListener('after_close');
+                    self.trigger('after_close');
                 }
             );
         }
@@ -1494,7 +1494,7 @@
         return !!self.elements.$popbox;
     };
 
-    Popbox.prototype.addEventListener = function(event,handler){
+    Popbox.prototype.on = function(event,handler){
         var self = this;
         var event_parts = event.split('.',2);
         if (event_parts.length) {
@@ -1505,7 +1505,7 @@
         }
     };
 
-    Popbox.prototype.removeEventListener = function(event,handler){
+    Popbox.prototype.off = function(event,handler){
         var self = this;
         var event_parts = event.split('.',2);
         if (event_parts.length) {
@@ -1530,7 +1530,7 @@
         }
     };
 
-    Popbox.prototype.triggerEventListener = function(event,handler,params){
+    Popbox.prototype.trigger = function(event,handler,params){
         var self = this;
         params = (_static.isArray(params)) ? params : [];
         var event_parts = event.split('.',2);
