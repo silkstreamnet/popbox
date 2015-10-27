@@ -69,7 +69,7 @@
 
         if (popbox.properties.gallery.items.length > 0) {
 
-            if (new_item_index > popbox.properties.gallery.items.length-1) {
+            if (new_item_index < -1 || new_item_index > popbox.properties.gallery.items.length-1) {
                 new_item_index = 0;
             }
             else if (new_item_index < 0) {
