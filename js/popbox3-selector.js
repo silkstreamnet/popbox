@@ -24,11 +24,13 @@
                         else if (data == 'false') data = !1;
                         else if (data_float == data) data = data_float;
 
-                        settings[p] = data;
+                        settings[property] = data;
                     }
                 }
             }
         }
+
+        return settings;
     };
 
     $.Popbox.prototype.default_settings.auto_setup = true;
