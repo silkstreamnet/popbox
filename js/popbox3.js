@@ -592,6 +592,9 @@
 
         if (self.isCreated()) {
 
+            self.properties.content_image_cache_pending = 0;
+            self.properties.interface_image_cache_pending = 0;
+
             var $images = self.elements.$popbox.find('img');
 
             $images.each(function(){
@@ -602,60 +605,78 @@
                     var image_ready = ((image.complete && _static.isNumber(image.naturalWidth,false)) || image.readyState === 4 || image.readyState === 'complete');
                     //var image_ready = (image.complete || image.readyState === 4 || image.readyState === 'complete');
                     if (!image_ready && !self.properties.image_cache[image.src]) {
-                        self.properties.image_cache[image.src] = {origin:image,$origin:$image,proxy:false};
+                        self.properties.image_cache[image.src] = {
+                            origin:image,
+                            $origin:$image,
+                            proxy:false,
+                            loaded:false,
+                            type:($image.closest(self.elements.$popbox_content).length > 0) ? 'content' : 'interface'
+                        };
                     }
                 }
             });
 
-            var proxy_image_event = function($image){
-                if ($image.closest(self.elements.$popbox_content).length > 0) {
+            var proxy_image_event = function(type){
+                if (type === 'content') {
                     self.properties.content_image_cache_pending--;
-                    if (self.properties.content_image_cache_pending == 0) {
+                    if (self.properties.content_image_cache_pending <= 0) {
+                        self.properties.content_image_cache_pending = 0;
                         if (self.isChangingState() && self.elements.$popbox_popup.hasClass('popbox-animating')) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);});
                         else self.adjust(true);
                     }
                 }
                 else {
                     self.properties.interface_image_cache_pending--;
-                    if (self.properties.interface_image_cache_pending == 0) {
+                    if (self.properties.interface_image_cache_pending <= 0) {
+                        self.properties.interface_image_cache_pending = 0;
                         //if (self.isLoading()) self.adjust(true);
                     }
                 }
             };
 
             for (var image_cache_src in self.properties.image_cache) {
-                if (self.properties.image_cache.hasOwnProperty(image_cache_src) && !self.properties.image_cache[image_cache_src].proxy) {
-                    (function(image_cache_src){
-                        var proxy_image = new Image();
+                if (self.properties.image_cache.hasOwnProperty(image_cache_src)) {
+                    if (!self.properties.image_cache[image_cache_src].proxy) {
+                        (function(image_cache_src){
+                            var proxy_image = new Image();
 
-                        if (self.properties.image_cache[image_cache_src].$origin.closest(self.elements.$popbox_content).length > 0) {
+                            if (self.properties.image_cache[image_cache_src].type === 'content') {
+                                self.properties.content_image_cache_pending++;
+                            }
+                            else {
+                                self.properties.interface_image_cache_pending++;
+                            }
+
+                            self.properties.image_cache[image_cache_src].proxy = proxy_image;
+
+                            proxy_image.onload = function(){
+                                if (!self.properties.image_cache[image_cache_src].loaded) {
+                                    self.properties.image_cache[image_cache_src].loaded = true;
+                                    proxy_image_event(self.properties.image_cache[image_cache_src].type);
+                                    self._private.triggerHook('on_image_load',[image_cache_src]);
+                                }
+                            };
+
+                            proxy_image.onerror = function(){
+                                if (!self.properties.image_cache[image_cache_src].loaded) {
+                                    self.properties.image_cache[image_cache_src].loaded = true;
+                                    proxy_image_event(self.properties.image_cache[image_cache_src].type);
+                                    self._private.triggerHook('on_image_error',[image_cache_src]);
+                                }
+                            };
+
+                            proxy_image.src = image_cache_src;
+
+                        })(image_cache_src);
+                    }
+                    else if (!self.properties.image_cache[image_cache_src].loaded) {
+                        if (self.properties.image_cache[image_cache_src].type === 'content') {
                             self.properties.content_image_cache_pending++;
                         }
                         else {
                             self.properties.interface_image_cache_pending++;
                         }
-
-                        self.properties.image_cache[image_cache_src].proxy = proxy_image;
-
-                        proxy_image.onload = function(){
-                            if (self.properties.image_cache[image_cache_src].proxy !== true) {
-                                self.properties.image_cache[image_cache_src].proxy = true;
-                                proxy_image_event(self.properties.image_cache[image_cache_src].$origin);
-                                self._private.triggerHook('on_image_load',[image_cache_src]);
-                            }
-                        };
-
-                        proxy_image.onerror = function(){
-                            if (self.properties.image_cache[image_cache_src].proxy !== true) {
-                                self.properties.image_cache[image_cache_src].proxy = true;
-                                proxy_image_event(self.properties.image_cache[image_cache_src].$origin);
-                                self._private.triggerHook('on_image_error',[image_cache_src]);
-                            }
-                        };
-
-                        proxy_image.src = image_cache_src;
-
-                    })(image_cache_src);
+                    }
                 }
             }
 
@@ -1356,7 +1377,7 @@
 
             if (self.settings.wait_for_images && self.properties.content_image_cache_pending > 0) {
                 self.showLoading(function(){
-                    adjust_elements(animate,false);
+                    if (!animate) adjust_elements(animate,false);
                 });
             }
             else if (!animate) {
