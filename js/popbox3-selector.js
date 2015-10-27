@@ -3,7 +3,9 @@
 
     var _static = $.Popbox.prototype._static;
 
-    _static.applyDataToSettings = function($object,defaults,settings,stage) {
+    _static.applyDataToSettings = function($object,settings,defaults,stage) {
+        settings = _static.param(settings,{});
+        defaults = _static.param(defaults,$.Popbox.prototype.default_settings);
         stage = _static.param(stage,'');
 
         for (var property in defaults) {
@@ -12,7 +14,7 @@
 
                 if (typeof defaults[property] === 'object' && defaults[property] !== null) {
                     if (typeof settings[property] !== 'object' || settings[property] === null) settings[property] = {};
-                    _static.applyDataToSettings($object,defaults[property],settings[property],data_property+'-');
+                    _static.applyDataToSettings($object,settings[property],defaults[property],data_property+'-');
                 }
                 else {
                     var data = $object.data(data_property);
@@ -41,7 +43,7 @@
                 _static.offTouchClick($element);
                 _static.onTouchClick($element,null,function(){
                     var _popbox, new_settings = $.extend(true,{},settings);
-                    _static.applyDataToSettings($element,$.Popbox.prototype.default_settings,new_settings);
+                    _static.applyDataToSettings($element,new_settings);
 
                     var href = new_settings.href || $element.attr('href'),
                         auto = new_settings.auto_setup,
