@@ -44,7 +44,7 @@
 
                 _static.offTouchClick($element);
                 _static.onTouchClick($element,null,function(){
-                    var _popbox, new_settings = $.extend(true,{},settings);
+                    var _popbox, new_settings = $.extend(true,{},$.Popbox.prototype.default_settings,settings);
                     _static.applyDataToSettings($element,new_settings);
 
                     var href = new_settings.href || $element.attr('href'),
@@ -97,7 +97,7 @@
                                                     break;
                                             }
 
-                                            $.extend(true,auto_settings,new_settings);
+                                            $.extend(true,new_settings,auto_settings);
                                             auto_run = true;
 
                                             break match_process;
