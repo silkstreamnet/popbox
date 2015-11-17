@@ -419,7 +419,7 @@
     _private.prototype.reset = function() {
         var self = this.self;
 
-        self._private.triggerHook('on_reset');
+        self._private.triggerHook('reset');
 
         if (self.properties.disable_background_click_timer !== false) {
             clearTimeout(self.properties.disable_background_click_timer);
@@ -653,7 +653,7 @@
                                 if (!self.properties.image_cache[image_cache_src].loaded) {
                                     self.properties.image_cache[image_cache_src].loaded = true;
                                     proxy_image_event(self.properties.image_cache[image_cache_src].type);
-                                    self._private.triggerHook('on_image_load',[image_cache_src]);
+                                    self._private.triggerHook('image_load',[image_cache_src]);
                                 }
                             };
 
@@ -661,7 +661,7 @@
                                 if (!self.properties.image_cache[image_cache_src].loaded) {
                                     self.properties.image_cache[image_cache_src].loaded = true;
                                     proxy_image_event(self.properties.image_cache[image_cache_src].type);
-                                    self._private.triggerHook('on_image_error',[image_cache_src]);
+                                    self._private.triggerHook('image_error',[image_cache_src]);
                                 }
                             };
 
@@ -692,7 +692,7 @@
         var self = this.self;
         if (self.isCreated()) {
 
-            self._private.triggerHook('on_update_dom');
+            self._private.triggerHook('update_dom');
 
             self.elements.$popbox_loading.html(self.settings.loading);
             self.elements.$popbox_close.html(self.settings.close);
@@ -760,7 +760,7 @@
         self._private = new _private();
         self._private.self = self;
 
-        self._private.triggerHook('on_initialize',[settings]);
+        self._private.triggerHook('initialize',[settings]);
 
         self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
 
@@ -805,7 +805,7 @@
         close_overlay_animation_speed:null,
         close_overlay_animation_ease:null,
         content:'',
-        close:'X',
+        close_text:'X',
         title:false,
         hide_page_scroll:true,
         hide_page_scroll_space:true,
@@ -820,9 +820,9 @@
         height_margin:0.08,
         z_index:99900, // should be a number greater than 0, otherwise z-index will not be set at all.
         mode:false, //normal, can be 'gallery' if extension is available
-        on_open:false,
+        open:false,
         after_open:false,
-        on_close:false,
+        close:false,
         after_close:false
     };
     Popbox.prototype._static = _static;
@@ -852,7 +852,7 @@
 
         self.destroy();
 
-        self._private.triggerHook('on_create');
+        self._private.triggerHook('create');
 
         self._private.createOverlay();
 
@@ -982,7 +982,7 @@
 
         if (self.elements.$popbox) {
 
-            self._private.triggerHook('on_destroy');
+            self._private.triggerHook('destroy');
 
             self.elements.$popbox.remove();
             self.elements.$popbox = null;
@@ -1030,8 +1030,8 @@
 
         if (!self.isOpen()) {
 
-            self._private.triggerHook('on_open');
-            self.trigger('on_open');
+            self._private.triggerHook('open');
+            self.trigger('open');
 
             if (!self.elements.$popbox) {
                 self.create();
@@ -1112,8 +1112,8 @@
     Popbox.prototype.close = function(destroy){
         var self = this;
         if (self.isOpen()) {
-            self._private.triggerHook('on_close');
-            self.trigger('on_close');
+            self._private.triggerHook('close');
+            self.trigger('close');
 
             self.properties.is_open = false;
 

@@ -94,7 +94,7 @@
 
     $.Popbox.prototype.gallery = gallery;
 
-    _static.addHook('on_initialize',function(){
+    _static.addHook('initialize',function(){
         var popbox = this;
         popbox.gallery = new gallery();
         popbox.gallery.self = popbox;
@@ -114,7 +114,7 @@
         };
     });
 
-    _static.addHook('on_open',function(){
+    _static.addHook('open',function(){
         var popbox = this;
         if (popbox.settings.mode == 'gallery') {
             popbox.gallery.updateItems();
@@ -127,7 +127,7 @@
         }
     });
 
-    _static.addHook('on_image_error',function(image_cache_src){
+    _static.addHook('image_error',function(image_cache_src){
         var popbox = this;
         if (popbox.settings.mode == 'gallery') {
             popbox.update({
