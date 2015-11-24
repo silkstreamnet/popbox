@@ -42,8 +42,8 @@
             $elements.each(function() {
                 var $element = $(this);
 
-                _static.offTouchClick($element);
-                _static.onTouchClick($element,null,function(){
+                $element.off('click.popbox_open').on('click.popbox_open',function(e){
+                    e.preventDefault();
                     var _popbox, new_settings = $.extend(true,{},$.Popbox.prototype.default_settings,settings);
                     _static.applyDataToSettings($element,new_settings);
 
@@ -114,7 +114,7 @@
 
                     // bind created popbox to element
                     $element.data('Popbox',_popbox);
-                },true);
+                });
             });
         }
         return this;

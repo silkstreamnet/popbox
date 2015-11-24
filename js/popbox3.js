@@ -403,7 +403,7 @@
             $object.on('mousedown.'+touch_click_namespace+' touchstart.'+touch_click_namespace,selector,function(e){
                 if (e.originalEvent.touches || e.which == 1) {
                     var $subobject = $(this);
-                    if (prevent_default) e.preventDefault();
+                    //if (prevent_default) e.preventDefault();
                     $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
                         if (e.originalEvent.touches || e.which == 1) {
                             if (prevent_default) e2.preventDefault();
@@ -479,8 +479,8 @@
             }).data('is_open',false).appendTo($container);
         }
 
-        _static.offTouchClick(self.elements.$popbox_overlay);
-        _static.onTouchClick(self.elements.$popbox_overlay,null,function(){
+        self.elements.$popbox_overlay.off('click.popbox_overlay_close').on('click.popbox_overlay_close',function(e){
+            e.preventDefault();
             for (var i in _static._instances) {
                 if (_static._instances.hasOwnProperty(i)) {
                     if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
@@ -489,7 +489,7 @@
                 }
             }
             self._private.closeOverlay();
-        },true);
+        });
     };
 
     _private.prototype.destroyOverlay = function(){
@@ -694,8 +694,8 @@
 
             self._private.triggerHook('update_dom');
 
-            self.elements.$popbox_loading.html(self.settings.loading);
-            self.elements.$popbox_close.html(self.settings.close);
+            self.elements.$popbox_loading.html(self.settings.loading_text);
+            self.elements.$popbox_close.html(self.settings.close_text);
             self.elements.$popbox_title.html(self.settings.title);
             self.elements.$popbox_content.html(self.settings.content);
 
@@ -707,7 +707,7 @@
             else self.elements.$popbox.removeClass('popbox-aspect-fit');
 
             // checks
-            if (self.settings.close === false) self.elements.$popbox_close.css('display','none');
+            if (self.settings.close_text === false) self.elements.$popbox_close.css('display','none');
             else self.elements.$popbox_close.css('display','block');
             if (self.settings.title === false) self.elements.$popbox_title.css('display','none');
             else self.elements.$popbox_title.css('display','block');
@@ -810,7 +810,7 @@
         hide_page_scroll:true,
         hide_page_scroll_space:true,
         content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
-        loading:'Loading',
+        loading_text:'Loading',
         absolute:'mobile',
         add_class:'', // supports multiple space separated classes
         aspect_fit:false, // recommended for images and iframes - not for content
@@ -929,9 +929,10 @@
         self._private.applyDomSettings();
 
         // events
-        _static.onTouchClick(self.elements.$popbox_close,null,function(){
+        self.elements.$popbox_close.off('click.popbox_close').on('click.popbox_close',function(e){
+            e.preventDefault();
             self.close();
-        },true);
+        });
 
         var _complex_close_namespace = 'Popbox_complex_close';
         self.elements.$popbox.on('mousedown.'+_static._event_namespace+' touchstart.'+_static._event_namespace,function(e1){

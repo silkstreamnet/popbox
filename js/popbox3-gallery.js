@@ -49,8 +49,8 @@
             });
 
             if (popbox.settings.gallery.clickable) {
-                _static.offTouchClick($items);
-                _static.onTouchClick($items,null,function(){
+                $items.off('click.popbox_gallery_open').on('click.popbox_gallery_open',function(e){
+                    e.preventDefault();
                     var $item = $(this),
                         href = $item.attr('href'),
                         src = $item.attr('src');
@@ -58,7 +58,7 @@
                     if (href) popbox.gallery.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
                     else if (src) popbox.gallery.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
                     popbox.open();
-                },true);
+                });
             }
         }
     };
@@ -175,15 +175,15 @@
                     }).html(popbox.settings.gallery.prev).appendTo(popbox.elements.$popbox_container);
                 }
 
-                _static.offTouchClick(popbox.elements.$popbox_gallery_next);
-                _static.onTouchClick(popbox.elements.$popbox_gallery_next,null,function(){
+                popbox.elements.$popbox_gallery_next.off('click.popbox_gallery_next').on('click.popbox_gallery_next',function(e){
+                    e.preventDefault();
                     popbox.gallery.next();
-                },true);
+                });
 
-                _static.offTouchClick(popbox.elements.$popbox_gallery_prev);
-                _static.onTouchClick(popbox.elements.$popbox_gallery_prev,null,function(){
+                popbox.elements.$popbox_gallery_prev.off('click.popbox_gallery_prev').on('click.popbox_gallery_prev',function(e){
+                    e.preventDefault();
                     popbox.gallery.prev();
-                },true);
+                });
 
                 show_btns = true;
             }
