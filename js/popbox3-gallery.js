@@ -35,7 +35,7 @@
                     // get sub items
                     $item.find('a[href]').each(function(){
                         var sublink = $(this).attr('href');
-                        if (sublink && _static.indexOf(sublink,popbox.properties.gallery.items,true) < 0)
+                        if (sublink && !sublink.match(/^#/) && _static.indexOf(sublink,popbox.properties.gallery.items,true) < 0)
                             popbox.properties.gallery.items.push(sublink);
                     });
                     $item.find('img[src]').each(function(){
@@ -57,6 +57,14 @@
                     popbox.gallery.updateItems();
                     if (href) popbox.gallery.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
                     else if (src) popbox.gallery.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
+                    else {
+                        // get first sub item
+                        var first_href = $item.find('a[href]:first').attr('href'),
+                            first_src = $item.find('img[src]:first').attr('src');
+
+                        if (first_href && !first_href.match(/^#/)) popbox.gallery.goTo(_static.indexOf(first_href,popbox.properties.gallery.items,true));
+                        else if (first_src) popbox.gallery.goTo(_static.indexOf(first_src,popbox.properties.gallery.items,true));
+                    }
                     popbox.open();
                 });
             }
