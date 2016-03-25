@@ -780,7 +780,7 @@
         self._private.triggerHook('after_initialize',[settings]);
     };
 
-    Popbox.prototype.version = '3.0.0';
+    Popbox.prototype.version = '3.0.1';
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
         height:false, // number = pixels to set, anything else is ignored

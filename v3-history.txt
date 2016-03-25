@@ -1,3 +1,8 @@
+=== v3.0.1 ===
+- Style modifications to visual padding and margin.
+- Added comment stating never to set a margin or padding on popbox-popup.
+- Finally fixed iOS bug where aspect_fit=true popboxes were rendering far smaller than they should have been.
+
 === v3.0.0 ===
 - creation, completely re-engineered
 - animations are now purely css3, fallback is no animation (IE9 and below)
