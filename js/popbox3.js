@@ -1218,7 +1218,7 @@
                     'top':'0px',
                     'left':'0px',
                     'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
-                    'height':'1px',
+                    'height':(self.settings.aspect_fit) ? '99999px' : '1px',
                     'overflow':'hidden'
                 });
                 self.elements.$popbox_container.css({
