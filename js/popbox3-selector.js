@@ -56,9 +56,9 @@
                     {
                         var matches = {
                             youtube:[
-                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)/, //normalurl
-                                /^(?:http:|https:)?\/\/youtu.be\/([a-zA-Z0-9_\-]+)/, //shorturl
-                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_\-]+)/ //embedurl
+                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)(?:&([a-zA-Z0-9_&=.\-]+))?/, //normalurl
+                                /^(?:http:|https:)?\/\/youtu.be\/([a-zA-Z0-9_\-]+)(?:\?([a-zA-Z0-9_&=.\-]+))?/, //shorturl
+                                /^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_\-]+)(?:\?([a-zA-Z0-9_&=.\-]+))?/ //embedurl
                             ],
                             vimeo:[
                                 /^(?:http:|https:)?\/\/(?:www\.)?vimeo\.com\/([a-zA-Z0-9_\-]+)/, //normalurl
@@ -84,7 +84,8 @@
                                             switch (matcher)
                                             {
                                                 case 'youtube':
-                                                    auto_settings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+'" frameborder="0" allowfullscreen></iframe>';
+                                                    var append_params = (matchresult[2]) ? '?'+matchresult[2] : '';
+                                                    auto_settings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+append_params+'" frameborder="0" allowfullscreen></iframe>';
                                                     auto_settings.aspect_fit = true;
                                                     break;
                                                 case 'vimeo':
