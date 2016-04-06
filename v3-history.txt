@@ -5,6 +5,7 @@
 - Updated selector extension to allow for parameters on youtube links.
 - Added plugin versioning.
 - Added overlay to z-index registering.
+- Added even triggers for all locations which had hooks but no triggers.
 
 === v3.0.0 ===
 - creation, completely re-engineered
