@@ -420,6 +420,7 @@
         var self = this.self;
 
         self._private.triggerHook('reset');
+        self.trigger('reset');
 
         if (self.properties.disable_background_click_timer !== false) {
             clearTimeout(self.properties.disable_background_click_timer);
@@ -453,6 +454,7 @@
         };
 
         self._private.triggerHook('after_reset');
+        self.trigger('after_reset');
     };
 
     _private.prototype.createOverlay = function(){
@@ -654,6 +656,7 @@
                                     self.properties.image_cache[image_cache_src].loaded = true;
                                     proxy_image_event(self.properties.image_cache[image_cache_src].type);
                                     self._private.triggerHook('image_load',[image_cache_src]);
+                                    self.trigger('image_load',false,[image_cache_src]);
                                 }
                             };
 
@@ -662,6 +665,7 @@
                                     self.properties.image_cache[image_cache_src].loaded = true;
                                     proxy_image_event(self.properties.image_cache[image_cache_src].type);
                                     self._private.triggerHook('image_error',[image_cache_src]);
+                                    self.trigger('image_error',false,[image_cache_src]);
                                 }
                             };
 
@@ -693,6 +697,7 @@
         if (self.isCreated()) {
 
             self._private.triggerHook('update_dom');
+            self.trigger('update_dom');
 
             self.elements.$popbox_loading.html(self.settings.loading_text);
             self.elements.$popbox_close.html(self.settings.close_text);
@@ -740,6 +745,7 @@
             }
 
             self._private.triggerHook('after_update_dom');
+            self.trigger('after_update_dom');
         }
     };
 
@@ -778,7 +784,10 @@
 
         _static._next_instance_id++;
 
+        self.trigger('initialize',false,[settings]);
+
         self._private.triggerHook('after_initialize',[settings]);
+        self.trigger('after_initialize',false,[settings]);
     };
 
     Popbox.prototype.version = '3.0.1';
