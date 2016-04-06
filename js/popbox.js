@@ -713,8 +713,9 @@
             else self.elements.$popbox_title.css('display','block');
 
             if (_static.isNumber(self.settings.z_index,true)) {
-                self.elements.$popbox.css('z-index',self.settings.z_index);
-                self.elements.$popbox_popup.css('z-index',self.settings.z_index+1);
+                self.elements.$popbox_overlay.css('z-index',self.settings.z_index);
+                self.elements.$popbox.css('z-index',self.settings.z_index+1);
+                self.elements.$popbox_popup.css('z-index',self.settings.z_index+2);
             }
 
             var user_agent_checks = {
