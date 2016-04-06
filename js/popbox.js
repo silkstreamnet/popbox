@@ -781,6 +781,7 @@
     };
 
     Popbox.prototype.version = '3.0.1';
+    Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
         height:false, // number = pixels to set, anything else is ignored
