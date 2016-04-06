@@ -3,6 +3,7 @@
 - Added comment stating never to set a margin or padding on popbox-popup.
 - Finally fixed iOS bug where aspect_fit=true popboxes were rendering far smaller than they should have been.
 - Updated selector extension to allow for parameters on youtube links.
+- Added plugin versioning.
 
 === v3.0.0 ===
 - creation, completely re-engineered
