@@ -101,6 +101,6 @@
     };
 
     $.extend(true,$.Popbox.prototype.animations,extend_animations);
-    $.PopBox.prototype.plugins.animations = '1.0.0';
+    $.Popbox.prototype.plugins.animations = '1.0.0';
 
 })(jQuery);

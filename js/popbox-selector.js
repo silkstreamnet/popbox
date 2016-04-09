@@ -123,6 +123,6 @@
 
     $('.open-popbox').Popbox();
 
-    $.PopBox.prototype.plugins.selector = '1.0.0';
+    $.Popbox.prototype.plugins.selector = '1.0.0';
 
 })(jQuery,window);

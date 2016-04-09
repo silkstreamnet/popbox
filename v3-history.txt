@@ -6,6 +6,7 @@
 - Added plugin versioning.
 - Added overlay to z-index registering.
 - Added even triggers for all locations which had hooks but no triggers.
+- Fixed issue scrolling on empty background not working.
 
 === v3.0.0 ===
 - creation, completely re-engineered

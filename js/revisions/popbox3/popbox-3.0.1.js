@@ -950,7 +950,6 @@
             var e1pageX = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageX : e1.pageX,
                 e1pageY = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageY : e1.pageY;
             if ((e1.originalEvent.touches || e1.which == 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
-                e1.preventDefault();
                 self.elements.$popbox.off('.'+_complex_close_namespace);
                 self.elements.$popbox.on('mouseup.'+_complex_close_namespace+' touchend.'+_complex_close_namespace,function(e2){
                     if (e2.originalEvent.touches || e2.which == 1) {
@@ -977,7 +976,6 @@
                 self.elements.$popbox.on('scroll.'+_complex_close_namespace,function(){
                     self.elements.$popbox.off('.'+_complex_close_namespace);
                 });
-                return false;
             }
         });
 
