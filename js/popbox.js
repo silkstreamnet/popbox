@@ -837,7 +837,6 @@
         after_close:false
     };
     Popbox.prototype._static = _static;
-    Popbox.prototype._private = _private;
     Popbox.prototype.animations = {
         'fade':{
             'open':[{

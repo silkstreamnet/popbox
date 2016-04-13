@@ -4,7 +4,7 @@
  */
 
 
-/*** Rendering ***/
+/*** Core - Recommended not to change ***/
 
 .popbox img, .popbox iframe, .popbox object, .popbox embed {
     max-width:100%;
@@ -16,14 +16,9 @@
     margin:0;
 }
 
-/*** Default ***/
 .popbox-overlay {
     background:rgb(230,230,230);
     background:rgba(0,0,0,0.4);
-}
-
-.popbox-overlay-close {
-
 }
 
 .popbox {
@@ -46,6 +41,21 @@
     margin:0;
 }
 
+.popbox-container {
+    -moz-box-sizing:content-box;
+    -webkit-box-sizing:content-box;
+    box-sizing:content-box;
+    padding:0;
+    margin:0;
+}
+
+.popbox-loading img {
+    display:block;
+}
+
+
+/*** Core Custom - freely modify below ***/
+
 .popbox-loading {
     width: 32px;
     height: 32px;
@@ -56,10 +66,6 @@
     margin: auto;
     position: absolute;
     background:url(../images/loading.gif) no-repeat 0 0;
-}
-
-.popbox-loading img {
-    display:block;
 }
 
 .popbox .popbox-close {
@@ -89,6 +95,9 @@
 }
 
 .popbox .popbox-content {
+    -moz-box-sizing:content-box;
+    -webkit-box-sizing:content-box;
+    box-sizing:content-box;
     padding:15px;
 }
 
@@ -96,7 +105,9 @@
     padding:15px;
 }
 
-/*** Gallery ***/
+
+/*** Gallery - freely modify below ***/
+
 .popbox-gallery-next, .popbox-gallery-prev {
     position:absolute;
     top:0;

@@ -1,3 +1,6 @@
+=== v3.0.2 ===
+- Removed static setting of _private object.
+
 === v3.0.1 ===
 - Style modifications to visual padding and margin.
 - Added comment stating never to set a margin or padding on popbox-popup.
