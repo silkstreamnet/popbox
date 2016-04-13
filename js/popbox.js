@@ -1075,13 +1075,16 @@
             // show elements
             self._private.openOverlay();
             self.elements.$popbox_popup.css({
-                'display':'block'
+                'display':'block',
+                'box-sizing':'content-box'
             });
             self.elements.$popbox.css({
-                'display':'block'
+                'display':'block',
+                'box-sizing':'content-box'
             });
             self.elements.$popbox_popup.css({
-                'visibility':'visible'
+                'visibility':'visible',
+                'box-sizing':'content-box'
             });
             self.showContent();
 
@@ -1219,7 +1222,8 @@
 
                 self.elements.$popbox_content.css({
                     'height':'',
-                    'overflow-y':''
+                    'overflow-y':'',
+                    'box-sizing':'content-box'
                 });
                 self.elements.$popbox_wrapper.css({
                     'position':'relative',
@@ -1227,7 +1231,8 @@
                     'left':'0px',
                     'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
                     'height':(self.settings.aspect_fit) ? '99999px' : '1px',
-                    'overflow':'hidden'
+                    'overflow':'hidden',
+                    'box-sizing':'content-box'
                 });
                 self.elements.$popbox_container.css({
                     'position':'absolute',
@@ -1237,7 +1242,8 @@
                     'height':set_popbox_height,
                     'min-width':min_popbox_width+'px',
                     'min-height':min_popbox_height+'px',
-                    'max-width':'100%'
+                    'max-width':'100%',
+                    'box-sizing':'content-box'
                 });
 
                 // use true width to get overhang (stops text wrapping)
@@ -1251,7 +1257,7 @@
                     var new_content_height = new_popbox_height-content_height_padding,
                         content_additional_offset = self.settings.content_additional_offset;
                     // deduct content offset top
-                    new_content_height -= self.elements.$popbox_content.offset().top-self.elements.$popbox_popup.offset().top;
+                    new_content_height -= self.elements.$popbox_content.offset().top-self.elements.$popbox_container.offset().top;
 
                     if (_static.isNumber(content_additional_offset)) {
                         new_content_height += content_additional_offset;
@@ -1279,6 +1285,8 @@
                         'height':(scroll) ? Math.floor(new_content_height)+'px' : new_content_height+'px',
                         'overflow-y':(scroll) ? 'scroll' : 'hidden'
                     });
+
+                    console.log(self.elements.$popbox_content.height());
                 };
 
                 if (self.settings.aspect_fit) {
@@ -1350,8 +1358,8 @@
                     _static.transition(
                         self.elements.$popbox_popup,
                         {
-                            'width':new_popbox_width+'px',
-                            'height':new_popbox_height+'px',
+                            'width':(new_popbox_width)+'px',
+                            'height':(new_popbox_height)+'px',
                             'top':new_popbox_top+'px',
                             'left':new_popbox_left+'px'
                         },
