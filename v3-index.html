@@ -31,6 +31,7 @@
 <a href="#" class="click-me-7">Selector Test</a><br>
 <a href="images/test-image.jpg" class="click-me-gallery-1">Gallery 1 Item 1</a><br>
 <a href="images/test-image-3.jpg" class="click-me-gallery-1">Gallery 1 Item 2</a><br>
+<a href="#" class="delayed-loading">Test Delayed Loading</a>
 <br><br>
 Possible classes for popbox-ajax.js<br>
 popbox-form<br>
@@ -60,7 +61,7 @@ popbox-link<br>
 <script type="text/javascript" src="js/popbox-selector.js"></script>
 <script type="text/javascript" src="js/popbox-gallery.js"></script>
 <script type="text/javascript">
-console.log($('.test-youtube-link').attr('href').match(/^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)(?:&([a-zA-Z0-9_&=.\-]+))?/));
+//console.log($('.test-youtube-link').attr('href').match(/^(?:http:|https:)?\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_\-]+)(?:&([a-zA-Z0-9_&=.\-]+))?/));
     var popbox1 = new $.Popbox({
         max_width:800,
         content:'<p>test masses of content</p>',
@@ -194,6 +195,27 @@ console.log($('.test-youtube-link').attr('href').match(/^(?:http:|https:)?\/\/(?
     $('.click-me-gallery-1').on('click',function(e){
         e.preventDefault();
         //popbox_gallery1.open();
+    });
+
+    var popbox_delayed_loading = new $.Popbox({
+        loading_text:'<img src="images/loading.gif" width="32" height="32" alt="" />',
+        content:'preload'
+    });
+
+    $('.delayed-loading').on('click',function(e){
+        e.preventDefault();
+        popbox_delayed_loading.on('open',function(){
+            setTimeout(function(){
+                popbox_delayed_loading.showLoading(function(){
+                    setTimeout(function(){
+                        popbox_delayed_loading.update({
+                            content:'Flying Goat<br/>Free the content<br/>Chicken<br/>Turkey'
+                        });
+                    },2000);
+                });
+            },1000);
+        });
+        popbox_delayed_loading.open();
     });
 
 </script>

@@ -1039,15 +1039,15 @@
 
         if (!self.isOpen()) {
 
-            self._private.triggerHook('open');
-            self.trigger('open');
-
             if (!self.elements.$popbox) {
                 self.create();
             }
             else {
                 self._private.applyDomSettings();
             }
+
+            self._private.triggerHook('open');
+            self.trigger('open');
 
             if (self.elements.$popbox.css('position') == 'absolute') {
                 self.elements.$popbox.css('top',_static.$window.scrollTop()+'px');
@@ -1086,7 +1086,11 @@
                 'visibility':'visible',
                 'box-sizing':'content-box'
             });
-            self.showContent();
+
+            // is_loading should be false unless someone has manually set it
+            if (!self.properties.is_loading) {
+                self.showContent();
+            }
 
             // adjust
             self.adjust(false);
@@ -1285,8 +1289,6 @@
                         'height':(scroll) ? Math.floor(new_content_height)+'px' : new_content_height+'px',
                         'overflow-y':(scroll) ? 'scroll' : 'hidden'
                     });
-
-                    console.log(self.elements.$popbox_content.height());
                 };
 
                 if (self.settings.aspect_fit) {
