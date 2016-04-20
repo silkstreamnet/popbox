@@ -1,3 +1,6 @@
+=== v3.0.3 ===
+- Moved the popbox-close element below the popbox-content element to fix issue with iOS Safari close button not being clickable.
+
 === v3.0.2 ===
 - Removed static setting of _private object.
 - Fixed padding calculation on popbox-popup.

@@ -790,7 +790,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.3';
+    Popbox.prototype.version = '3.0.2';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -923,17 +923,17 @@
             'class':'popbox-container'
         }).appendTo(self.elements.$popbox_wrapper);
 
+        self.elements.$popbox_close = $('<a/>',{
+            'class':'popbox-close',
+            'href':'javascript:void(0);'
+        }).appendTo(self.elements.$popbox_container);
+
         self.elements.$popbox_title = $('<div/>',{
             'class':'popbox-title'
         }).appendTo(self.elements.$popbox_container);
 
         self.elements.$popbox_content = $('<div/>',{
             'class':'popbox-content'
-        }).appendTo(self.elements.$popbox_container);
-
-        self.elements.$popbox_close = $('<a/>',{
-            'class':'popbox-close',
-            'href':'javascript:void(0);'
         }).appendTo(self.elements.$popbox_container);
 
         self._private.applyDomSettings();
