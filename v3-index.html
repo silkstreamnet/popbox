@@ -12,6 +12,25 @@
         .testa {width:200px; height:200px; transform:scale(0.5);}
         .testb {width:100px; height:100px; position:fixed;}
 
+        .popbox-contain .grid {
+            box-sizing: border-box;
+            display: flex;
+            flex-flow: row wrap;
+            margin: 0 -.5em;
+        }
+        .popbox-contain .col-2_sm-12 {
+            flex: 0 0 auto;
+            max-width: 16.66667%;
+            box-sizing: border-box;
+            padding: 0 .5em 1em;
+        }
+        .popbox-contain .col-5_sm-12 {
+            flex: 0 0 auto;
+            max-width: 41.66667%;
+            box-sizing: border-box;
+            padding: 0 .5em 1em;
+        }
+
         *, *:before, *:after {
             -webkit-box-sizing: border-box;
             -moz-box-sizing: border-box;
@@ -31,8 +50,50 @@
 <a href="#" class="click-me-7">Selector Test</a><br>
 <a href="images/test-image.jpg" class="click-me-gallery-1">Gallery 1 Item 1</a><br>
 <a href="images/test-image-3.jpg" class="click-me-gallery-1">Gallery 1 Item 2</a><br>
-<a href="#" class="delayed-loading">Test Delayed Loading</a>
+<a href="#" class="delayed-loading">Test Delayed Loading</a><br>
+<a href="#" class="click-me-insertcoin-test">Insert Coin Test</a>
 <br><br>
+<div class="content-insertcoin-test">
+    <div class="popbox-contain"><div class="popbox-text"><div id="main">
+        <section class="l-login l-login-account" id="account-login">
+
+            <h1 class="l-page-heading">Login / Register</h1>
+
+            <div class="grid">
+                <div class="col-5_sm-12">
+
+                    <h3>Existing Customer</h3>
+                    <form class="genForm dynamicForm" data-target="account-login" action="http://insertcoin.silkstream.net/my-account.html?do=login" method="post">
+                        <fieldset>
+                            <ul>
+                                <li class="">
+                                    <label for="tbxEmail">Email</label>
+                                    <input type="email" id="tbxEmail" name="email" value="">
+                                </li>
+                                <li class="">
+                                    <label for="tbxPassword">Password</label>
+                                    <input id="tbxPassword" name="password" type="password" value="" class="req">
+                                </li>							<li><a class="popboxLink" href="http://insertcoin.silkstream.net/reset-password.html" title="Forgotten your password?">Forgotten your password?</a></li>
+                                <li><button type="submit" value="1" class="btn-grey">Login</button></li>
+                            </ul>
+                        </fieldset>
+                    </form>
+
+                </div>
+                <div class="col-2_sm-12"><div></div></div>
+                <div class="col-5_sm-12">
+                    <h3>Register</h3>
+                    <div class="register-text">
+                        <p>Sign up today to process your order. You'll also get FREE updates and receive regular e-newsletters to keep you posted on what's going on.</p>
+                        <p>Best of all, members also get 'coins' every time they buy to use against future purchases - <a href="http://insertcoin.silkstream.net/faqs.html#coins" title="Coins system">click here for more information</a>.</p>
+                        <a class="btn-grey" href="http://insertcoin.silkstream.net/my-account.html?do=register" title="Create an account">Create one here</a>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div></div></div>
+</div>
 Possible classes for popbox-ajax.js<br>
 popbox-form<br>
 popbox-link<br>
@@ -216,6 +277,16 @@ popbox-link<br>
             },1000);
         });
         popbox_delayed_loading.open();
+    });
+
+    var popbox_insertcoin_test = new $.Popbox({
+        loading_text:'',
+        content:$('.content-insertcoin-test').html()
+    });
+
+    $('.click-me-insertcoin-test').on('click',function(e){
+        e.preventDefault();
+        popbox_insertcoin_test.open();
     });
 
 </script>
