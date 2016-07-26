@@ -704,6 +704,7 @@
             self.elements.$popbox_title.html(self.settings.title);
 
             if (_static.isFunction(self.settings.content.appendTo)) {
+                self.elements.$popbox_content.html('');
                 self.settings.content.appendTo(self.elements.$popbox_content);
             }
             else {
