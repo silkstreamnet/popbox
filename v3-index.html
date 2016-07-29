@@ -52,6 +52,8 @@
 <a href="images/test-image-3.jpg" class="click-me-gallery-1">Gallery 1 Item 2</a><br>
 <a href="#" class="delayed-loading">Test Delayed Loading</a><br>
 <a href="#" class="click-me-insertcoin-test">Insert Coin Test</a>
+<img src="images/test-image-3.jpg" data-url="images/test-image-3.jpg" class="break-img" />
+<img src="images/test-image.jpg" data-url="images/test-image.jpg" class="break-img" />
 <br><br>
 <div class="content-insertcoin-test">
     <div class="popbox-contain"><div class="popbox-text"><div id="main">
@@ -291,8 +293,13 @@ popbox-link<br>
 
     var popbox_breakage = new $.Popbox({
         mode:'gallery',
-        selector:''
+        gallery:{
+            selector:'.break-img'
+        }
     });
+
+    popbox_breakage.open();
+
 
 </script>
 </body>
