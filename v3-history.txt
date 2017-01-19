@@ -1,3 +1,7 @@
+=== v3.0.7 ===
+- Added aspect_fit_round setting.
+- Added aspect_fit_round support to popbox-selector plugin.
+
 === v3.0.6 ===
 - Added overlay_text setting.
 

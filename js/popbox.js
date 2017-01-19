@@ -799,7 +799,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.6';
+    Popbox.prototype.version = '3.0.7';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -835,6 +835,7 @@
         absolute:'mobile',
         add_class:'', // supports multiple space separated classes
         aspect_fit:false, // recommended for images and iframes - not for content
+        aspect_fit_round:false, // recommended for iframes
         cache:false,
         wait_for_images:true,
         width_margin:0.1,
@@ -1301,7 +1302,7 @@
                     });
                 };
 
-                if (self.settings.aspect_fit) {
+                if (self.settings.aspect_fit) { // ASPECT_FIT_IFRAME
                     if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
                         var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
                             new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
@@ -1312,6 +1313,11 @@
                         else {
                             new_popbox_height = ((new_popbox_height-content_height_padding) * ((max_popbox_width-content_width_padding) / (new_popbox_width-content_width_padding)))+content_height_padding;
                             new_popbox_width = max_popbox_width;
+                        }
+
+                        if (self.settings.aspect_fit_round) {
+                            new_popbox_width = Math.round(new_popbox_width);
+                            new_popbox_height = Math.round(new_popbox_height);
                         }
 
                         set_content_height(false);

@@ -87,10 +87,12 @@
                                                     var append_params = (matchresult[2]) ? '?'+matchresult[2] : '';
                                                     auto_settings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+append_params+'" frameborder="0" allowfullscreen></iframe>';
                                                     auto_settings.aspect_fit = true;
+                                                    auto_settings.aspect_fit_round = true;
                                                     break;
                                                 case 'vimeo':
                                                     auto_settings.content = '<iframe width="1280" height="720" src="//player.vimeo.com/video/'+matchresult[1]+'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
                                                     auto_settings.aspect_fit = true;
+                                                    auto_settings.aspect_fit_round = true;
                                                     break;
                                                 case 'image':
                                                     auto_settings.content = '<img src="'+matchresult[0]+'" alt="" />';
@@ -123,6 +125,6 @@
 
     $('.open-popbox').Popbox();
 
-    $.Popbox.prototype.plugins.selector = '1.0.0';
+    $.Popbox.prototype.plugins.selector = '1.0.1';
 
 })(jQuery,window);
