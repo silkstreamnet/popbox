@@ -1,3 +1,12 @@
+=== v3.0.6 ===
+- Added overlay_text setting.
+
+=== v3.0.5 ===
+MISSING
+
+=== v3.0.4 ===
+MISSING
+
 === v3.0.3 ===
 - Moved the popbox-close element below the popbox-content element to fix issue with iOS Safari close button not being clickable.
 
