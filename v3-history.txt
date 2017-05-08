@@ -1,25 +1,26 @@
-=== v3.0.7 ===
-- Added aspect_fit_round setting.
-- Added aspect_fit_round support to popbox-selector plugin.
+##### CORE #####
 
-=== v3.0.6 ===
+=== 3.0.7 ===
+- Added aspect_fit_round setting.
+
+=== 3.0.6 ===
 - Added overlay_text setting.
 
-=== v3.0.5 ===
-MISSING
+=== 3.0.5 ===
+- Removed min_width true 100% and max_width true 100% support.
 
-=== v3.0.4 ===
-MISSING
+=== 3.0.4 ===
+- Added option to set content setting to a jquery element object (used to only support a string with html or text).
 
-=== v3.0.3 ===
+=== 3.0.3 ===
 - Moved the popbox-close element below the popbox-content element to fix issue with iOS Safari close button not being clickable.
 
-=== v3.0.2 ===
+=== 3.0.2 ===
 - Removed static setting of _private object.
 - Fixed padding calculation on popbox-popup.
 - Updated code to support applying showLoading manually. (useful for ajax calls)
 
-=== v3.0.1 ===
+=== 3.0.1 ===
 - Style modifications to visual padding and margin.
 - Added comment stating never to set a margin or padding on popbox-popup.
 - Finally fixed iOS bug where aspect_fit=true popboxes were rendering far smaller than they should have been.
@@ -29,7 +30,33 @@ MISSING
 - Added even triggers for all locations which had hooks but no triggers.
 - Fixed issue scrolling on empty background not working.
 
-=== v3.0.0 ===
-- creation, completely re-engineered
-- animations are now purely css3, fallback is no animation (IE9 and below)
-- open and close animations are now highly customisable in javascript
+=== 3.0.0 ===
+- Creation, completely re-engineered
+- Animations are now purely css3, fallback is no animation (IE9 and below)
+- Open and close animations are now highly customisable in javascript
+
+##### PLUGINS #####
+
+||||| AJAX |||||
+unfinished
+
+||||| ANIMATIONS |||||
+=== 1.0.0 ===
+- Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
+
+||||| GALLERY |||||
+=== 1.0.1 ===
+- Added support for data-url attribute.
+
+=== 1.0.0 ===
+- Requires setting the mode of the popbox to "gallery".
+- API included for controlling the gallery.
+
+||||| SELECTOR |||||
+=== 1.0.1 ===
+- Added aspect_fit_round support to popbox-selector plugin.
+
+=== 1.0.0 ===
+- Adds ability to initiate a popbox element by specifying the "open-popbox" class on an element.
+- Supports Vimeo and Youtube links.
+- Specify settings by using the data attributes.
