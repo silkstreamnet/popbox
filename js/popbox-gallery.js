@@ -1,5 +1,5 @@
 (function($,window){
-    (function(){var minimum_required_popbox_version = '3.0.0'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
+    (function(){var minimum_required_popbox_version = '3.0.7'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
 
     var _static = $.Popbox.prototype._static,
         extend_default_settings = {
@@ -114,7 +114,10 @@
 
     _static.addHook('after_initialize',function(new_settings){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) popbox.settings.aspect_fit = true;
+        if (popbox.settings.mode == 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
+            popbox.settings.aspect_fit = true;
+            popbox.settings.aspect_fit_round = true;
+        }
         popbox.gallery.updateItems();
     });
 

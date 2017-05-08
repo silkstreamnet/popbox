@@ -45,6 +45,10 @@ unfinished
 - Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
 
 ||||| GALLERY |||||
+=== 1.0.2 ===
+- Added aspect_fit_round support.
+- Raised core version requirement to 3.0.7
+
 === 1.0.1 ===
 - Added support for data-url attribute.
 
@@ -54,7 +58,8 @@ unfinished
 
 ||||| SELECTOR |||||
 === 1.0.1 ===
-- Added aspect_fit_round support to popbox-selector plugin.
+- Added aspect_fit_round support.
+- Raised core version requirement to 3.0.7
 
 === 1.0.0 ===
 - Adds ability to initiate a popbox element by specifying the "open-popbox" class on an element.
