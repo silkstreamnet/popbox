@@ -1653,7 +1653,7 @@
         // store whether this has run, only run more than once on open if cache is false
     });
 
-    $.PopBox.prototype.plugins.ajax = '1.0.0';
+    $.Popbox.prototype.plugins.ajax = '1.0.0';
 
 })(jQuery,window);
 (function($){
@@ -1772,17 +1772,24 @@
                 clickable:true, // whether to apply a click/touch to selector items
                 error:'<div class="popbox-gallery-error">There was an error loading the image.</div>',
                 next:'<span>&#x25B6;</span>',
-                prev:'<span>&#x25C0;</span>'
+                prev:'<span>&#x25C0;</span>',
+                items:[] // array of image urls
             }
         };
 
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
     var gallery = function(){};
-    gallery.prototype.updateItems = function(){
+    gallery.prototype.refreshItems = function(){
         var popbox = this.self;
 
         // get image file links
+        if (_static.isArray(popbox.settings.gallery.items) && popbox.settings.gallery.items.length > 0) {
+            for (var i=0; i<popbox.settings.gallery.items.length; i++) {
+                popbox.properties.gallery.items.push(popbox.settings.gallery.items[i]);
+            }
+        }
+
         if (popbox.settings.gallery.selector) {
 
             var $items = $(popbox.settings.gallery.selector);
@@ -1821,7 +1828,7 @@
                         data_url = $item.data('url'),
                         href = $item.attr('href'),
                         src = $item.attr('src');
-                    popbox.gallery.updateItems();
+                    popbox.gallery.refreshItems();
                     if (data_url) popbox.gallery.goTo(_static.indexOf(data_url,popbox.properties.gallery.items,true));
                     else if (href) popbox.gallery.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
                     else if (src) popbox.gallery.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
@@ -1838,6 +1845,12 @@
             }
         }
     };
+    gallery.prototype.addItem = function(item) {
+
+    };
+
+    console.dir(gallery.prototype);
+    //gallery.prototype.removeItem = function() {};
     gallery.prototype.goTo = function(new_item_index){
         var popbox = this.self;
 
@@ -1882,7 +1895,7 @@
             popbox.settings.aspect_fit = true;
             popbox.settings.aspect_fit_round = true;
         }
-        popbox.gallery.updateItems();
+        popbox.gallery.refreshItems();
     });
 
     _static.addHook('after_reset',function(){
@@ -1896,7 +1909,7 @@
     _static.addHook('open',function(){
         var popbox = this;
         if (popbox.settings.mode == 'gallery') {
-            popbox.gallery.updateItems();
+            popbox.gallery.refreshItems();
             var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
                 existing_img_index = -1;
             if ($existing_img.length) {
@@ -1928,7 +1941,7 @@
         }
 
         if (popbox.settings.mode == 'gallery') {
-            popbox.gallery.updateItems();
+            popbox.gallery.refreshItems();
             popbox.gallery.goTo();
         }
     });
@@ -1977,7 +1990,7 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.0.1';
+    $.Popbox.prototype.plugins.gallery = '1.0.2';
 
 })(jQuery,window);
 (function($,window){

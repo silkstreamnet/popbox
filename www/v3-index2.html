@@ -45,7 +45,17 @@ popbox-link<br>
 <script type="text/javascript" src="dist/js/popbox-development.js"></script>
 <script type="text/javascript">
 
+    (function(){
+        var popbox_test_gallery = new $.Popbox({
+            mode:'gallery'
+        });
 
+        popbox_test_gallery.addItem('/dist/images/bg.jpg');
+
+        $('.popbox-test-gallery').on('click',function() {
+            popbox_test_gallery.open();
+        });
+    })();
 
 </script>
 </body>

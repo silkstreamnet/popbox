@@ -45,6 +45,10 @@ unfinished
 - Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
 
 ||||| GALLERY |||||
+=== 1.1.0 ===
+- Renamed updateItems to refreshItems
+- Added API functions addItem and removeItem. Not recommended to use these when using selector setting.
+
 === 1.0.2 ===
 - Added aspect_fit_round support.
 - Raised core version requirement to 3.0.7

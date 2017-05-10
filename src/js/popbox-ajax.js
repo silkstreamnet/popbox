@@ -23,6 +23,6 @@
         // store whether this has run, only run more than once on open if cache is false
     });
 
-    $.PopBox.prototype.plugins.ajax = '1.0.0';
+    $.Popbox.prototype.plugins.ajax = '1.0.0';
 
 })(jQuery,window);
