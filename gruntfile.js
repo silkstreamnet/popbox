@@ -9,8 +9,8 @@ module.exports = function(grunt){
                 footer: ''
             },
             dist: {
-                src: ['src/js/*.js'],
-                dest: 'dist/js/popbox-development.js'
+                src: ['src/js/popbox.js','src/js/popbox-ajax.js','src/js/popbox-animations.js','src/js/popbox-gallery.js','src/js/popbox-selector.js'],
+                dest: 'www/dist/js/popbox-development.js'
             }
         },
         uglify: {
@@ -21,8 +21,11 @@ module.exports = function(grunt){
             },
             files: {
                 expand:true,
-                src: ['**/*.js','!**/*.min.js'],
-                cwd: 'dist/js'
+                //src: ['www/dist/js/**/*.js','!www/dist/js/**/*.min.js','!www/dist/js/popbox-development.js'],
+                src: ['www/dist/js/popbox-release/popbox3/**/*.js','!www/dist/js/popbox-release/popbox3/**/*.min.js'],
+                rename:function(dst,src){
+                    return src.replace('.js','.min.js');
+                }
             }
         }
     });
@@ -30,6 +33,7 @@ module.exports = function(grunt){
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('js', ['concat', 'uglify']);
+    grunt.registerTask('js', ['concat']);
+    grunt.registerTask('scss', ['uglify']);
 
 };
