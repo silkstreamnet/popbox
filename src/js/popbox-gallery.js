@@ -213,6 +213,6 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.0.1';
+    $.Popbox.prototype.plugins.gallery = '1.0.2';
 
 })(jQuery,window);
