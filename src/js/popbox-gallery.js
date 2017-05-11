@@ -25,6 +25,7 @@
             // include movement vertically in case we need to escape for vertical scrolling
 
             var $image = false,
+                $locked_target = false,
                 capture_space = 8,
                 captured = false,
                 start_x = 0,
@@ -34,9 +35,11 @@
                 movement = 0,
 
                 start = function(new_x,new_y,event,type) {
+                    console.log("start");
+                    captured = false;
                     $image = popbox.elements.$popbox_popup.find('.popbox-gallery-image');
                     if ($image.length) {
-                        captured = false;
+                        $locked_target = $(event.target);
                         start_x = new_x;
                         start_y = new_y;
                         move_x = start_x;
@@ -47,19 +50,32 @@
                     return false;
                 },
                 move = function(new_x,new_y,event,type) {
+                    console.log("move");
                     move_x = new_x;
                     move_y = new_y;
 
                     var move_diff_x = Math.abs(move_x - start_x) - capture_space,
                         move_diff_y = Math.abs(move_y - start_y) - capture_space;
-
+                    console.log(captured);
+                    console.log(move_diff_x);
+                    console.log(move_diff_y);
                     if (!captured) {
                         if (move_diff_x > 0 && move_diff_x > move_diff_y) {
                             captured = true;
-                            console.log("captured");
+
+                            if ($locked_target && $locked_target.length) {
+                                $locked_target.one('click',function(e){
+                                    //TODO need to test if this works on final level elements with click listeners.
+                                    console.log("moo");
+                                    e.stopImmediatePropagation();
+                                    e.preventDefault();
+                                    end(e,type);
+                                    return false;
+                                });
+                            }
                         } else {
                             if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
-                                end(new_x,new_y,event,type);
+                                end(event,type);
                             }
                             return;
                         }
@@ -73,28 +89,21 @@
                     }
                 },
                 end = function(event,type) {
+                    console.log("end");
                     _static.$document.off('touchmove.'+_static._gallery_event_namespace);
                     _static.$document.off('touchend.'+_static._gallery_event_namespace);
                     _static.$document.off('mousemove.'+_static._gallery_event_namespace);
                     _static.$document.off('mouseup.'+_static._gallery_event_namespace);
+                    $locked_target = false;
 
                     if (captured) {
-                        var $target = $(event.target);
-                        if ($target.closest(popbox.elements.$popbox_popup).length) {
-                            $(event.target).one('click',function(e){
-                                //TODO need to test if this works on final level elements with click listeners.
-                                e.preventDefault();
-                                e.stopImmediatePropagation();
-                                return false;
-                            });
-                        }
-                        event.preventDefault();
                         event.stopImmediatePropagation();
+                        event.preventDefault();
 
                         if (move_x > start_x) {
-                            self.prev();
+                            //self.prev();
                         } else if (move_x < start_x) {
-                            self.next();
+                            //self.next();
                         }
                     }
 
@@ -129,7 +138,11 @@
                 }
             });
             popbox.elements.$popbox_popup.off('click.'+_static._gallery_event_namespace).on('click.'+_static._gallery_event_namespace, function(e){
-
+                if (captured) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    return false;
+                }
             });
         }
     };
@@ -361,6 +374,7 @@
 
                 popbox.elements.$popbox_gallery_next.off('click.popbox_gallery_next').on('click.popbox_gallery_next',function(e){
                     e.preventDefault();
+                    console.log("hi");
                     self.next();
                 });
 
