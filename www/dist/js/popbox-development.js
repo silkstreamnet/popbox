@@ -75,6 +75,33 @@
     _static._support.transform          = getVendorPropertyName('transform');
     _static._support.transform_origin   = getVendorPropertyName('transformOrigin');
     _static._support.transition_end     = _static._transition_end_event_names[_static._support.transition] || null;
+    _static._support.transform3d        = (function () {
+        var el = document.createElement('p'),
+            has3d,
+            transforms = {
+                'webkitTransform': '-webkit-transform',
+                'OTransform': '-o-transform',
+                'msTransform': '-ms-transform',
+                'MozTransform': '-moz-transform',
+                'transform': 'transform'
+            };
+
+        // Add it to the body to get the computed style
+        document.body.insertBefore(el, null);
+
+        for (var t in transforms) {
+            if (transforms.hasOwnProperty(t)) {
+                if (el.style[t] !== undefined) {
+                    el.style[t] = 'translate3d(1px,1px,1px)';
+                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+                }
+            }
+        }
+
+        document.body.removeChild(el);
+
+        return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+    })();
 
     _static._test_div = null;
 
@@ -1301,6 +1328,7 @@
 
                     self.elements.$popbox_content.css({
                         'height':(scroll) ? Math.floor(new_content_height)+'px' : new_content_height+'px',
+                        'overflow-x':'hidden',
                         'overflow-y':(scroll) ? 'scroll' : 'hidden'
                     });
                 };
@@ -1787,24 +1815,32 @@
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
     _private.prototype.attachSwipeEvents = function() {
-        var popbox = this.self.popbox;
+        var self = this.self, popbox = this.self.popbox;
 
         if (popbox.elements.$popbox_popup) {
             // include movement vertically in case we need to escape for vertical scrolling
-            var disable_mouse = false,
+
+            var $image = false,
                 capture_space = 8,
                 captured = false,
                 start_x = 0,
                 start_y = 0,
                 move_x = 0,
                 move_y = 0,
+                movement = 0,
 
                 start = function(new_x,new_y,event,type) {
-                    start_x = new_x;
-                    start_y = new_y;
-                    move_x = start_x;
-                    move_y = start_y;
-                    move(new_x,new_y,event,type);
+                    $image = popbox.elements.$popbox_popup.find('.popbox-gallery-image');
+                    if ($image.length) {
+                        captured = false;
+                        start_x = new_x;
+                        start_y = new_y;
+                        move_x = start_x;
+                        move_y = start_y;
+                        move(new_x,new_y,event,type);
+                        return true;
+                    }
+                    return false;
                 },
                 move = function(new_x,new_y,event,type) {
                     move_x = new_x;
@@ -1816,6 +1852,7 @@
                     if (!captured) {
                         if (move_diff_x > 0 && move_diff_x > move_diff_y) {
                             captured = true;
+                            console.log("captured");
                         } else {
                             if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
                                 end(new_x,new_y,event,type);
@@ -1824,19 +1861,37 @@
                         }
                     }
 
-                    if (event) event.preventDefault();
-
                     // move image
-
+                    if (_static._support.transform3d) {
+                        $image.css('transform','translate3d('+(move_x-start_x)+'px,0px,0px');
+                    } else {
+                        $image.css('transform','translate('+(move_x-start_x)+'px,0px');
+                    }
                 },
-                end = function(new_x,new_y,event,type) {
+                end = function(event,type) {
                     _static.$document.off('touchmove.'+_static._gallery_event_namespace);
                     _static.$document.off('touchend.'+_static._gallery_event_namespace);
                     _static.$document.off('mousemove.'+_static._gallery_event_namespace);
                     _static.$document.off('mouseup.'+_static._gallery_event_namespace);
 
                     if (captured) {
+                        var $target = $(event.target);
+                        if ($target.closest(popbox.elements.$popbox_popup).length) {
+                            $(event.target).one('click',function(e){
+                                //TODO need to test if this works on final level elements with click listeners.
+                                e.preventDefault();
+                                e.stopImmediatePropagation();
+                                return false;
+                            });
+                        }
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
 
+                        if (move_x > start_x) {
+                            self.prev();
+                        } else if (move_x < start_x) {
+                            self.next();
+                        }
                     }
 
                     return !captured;
@@ -1846,25 +1901,27 @@
                 e.preventDefault();
             });
             popbox.elements.$popbox_popup.off('touchstart.'+_static._gallery_event_namespace).on('touchstart.'+_static._gallery_event_namespace, function(e){
-                start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
-                _static.$document.off('touchmove.'+_static._gallery_event_namespace).on('touchmove.'+_static._gallery_event_namespace, function(e){
-                    move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
-                });
-                _static.$document.off('touchend.'+_static._gallery_event_namespace).on('touchend.'+_static._gallery_event_namespace, function(e){
-                    return end(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
-                });
+                if (start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch')) {
+                    _static.$document.off('touchmove.'+_static._gallery_event_namespace).on('touchmove.'+_static._gallery_event_namespace, function(e){
+                        move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
+                    });
+                    _static.$document.off('touchend.'+_static._gallery_event_namespace).on('touchend.'+_static._gallery_event_namespace, function(e){
+                        return end(e,'touch');
+                    });
+                }
             });
             popbox.elements.$popbox_popup.off('mousedown.'+_static._gallery_event_namespace).on('mousedown.'+_static._gallery_event_namespace, function(e){
                 if (e.which === 1) {
-                    start(e.pageX,e.pageY,e,'mouse');
-                    _static.$document.off('mousemove.'+_static._gallery_event_namespace).on('mousemove.'+_static._gallery_event_namespace, function(e){
-                        move(e.pageX,e.pageY,e,'mouse');
-                    });
-                    _static.$document.off('mouseup.'+_static._gallery_event_namespace).on('mouseup.'+_static._gallery_event_namespace, function(e){
-                        if (e.which === 1) {
-                            return end(e.pageX,e.pageY,e,'mouse');
-                        }
-                    });
+                    if (start(e.pageX,e.pageY,e,'mouse')) {
+                        _static.$document.off('mousemove.'+_static._gallery_event_namespace).on('mousemove.'+_static._gallery_event_namespace, function(e){
+                            move(e.pageX,e.pageY,e,'mouse');
+                        });
+                        _static.$document.off('mouseup.'+_static._gallery_event_namespace).on('mouseup.'+_static._gallery_event_namespace, function(e){
+                            if (e.which === 1) {
+                                return end(e,'mouse');
+                            }
+                        });
+                    }
                 }
             });
             popbox.elements.$popbox_popup.off('click.'+_static._gallery_event_namespace).on('click.'+_static._gallery_event_namespace, function(e){
@@ -1992,7 +2049,7 @@
             popbox.properties.gallery.current_index = new_item_index;
 
             popbox.update({
-                content:'<div class="popbox-gallery-image"><img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" /></div>'
+                content:'<div class="popbox-gallery-container" style="overflow:hidden;"><div class="popbox-gallery-image"><img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" /></div></div>'
             },true);
         }
     };
@@ -2029,8 +2086,10 @@
     });
 
     _static.addHook('after_create',function(){
-        var self = this.gallery;
-        self._private.attachSwipeEvents();
+        var self = this.gallery, popbox = this;
+        if (popbox.settings.mode === 'gallery') {
+            self._private.attachSwipeEvents();
+        }
     });
 
     _static.addHook('open',function(){

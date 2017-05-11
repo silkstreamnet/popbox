@@ -75,6 +75,33 @@
     _static._support.transform          = getVendorPropertyName('transform');
     _static._support.transform_origin   = getVendorPropertyName('transformOrigin');
     _static._support.transition_end     = _static._transition_end_event_names[_static._support.transition] || null;
+    _static._support.transform3d        = (function () {
+        var el = document.createElement('p'),
+            has3d,
+            transforms = {
+                'webkitTransform': '-webkit-transform',
+                'OTransform': '-o-transform',
+                'msTransform': '-ms-transform',
+                'MozTransform': '-moz-transform',
+                'transform': 'transform'
+            };
+
+        // Add it to the body to get the computed style
+        document.body.insertBefore(el, null);
+
+        for (var t in transforms) {
+            if (transforms.hasOwnProperty(t)) {
+                if (el.style[t] !== undefined) {
+                    el.style[t] = 'translate3d(1px,1px,1px)';
+                    has3d = window.getComputedStyle(el).getPropertyValue(transforms[t]);
+                }
+            }
+        }
+
+        document.body.removeChild(el);
+
+        return (has3d !== undefined && has3d.length > 0 && has3d !== "none");
+    })();
 
     _static._test_div = null;
 
@@ -1301,6 +1328,7 @@
 
                     self.elements.$popbox_content.css({
                         'height':(scroll) ? Math.floor(new_content_height)+'px' : new_content_height+'px',
+                        'overflow-x':'hidden',
                         'overflow-y':(scroll) ? 'scroll' : 'hidden'
                     });
                 };

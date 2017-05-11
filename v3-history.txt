@@ -3,6 +3,8 @@
 === 3.0.8 ===
 - Added some recommended coercion checks.
 - Added mode class support (gallery).
+- Added new support check for 3d.
+- Added overflow-x hidden on popbox-content.
 
 === 3.0.7 ===
 - Added aspect_fit_round setting.
