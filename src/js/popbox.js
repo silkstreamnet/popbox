@@ -3,6 +3,7 @@
     var _private = function(){},
         _static = {
             $window:$(window),
+            $document:$(document),
             $html:$('html'),
             $body:$('body'),
             _event_namespace:'Popbox',
@@ -801,7 +802,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.8';
+    Popbox.prototype.version = '3.0.9';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1317,6 +1318,7 @@
                             new_popbox_width = max_popbox_width;
                         }
 
+                        // for iframes
                         if (self.settings.aspect_fit_round) {
                             new_popbox_width = Math.round(new_popbox_width);
                             new_popbox_height = Math.round(new_popbox_height);

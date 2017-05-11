@@ -3,6 +3,7 @@
     var _private = function(){},
         _static = {
             $window:$(window),
+            $document:$(document),
             $html:$('html'),
             $body:$('body'),
             _event_namespace:'Popbox',
@@ -801,7 +802,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.8';
+    Popbox.prototype.version = '3.0.9';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1317,6 +1318,7 @@
                             new_popbox_width = max_popbox_width;
                         }
 
+                        // for iframes
                         if (self.settings.aspect_fit_round) {
                             new_popbox_width = Math.round(new_popbox_width);
                             new_popbox_height = Math.round(new_popbox_height);
@@ -1765,9 +1767,10 @@
 
 })(jQuery);
 (function($,window){
-    (function(){var minimum_required_popbox_version = '3.0.7'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
+    (function(){var minimum_required_popbox_version = '3.0.9'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
 
-    var _static = $.Popbox.prototype._static,
+    var _private = function(){},
+        _static = $.Popbox.prototype._static,
         extend_default_settings = {
             gallery:{ // mode must be set to gallery for this to be used
                 selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
@@ -1779,11 +1782,106 @@
             }
         };
 
+    _static._gallery_event_namespace = 'PopboxGallery';
+
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
-    var gallery = function(){};
+    _private.prototype.attachSwipeEvents = function() {
+        var popbox = this.self.popbox;
+
+        if (popbox.elements.$popbox_popup) {
+            // include movement vertically in case we need to escape for vertical scrolling
+            var disable_mouse = false,
+                capture_space = 8,
+                captured = false,
+                start_x = 0,
+                start_y = 0,
+                move_x = 0,
+                move_y = 0,
+
+                start = function(new_x,new_y,event,type) {
+                    start_x = new_x;
+                    start_y = new_y;
+                    move_x = start_x;
+                    move_y = start_y;
+                    move(new_x,new_y,event,type);
+                },
+                move = function(new_x,new_y,event,type) {
+                    move_x = new_x;
+                    move_y = new_y;
+
+                    var move_diff_x = Math.abs(move_x - start_x) - capture_space,
+                        move_diff_y = Math.abs(move_y - start_y) - capture_space;
+
+                    if (!captured) {
+                        if (move_diff_x > 0 && move_diff_x > move_diff_y) {
+                            captured = true;
+                        } else {
+                            if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
+                                end(new_x,new_y,event,type);
+                            }
+                            return;
+                        }
+                    }
+
+                    if (event) event.preventDefault();
+
+                    // move image
+
+                },
+                end = function(new_x,new_y,event,type) {
+                    _static.$document.off('touchmove.'+_static._gallery_event_namespace);
+                    _static.$document.off('touchend.'+_static._gallery_event_namespace);
+                    _static.$document.off('mousemove.'+_static._gallery_event_namespace);
+                    _static.$document.off('mouseup.'+_static._gallery_event_namespace);
+
+                    if (captured) {
+
+                    }
+
+                    return !captured;
+                };
+
+            popbox.elements.$popbox_popup.off('dragstart.'+_static._gallery_event_namespace).on('dragstart.'+_static._gallery_event_namespace, function(e){
+                e.preventDefault();
+            });
+            popbox.elements.$popbox_popup.off('touchstart.'+_static._gallery_event_namespace).on('touchstart.'+_static._gallery_event_namespace, function(e){
+                start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
+                _static.$document.off('touchmove.'+_static._gallery_event_namespace).on('touchmove.'+_static._gallery_event_namespace, function(e){
+                    move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
+                });
+                _static.$document.off('touchend.'+_static._gallery_event_namespace).on('touchend.'+_static._gallery_event_namespace, function(e){
+                    return end(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
+                });
+            });
+            popbox.elements.$popbox_popup.off('mousedown.'+_static._gallery_event_namespace).on('mousedown.'+_static._gallery_event_namespace, function(e){
+                if (e.which === 1) {
+                    start(e.pageX,e.pageY,e,'mouse');
+                    _static.$document.off('mousemove.'+_static._gallery_event_namespace).on('mousemove.'+_static._gallery_event_namespace, function(e){
+                        move(e.pageX,e.pageY,e,'mouse');
+                    });
+                    _static.$document.off('mouseup.'+_static._gallery_event_namespace).on('mouseup.'+_static._gallery_event_namespace, function(e){
+                        if (e.which === 1) {
+                            return end(e.pageX,e.pageY,e,'mouse');
+                        }
+                    });
+                }
+            });
+            popbox.elements.$popbox_popup.off('click.'+_static._gallery_event_namespace).on('click.'+_static._gallery_event_namespace, function(e){
+
+            });
+        }
+    };
+
+    var gallery = function(popbox){
+        var self = this;
+        self.popbox = popbox;
+        self._private = new _private();
+        self._private.self = self;
+    };
+
     gallery.prototype.refreshItems = function(){
-        var popbox = this.self;
+        var self = this, popbox = this.popbox;
 
         // get image file links
         if (_static.isArray(popbox.settings.gallery.items) && popbox.settings.gallery.items.length > 0) {
@@ -1830,17 +1928,17 @@
                         data_url = $item.data('url'),
                         href = $item.attr('href'),
                         src = $item.attr('src');
-                    popbox.gallery.refreshItems();
-                    if (data_url) popbox.gallery.goTo(_static.indexOf(data_url,popbox.properties.gallery.items,true));
-                    else if (href) popbox.gallery.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
-                    else if (src) popbox.gallery.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
+                    self.refreshItems();
+                    if (data_url) self.goTo(_static.indexOf(data_url,popbox.properties.gallery.items,true));
+                    else if (href) self.goTo(_static.indexOf(href,popbox.properties.gallery.items,true));
+                    else if (src) self.goTo(_static.indexOf(src,popbox.properties.gallery.items,true));
                     else {
                         // get first sub item
                         var first_href = $item.find('a[href]:first').attr('href'),
                             first_src = $item.find('img[src]:first').attr('src');
 
-                        if (first_href && !first_href.match(/^#/)) popbox.gallery.goTo(_static.indexOf(first_href,popbox.properties.gallery.items,true));
-                        else if (first_src) popbox.gallery.goTo(_static.indexOf(first_src,popbox.properties.gallery.items,true));
+                        if (first_href && !first_href.match(/^#/)) self.goTo(_static.indexOf(first_href,popbox.properties.gallery.items,true));
+                        else if (first_src) self.goTo(_static.indexOf(first_src,popbox.properties.gallery.items,true));
                     }
                     popbox.open();
                 });
@@ -1848,15 +1946,15 @@
         }
     };
     gallery.prototype.addItem = function(item) {
-        var popbox = this.self;
-        popbox.gallery.addItems([item]);
+        var self = this;
+        self.addItems([item]);
     };
     gallery.prototype.removeItem = function(item) {
-        var popbox = this.self;
-        popbox.gallery.removeItems([item]);
+        var self = this;
+        self.removeItems([item]);
     };
     gallery.prototype.addItems = function(items) {
-        var popbox = this.self;
+        var popbox = this.popbox;
         if (items) {
             if (!_static.isArray(popbox.settings.gallery.items)) popbox.settings.gallery.items = [];
             if (!_static.isArray(items)) items = [items];
@@ -1866,7 +1964,7 @@
         }
     };
     gallery.prototype.removeItems = function(items) {
-        var popbox = this.self;
+        var popbox = this.popbox;
         if (items && _static.isArray(popbox.settings.gallery.items)) {
             if (!_static.isArray(items)) items = [items];
             for (var i=0; i<items.length; i++) {
@@ -1878,7 +1976,7 @@
         }
     };
     gallery.prototype.goTo = function(new_item_index){
-        var popbox = this.self;
+        var popbox = this.popbox;
 
         new_item_index = (_static.isNumber(new_item_index)) ? new_item_index : popbox.properties.gallery.current_index;
 
@@ -1894,34 +1992,32 @@
             popbox.properties.gallery.current_index = new_item_index;
 
             popbox.update({
-                content:'<img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" />'
+                content:'<div class="popbox-gallery-image"><img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" /></div>'
             },true);
         }
     };
     gallery.prototype.next = function(){
-        var popbox = this.self;
-        popbox.gallery.goTo(popbox.properties.gallery.current_index+1);
+        var self = this, popbox = this.popbox;
+        self.goTo(popbox.properties.gallery.current_index+1);
     };
     gallery.prototype.prev = function(){
-        var popbox = this.self;
-        popbox.gallery.goTo(popbox.properties.gallery.current_index-1);
+        var self = this, popbox = this.popbox;
+        self.goTo(popbox.properties.gallery.current_index-1);
     };
 
     $.Popbox.prototype.gallery = gallery;
 
     _static.addHook('initialize',function(){
         var popbox = this;
-        popbox.gallery = new gallery();
-        popbox.gallery.self = popbox;
+        popbox.gallery = new gallery(popbox);
     });
 
     _static.addHook('after_initialize',function(new_settings){
-        var popbox = this;
+        var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
             popbox.settings.aspect_fit = true;
-            popbox.settings.aspect_fit_round = true;
         }
-        popbox.gallery.refreshItems();
+        self.refreshItems();
     });
 
     _static.addHook('after_reset',function(){
@@ -1932,16 +2028,21 @@
         };
     });
 
+    _static.addHook('after_create',function(){
+        var self = this.gallery;
+        self._private.attachSwipeEvents();
+    });
+
     _static.addHook('open',function(){
-        var popbox = this;
+        var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
-            popbox.gallery.refreshItems();
+            self.refreshItems();
             var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
                 existing_img_index = 0;
             if ($existing_img.length) {
                 existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
             }
-            popbox.gallery.goTo(existing_img_index);
+            self.goTo(existing_img_index);
         }
     });
 
@@ -1959,7 +2060,7 @@
     });
 
     _static.addHook('after_update',function(){
-        var popbox = this;
+        var self = this.gallery, popbox = this;
 
         if (!popbox.isOpen()) {
             popbox.properties.gallery.items = [];
@@ -1967,13 +2068,13 @@
         }
 
         if (popbox.settings.mode === 'gallery') {
-            popbox.gallery.refreshItems();
-            popbox.gallery.goTo();
+            self.refreshItems();
+            self.goTo();
         }
     });
 
     _static.addHook('after_update_dom',function(){
-        var popbox = this;
+        var self = this.gallery, popbox = this;
 
         var show_btns = false;
 
@@ -1997,12 +2098,12 @@
 
                 popbox.elements.$popbox_gallery_next.off('click.popbox_gallery_next').on('click.popbox_gallery_next',function(e){
                     e.preventDefault();
-                    popbox.gallery.next();
+                    self.next();
                 });
 
                 popbox.elements.$popbox_gallery_prev.off('click.popbox_gallery_prev').on('click.popbox_gallery_prev',function(e){
                     e.preventDefault();
-                    popbox.gallery.prev();
+                    self.prev();
                 });
 
                 show_btns = true;
