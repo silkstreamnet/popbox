@@ -5,6 +5,7 @@
 - Added mode class support (gallery).
 - Added new support check for 3d.
 - Added overflow-x hidden on popbox-content.
+- Changed events to be assigned to popbox and use target.
 
 === 3.0.7 ===
 - Added aspect_fit_round setting.
@@ -52,8 +53,11 @@ unfinished
 
 ||||| GALLERY |||||
 === 1.1.0 ===
-- Renamed updateItems to refreshItems
-- Added API functions addItem and removeItem. Not recommended to use these when using selector setting.
+- Renamed updateItems to refreshItems.
+- Added API functions: addItem, removeItem, addItems, removeItems. Not recommended to use these when using selector setting.
+- Added swipe support.
+- Changed events to be attached to popbox then use targets.
+- Moved code around for organisation.
 
 === 1.0.2 ===
 - Added aspect_fit_round support.

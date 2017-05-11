@@ -980,13 +980,15 @@
         self._private.applyDomSettings();
 
         // events
-        self.elements.$popbox_close.off('click.popbox_close').on('click.popbox_close',function(e){
+        var _close_namespace = _static._event_namespace+'Close';
+        self.elements.$popbox.off('click.'+_close_namespace).on('click.'+_close_namespace,'.popbox-close',function(e){
             e.preventDefault();
             self.close();
         });
 
-        var _complex_close_namespace = 'Popbox_complex_close';
-        self.elements.$popbox.on('mousedown.'+_static._event_namespace+' touchstart.'+_static._event_namespace,function(e1){
+        var _complex_close_start_namespace = _static._event_namespace+'ComplexCloseStart',
+            _complex_close_namespace = _static._event_namespace+'ComplexClose';
+        self.elements.$popbox.on('mousedown.'+_complex_close_start_namespace+' touchstart.'+_complex_close_start_namespace,function(e1){
             var e1pageX = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageX : e1.pageX,
                 e1pageY = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageY : e1.pageY;
             if ((e1.originalEvent.touches || e1.which === 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
@@ -1817,10 +1819,12 @@
     _private.prototype.attachSwipeEvents = function() {
         var self = this.self, popbox = this.self.popbox;
 
-        if (popbox.elements.$popbox_popup) {
+        if (popbox.elements.$popbox) {
             // include movement vertically in case we need to escape for vertical scrolling
 
-            var $image = false,
+            var _swipe_namespace = _static._gallery_event_namespace+'Swipe',
+                disable_mouse = false,
+                $image = false,
                 $locked_target = false,
                 capture_space = 8,
                 captured = false,
@@ -1828,13 +1832,12 @@
                 start_y = 0,
                 move_x = 0,
                 move_y = 0,
-                movement = 0,
 
                 start = function(new_x,new_y,event,type) {
-                    console.log("start");
                     captured = false;
                     $image = popbox.elements.$popbox_popup.find('.popbox-gallery-image');
                     if ($image.length) {
+                        if (!$image.data('movement')) $image.data('movement',0);
                         $locked_target = $(event.target);
                         start_x = new_x;
                         start_y = new_y;
@@ -1846,29 +1849,24 @@
                     return false;
                 },
                 move = function(new_x,new_y,event,type) {
-                    console.log("move");
                     move_x = new_x;
                     move_y = new_y;
 
                     var move_diff_x = Math.abs(move_x - start_x) - capture_space,
                         move_diff_y = Math.abs(move_y - start_y) - capture_space;
-                    console.log(captured);
-                    console.log(move_diff_x);
-                    console.log(move_diff_y);
+
                     if (!captured) {
                         if (move_diff_x > 0 && move_diff_x > move_diff_y) {
                             captured = true;
 
-                            if ($locked_target && $locked_target.length) {
-                                $locked_target.one('click',function(e){
-                                    //TODO need to test if this works on final level elements with click listeners.
-                                    console.log("moo");
-                                    e.stopImmediatePropagation();
-                                    e.preventDefault();
-                                    end(e,type);
-                                    return false;
-                                });
-                            }
+                            // this is wrong. but it works.
+                            $('<div/>').css({
+                                'position':'absolute',
+                                'top':'0',
+                                'left':'0',
+                                'right':'0',
+                                'bottom':'0'
+                            }).addClass('popbox-swipe-shield').appendTo(popbox.elements.$popbox_popup);
                         } else {
                             if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
                                 end(event,type);
@@ -1879,53 +1877,58 @@
 
                     // move image
                     if (_static._support.transform3d) {
-                        $image.css('transform','translate3d('+(move_x-start_x)+'px,0px,0px');
+                        $image.css('transform','translate3d('+((move_x-start_x)+$image.data('movement'))+'px,0px,0px');
                     } else {
-                        $image.css('transform','translate('+(move_x-start_x)+'px,0px');
+                        $image.css('transform','translate('+((move_x-start_x)+$image.data('movement'))+'px,0px');
                     }
                 },
                 end = function(event,type) {
-                    console.log("end");
-                    _static.$document.off('touchmove.'+_static._gallery_event_namespace);
-                    _static.$document.off('touchend.'+_static._gallery_event_namespace);
-                    _static.$document.off('mousemove.'+_static._gallery_event_namespace);
-                    _static.$document.off('mouseup.'+_static._gallery_event_namespace);
-                    $locked_target = false;
+                    disable_mouse = false;
+                    _static.$document.off('touchmove.'+_swipe_namespace);
+                    _static.$document.off('touchend.'+_swipe_namespace);
+                    _static.$document.off('mousemove.'+_swipe_namespace);
+                    _static.$document.off('mouseup.'+_swipe_namespace);
+                    $image.data('movement',(move_x-start_x)+$image.data('movement'));
 
                     if (captured) {
                         event.stopImmediatePropagation();
                         event.preventDefault();
 
                         if (move_x > start_x) {
-                            //self.prev();
+                            self.prev();
                         } else if (move_x < start_x) {
-                            //self.next();
+                            self.next();
                         }
                     }
+
+                    popbox.elements.$popbox_popup.find('.popbox-swipe-shield').remove();
 
                     return !captured;
                 };
 
-            popbox.elements.$popbox_popup.off('dragstart.'+_static._gallery_event_namespace).on('dragstart.'+_static._gallery_event_namespace, function(e){
+            popbox.elements.$popbox.off('dragstart.'+_swipe_namespace).on('dragstart.'+_swipe_namespace, '.popbox-popup', function(e){
                 e.preventDefault();
             });
-            popbox.elements.$popbox_popup.off('touchstart.'+_static._gallery_event_namespace).on('touchstart.'+_static._gallery_event_namespace, function(e){
+            popbox.elements.$popbox.off('touchstart.'+_swipe_namespace).on('touchstart.'+_swipe_namespace, '.popbox-popup', function(e){
+                disable_mouse = true;
                 if (start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch')) {
-                    _static.$document.off('touchmove.'+_static._gallery_event_namespace).on('touchmove.'+_static._gallery_event_namespace, function(e){
+                    _static.$document.off('touchmove.'+_swipe_namespace).on('touchmove.'+_swipe_namespace, function(e){
                         move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
                     });
-                    _static.$document.off('touchend.'+_static._gallery_event_namespace).on('touchend.'+_static._gallery_event_namespace, function(e){
+                    _static.$document.off('touchend.'+_swipe_namespace).on('touchend.'+_swipe_namespace, function(e){
                         return end(e,'touch');
                     });
+                } else {
+                    disable_mouse = false;
                 }
             });
-            popbox.elements.$popbox_popup.off('mousedown.'+_static._gallery_event_namespace).on('mousedown.'+_static._gallery_event_namespace, function(e){
-                if (e.which === 1) {
+            popbox.elements.$popbox.off('mousedown.'+_swipe_namespace).on('mousedown.'+_swipe_namespace, '.popbox-popup', function(e){
+                if (!disable_mouse && e.which === 1) {
                     if (start(e.pageX,e.pageY,e,'mouse')) {
-                        _static.$document.off('mousemove.'+_static._gallery_event_namespace).on('mousemove.'+_static._gallery_event_namespace, function(e){
+                        _static.$document.off('mousemove.'+_swipe_namespace).on('mousemove.'+_swipe_namespace, function(e){
                             move(e.pageX,e.pageY,e,'mouse');
                         });
-                        _static.$document.off('mouseup.'+_static._gallery_event_namespace).on('mouseup.'+_static._gallery_event_namespace, function(e){
+                        _static.$document.off('mouseup.'+_swipe_namespace).on('mouseup.'+_swipe_namespace, function(e){
                             if (e.which === 1) {
                                 return end(e,'mouse');
                             }
@@ -1933,12 +1936,32 @@
                     }
                 }
             });
-            popbox.elements.$popbox_popup.off('click.'+_static._gallery_event_namespace).on('click.'+_static._gallery_event_namespace, function(e){
+            popbox.elements.$popbox.off('click.'+_swipe_namespace).on('click.'+_swipe_namespace, '.popbox-popup', function(e){
                 if (captured) {
                     e.stopImmediatePropagation();
                     e.preventDefault();
                     return false;
                 }
+            });
+        }
+    };
+
+    _private.prototype.attachNavEvents = function() {
+        var self = this.self, popbox = this.self.popbox;
+
+        if (popbox.elements.$popbox) {
+            var _nav_namespace = _static._gallery_event_namespace+'Nav';
+
+            popbox.elements.$popbox.off('click.'+_nav_namespace);
+
+            popbox.elements.$popbox.on('click.'+_nav_namespace,'.popbox-gallery-next',function(e){
+                e.preventDefault();
+                self.next();
+            });
+
+            popbox.elements.$popbox.on('click.'+_nav_namespace,'.popbox-gallery-prev',function(e){
+                e.preventDefault();
+                self.prev();
             });
         }
     };
@@ -2084,10 +2107,12 @@
 
     _static.addHook('after_initialize',function(new_settings){
         var self = this.gallery, popbox = this;
-        if (popbox.settings.mode === 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
-            popbox.settings.aspect_fit = true;
+        if (popbox.settings.mode === 'gallery') {
+            if (new_settings && !_static.isSet(new_settings.aspect_fit)) {
+                popbox.settings.aspect_fit = true;
+            }
+            self.refreshItems();
         }
-        self.refreshItems();
     });
 
     _static.addHook('after_reset',function(){
@@ -2101,7 +2126,8 @@
     _static.addHook('after_create',function(){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
-            self._private.attachSwipeEvents();
+            self._private.attachSwipeEvents(); // must go first
+            self._private.attachNavEvents();
         }
     });
 
@@ -2146,7 +2172,7 @@
     });
 
     _static.addHook('after_update_dom',function(){
-        var self = this.gallery, popbox = this;
+        var popbox = this;
 
         var show_btns = false;
 
@@ -2167,17 +2193,6 @@
                         'href':'javascript:void(0);'
                     }).html(popbox.settings.gallery.prev).appendTo(popbox.elements.$popbox_container);
                 }
-
-                popbox.elements.$popbox_gallery_next.off('click.popbox_gallery_next').on('click.popbox_gallery_next',function(e){
-                    e.preventDefault();
-                    console.log("hi");
-                    self.next();
-                });
-
-                popbox.elements.$popbox_gallery_prev.off('click.popbox_gallery_prev').on('click.popbox_gallery_prev',function(e){
-                    e.preventDefault();
-                    self.prev();
-                });
 
                 show_btns = true;
             }
