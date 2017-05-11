@@ -99,7 +99,7 @@
         return typeof number === "number" && (!_static.param(required,false) || number > 0);
     };
     _static.isString = function(string,required) {
-        return typeof string === "string" && (!_static.param(required,false) || string != '');
+        return typeof string === "string" && (!_static.param(required,false) || string !== '');
     };
     _static.getAttributeString = function($object,attr) {
         var val = $object.attr(attr);
@@ -163,7 +163,7 @@
                     end_match = parts[i].match(new RegExp('[^'+container_start_ie+']*['+container_end_ie+']'));
 
                 if (inside !== false) {
-                    if (j == current) {
+                    if (j === current) {
                         inside += parts[i];
                         if (end_match) {
                             results.push(inside);
@@ -249,7 +249,7 @@
                             property_difference = true;
                         }
                     }
-                    else if (cur_property_val != new_property_val) {
+                    else if (cur_property_val !== new_property_val) {
                         property_difference = true;
                     }
                 }
@@ -401,11 +401,11 @@
                 });
             }
             $object.on('mousedown.'+touch_click_namespace+' touchstart.'+touch_click_namespace,selector,function(e){
-                if (e.originalEvent.touches || e.which == 1) {
+                if (e.originalEvent.touches || e.which === 1) {
                     var $subobject = $(this);
                     //if (prevent_default) e.preventDefault();
                     $subobject.off('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace).on('mouseup.'+touch_click_namespace+' touchend.'+touch_click_namespace,function(e2){
-                        if (e.originalEvent.touches || e.which == 1) {
+                        if (e.originalEvent.touches || e.which === 1) {
                             if (prevent_default) e2.preventDefault();
                             if (_static.isFunction(handler)) handler.call(this,e2);
                         }
@@ -685,7 +685,7 @@
                 }
             }
 
-            if (self.properties.content_image_cache_pending == 0 && self.properties.interface_image_cache_pending == 0) {
+            if (self.properties.content_image_cache_pending === 0 && self.properties.interface_image_cache_pending === 0) {
                 return true;
             }
         }
@@ -699,6 +699,8 @@
 
             self._private.triggerHook('update_dom');
             self.trigger('update_dom');
+
+            self.elements.$popbox.attr('class','').addClass('popbox');
 
             self.elements.$popbox_loading.html(self.settings.loading_text);
             self.elements.$popbox_close.html(self.settings.close_text);
@@ -799,7 +801,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.7';
+    Popbox.prototype.version = '3.0.8';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -959,10 +961,10 @@
         self.elements.$popbox.on('mousedown.'+_static._event_namespace+' touchstart.'+_static._event_namespace,function(e1){
             var e1pageX = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageX : e1.pageX,
                 e1pageY = (e1.originalEvent.touches && e1.originalEvent.touches[0]) ? e1.originalEvent.touches[0].pageY : e1.pageY;
-            if ((e1.originalEvent.touches || e1.which == 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
+            if ((e1.originalEvent.touches || e1.which === 1) && $(e1.target).closest('.popbox-popup').length === 0 && e1pageX < self.elements.$popbox_empty.width()) {
                 self.elements.$popbox.off('.'+_complex_close_namespace);
                 self.elements.$popbox.on('mouseup.'+_complex_close_namespace+' touchend.'+_complex_close_namespace,function(e2){
-                    if (e2.originalEvent.touches || e2.which == 1) {
+                    if (e2.originalEvent.touches || e2.which === 1) {
                         self.elements.$popbox.off('.'+_complex_close_namespace);
                         if (!self.properties.disable_background_click && e1.target === e2.target && $(e2.target).closest('.popbox-popup').length === 0) {
                             e2.preventDefault();
@@ -1060,7 +1062,7 @@
             self._private.triggerHook('open');
             self.trigger('open');
 
-            if (self.elements.$popbox.css('position') == 'absolute') {
+            if (self.elements.$popbox.css('position') === 'absolute') {
                 self.elements.$popbox.css('top',_static.$window.scrollTop()+'px');
             }
             else {
@@ -1302,7 +1304,7 @@
                     });
                 };
 
-                if (self.settings.aspect_fit) { // ASPECT_FIT_IFRAME
+                if (self.settings.aspect_fit) { // ASPECT_FIT for iframes and images
                     if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
                         var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
                             new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
@@ -1846,11 +1848,35 @@
         }
     };
     gallery.prototype.addItem = function(item) {
-
+        var popbox = this.self;
+        popbox.gallery.addItems([item]);
     };
-
-    console.dir(gallery.prototype);
-    //gallery.prototype.removeItem = function() {};
+    gallery.prototype.removeItem = function(item) {
+        var popbox = this.self;
+        popbox.gallery.removeItems([item]);
+    };
+    gallery.prototype.addItems = function(items) {
+        var popbox = this.self;
+        if (items) {
+            if (!_static.isArray(popbox.settings.gallery.items)) popbox.settings.gallery.items = [];
+            if (!_static.isArray(items)) items = [items];
+            for (var i=0; i<items.length; i++) {
+                popbox.settings.gallery.items.push(items[i]);
+            }
+        }
+    };
+    gallery.prototype.removeItems = function(items) {
+        var popbox = this.self;
+        if (items && _static.isArray(popbox.settings.gallery.items)) {
+            if (!_static.isArray(items)) items = [items];
+            for (var i=0; i<items.length; i++) {
+                var item_index = _static.indexOf(items[i],popbox.settings.gallery.items);
+                if (item_index >= 0) {
+                    popbox.settings.gallery.items.splice(item_index,1);
+                }
+            }
+        }
+    };
     gallery.prototype.goTo = function(new_item_index){
         var popbox = this.self;
 
@@ -1858,7 +1884,7 @@
 
         if (popbox.properties.gallery.items.length > 0) {
 
-            if (new_item_index < -1 || new_item_index > popbox.properties.gallery.items.length-1) {
+            if (new_item_index > popbox.properties.gallery.items.length-1) {
                 new_item_index = 0;
             }
             else if (new_item_index < 0) {
@@ -1891,7 +1917,7 @@
 
     _static.addHook('after_initialize',function(new_settings){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
+        if (popbox.settings.mode === 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
             popbox.settings.aspect_fit = true;
             popbox.settings.aspect_fit_round = true;
         }
@@ -1908,10 +1934,10 @@
 
     _static.addHook('open',function(){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.gallery.refreshItems();
             var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
-                existing_img_index = -1;
+                existing_img_index = 0;
             if ($existing_img.length) {
                 existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
             }
@@ -1921,7 +1947,7 @@
 
     _static.addHook('image_error',function(image_cache_src){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.update({
                 content:popbox.settings.gallery.error
             },false);
@@ -1940,7 +1966,7 @@
             popbox.properties.gallery.current_index = 0;
         }
 
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.gallery.refreshItems();
             popbox.gallery.goTo();
         }
@@ -1952,6 +1978,8 @@
         var show_btns = false;
 
         if (popbox.settings.mode === 'gallery') {
+            popbox.elements.$popbox.addClass('popbox-gallery');
+
             if (popbox.properties.gallery.items.length > 1) {
                 // put the next and previous buttons in the popbox
                 if (!popbox.elements.$popbox_gallery_next) {
@@ -1990,7 +2018,7 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.0.2';
+    $.Popbox.prototype.plugins.gallery = '1.1.0';
 
 })(jQuery,window);
 (function($,window){

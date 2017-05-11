@@ -1,7 +1,8 @@
 (function($,window){
     (function(){var minimum_required_popbox_version = '3.0.7'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
 
-    var _static = $.Popbox.prototype._static,
+    var _private = function(){},
+        _static = $.Popbox.prototype._static,
         extend_default_settings = {
             gallery:{ // mode must be set to gallery for this to be used
                 selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
@@ -15,7 +16,41 @@
 
     $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
 
-    var gallery = function(){};
+    _private.prototype.attachSwipeEvents = function() {
+        var popbox = this.self;
+
+        if (popbox.elements.$popbox) {
+            var start = function() {
+
+                },
+                move = function() {
+
+                },
+                end = function() {
+
+                };
+
+            popbox.elements.$popbox.off('dragstart.'+_static._event_namespace).on('dragstart.'+_static._event_namespace, function(){
+                e.preventDefault();
+            });
+            popbox.elements.$popbox.off('touchstart.'+_static._event_namespace).on('touchstart.'+_static._event_namespace, function(){
+
+            });
+            popbox.elements.$popbox.off('mousedown.'+_static._event_namespace).on('mousedown.'+_static._event_namespace, function(){
+
+            });
+            popbox.elements.$popbox.off('click.'+_static._event_namespace).on('click.'+_static._event_namespace, function(){
+
+            });
+        }
+    };
+
+    var gallery = function(){
+        var self = this;
+        self._private = new _private();
+        self._private.self = self;
+    };
+
     gallery.prototype.refreshItems = function(){
         var popbox = this.self;
 
@@ -91,15 +126,17 @@
     };
     gallery.prototype.addItems = function(items) {
         var popbox = this.self;
-        if (!_static.isArray(popbox.settings.gallery.items)) popbox.settings.gallery.items = [];
-        if (!_static.isArray(items)) items = [items];
-        for (var i=0; i<items.length; i++) {
-            popbox.settings.gallery.items.push(items[i]);
+        if (items) {
+            if (!_static.isArray(popbox.settings.gallery.items)) popbox.settings.gallery.items = [];
+            if (!_static.isArray(items)) items = [items];
+            for (var i=0; i<items.length; i++) {
+                popbox.settings.gallery.items.push(items[i]);
+            }
         }
     };
     gallery.prototype.removeItems = function(items) {
         var popbox = this.self;
-        if (_static.isArray(popbox.settings.gallery.items)) {
+        if (items && _static.isArray(popbox.settings.gallery.items)) {
             if (!_static.isArray(items)) items = [items];
             for (var i=0; i<items.length; i++) {
                 var item_index = _static.indexOf(items[i],popbox.settings.gallery.items);
@@ -116,7 +153,7 @@
 
         if (popbox.properties.gallery.items.length > 0) {
 
-            if (new_item_index < -1 || new_item_index > popbox.properties.gallery.items.length-1) {
+            if (new_item_index > popbox.properties.gallery.items.length-1) {
                 new_item_index = 0;
             }
             else if (new_item_index < 0) {
@@ -149,7 +186,7 @@
 
     _static.addHook('after_initialize',function(new_settings){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
+        if (popbox.settings.mode === 'gallery' && new_settings && !_static.isSet(new_settings.aspect_fit)) {
             popbox.settings.aspect_fit = true;
             popbox.settings.aspect_fit_round = true;
         }
@@ -164,12 +201,17 @@
         };
     });
 
+    _static.addHook('after_create',function(){
+        var popbox = this;
+        popbox.gallery._private.attachSwipeEvents();
+    });
+
     _static.addHook('open',function(){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.gallery.refreshItems();
             var $existing_img = $('<div/>').html(popbox.settings.content).find('img[src]'),
-                existing_img_index = -1;
+                existing_img_index = 0;
             if ($existing_img.length) {
                 existing_img_index = _static.indexOf($existing_img.attr('src'),popbox.properties.gallery.items,true);
             }
@@ -179,7 +221,7 @@
 
     _static.addHook('image_error',function(image_cache_src){
         var popbox = this;
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.update({
                 content:popbox.settings.gallery.error
             },false);
@@ -198,7 +240,7 @@
             popbox.properties.gallery.current_index = 0;
         }
 
-        if (popbox.settings.mode == 'gallery') {
+        if (popbox.settings.mode === 'gallery') {
             popbox.gallery.refreshItems();
             popbox.gallery.goTo();
         }
@@ -210,6 +252,8 @@
         var show_btns = false;
 
         if (popbox.settings.mode === 'gallery') {
+            popbox.elements.$popbox.addClass('popbox-gallery');
+
             if (popbox.properties.gallery.items.length > 1) {
                 // put the next and previous buttons in the popbox
                 if (!popbox.elements.$popbox_gallery_next) {
@@ -248,6 +292,6 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.0.2';
+    $.Popbox.prototype.plugins.gallery = '1.1.0';
 
 })(jQuery,window);

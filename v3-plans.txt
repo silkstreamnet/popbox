@@ -2,7 +2,6 @@ VERSION 3 PLANS
 To do
 - Add gallery extension support. Horizontal swipe support.
 - Add native url content handling (ajax) extension support.
-- Add fallback for content with forms for mobile devices. Done, needs testing.
 - Add smooth popbox switching. (if one popbox is opened when another is already opened)
 - Make sure different containers other than body work. Currently only supports body.
 - Need ability to pre-adjust, edit html real-time, then finish adjust. (pre-adjust hides the content and finish adjust brings it back in)

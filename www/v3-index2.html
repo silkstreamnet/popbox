@@ -19,7 +19,7 @@
     <link href="dist/css/v3-popbox.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
-<a href="#" class="popbox-test-gallery"></a>
+<a href="#" class="popbox-test-gallery">Open Popbox</a><br>
 Possible classes for popbox-ajax.js<br>
 popbox-form<br>
 popbox-link<br>
@@ -47,10 +47,12 @@ popbox-link<br>
 
     (function(){
         var popbox_test_gallery = new $.Popbox({
-            mode:'gallery'
+            mode:'gallery',
+            loading_text:''
         });
 
-        popbox_test_gallery.addItem('/dist/images/bg.jpg');
+        popbox_test_gallery.gallery.addItem('dist/images/bg.jpg');
+        popbox_test_gallery.gallery.addItems(['dist/images/test-image.jpg','dist/images/test-image-2.jpg']);
 
         $('.popbox-test-gallery').on('click',function() {
             popbox_test_gallery.open();
