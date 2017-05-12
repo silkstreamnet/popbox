@@ -829,7 +829,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.9';
+    Popbox.prototype.version = '3.0.8';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1797,7 +1797,7 @@
 
 })(jQuery);
 (function($,window){
-    (function(){var minimum_required_popbox_version = '3.0.9'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
+    (function(){var minimum_required_popbox_version = '3.0.8'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
 
     var _private = function(){},
         _static = $.Popbox.prototype._static,
@@ -1825,7 +1825,6 @@
             var _swipe_namespace = _static._gallery_event_namespace+'Swipe',
                 disable_mouse = false,
                 $image = false,
-                $locked_target = false,
                 capture_space = 8,
                 captured = false,
                 start_x = 0,
@@ -1838,7 +1837,6 @@
                     $image = popbox.elements.$popbox_popup.find('.popbox-gallery-image');
                     if ($image.length) {
                         if (!$image.data('movement')) $image.data('movement',0);
-                        $locked_target = $(event.target);
                         start_x = new_x;
                         start_y = new_y;
                         move_x = start_x;
@@ -1865,7 +1863,8 @@
                                 'top':'0',
                                 'left':'0',
                                 'right':'0',
-                                'bottom':'0'
+                                'bottom':'0',
+                                'z-index':popbox.settings.z_index+50
                             }).addClass('popbox-swipe-shield').appendTo(popbox.elements.$popbox_popup);
                         } else {
                             if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
