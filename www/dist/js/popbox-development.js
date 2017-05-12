@@ -1831,8 +1831,9 @@
                 start_y = 0,
                 move_x = 0,
                 move_y = 0,
+                move_velocities = [],
 
-                start = function(new_x,new_y,event,type) {
+                start = function(new_x,new_y,event) {
                     captured = false;
                     $image = popbox.elements.$popbox_popup.find('.popbox-gallery-image');
                     if ($image.length) {
@@ -1841,12 +1842,15 @@
                         start_y = new_y;
                         move_x = start_x;
                         move_y = start_y;
-                        move(new_x,new_y,event,type);
+                        move(new_x,new_y,event);
                         return true;
                     }
                     return false;
                 },
-                move = function(new_x,new_y,event,type) {
+                move = function(new_x,new_y,event) {
+                    move_velocities.push({distance:new_x-move_x,time:new Date().getTime()});
+                    if (move_velocities.length > 10) move_velocities.shift();
+
                     move_x = new_x;
                     move_y = new_y;
 
@@ -1857,7 +1861,7 @@
                         if (move_diff_x > 0 && move_diff_x > move_diff_y) {
                             captured = true;
 
-                            // this is wrong. but it works.
+                            // this is wrong, morally wrong, but it works.
                             $('<div/>').css({
                                 'position':'absolute',
                                 'top':'0',
@@ -1866,9 +1870,11 @@
                                 'bottom':'0',
                                 'z-index':popbox.settings.z_index+50
                             }).addClass('popbox-swipe-shield').appendTo(popbox.elements.$popbox_popup);
+
+                            end(event);
                         } else {
                             if ((move_diff_x > 0 || move_diff_y > 0) && move_diff_y > move_diff_x) {
-                                end(event,type);
+                                end(event);
                             }
                             return;
                         }
@@ -1881,13 +1887,15 @@
                         $image.css('transform','translate('+((move_x-start_x)+$image.data('movement'))+'px,0px');
                     }
                 },
-                end = function(event,type) {
+                end = function(event) {
                     disable_mouse = false;
                     _static.$document.off('touchmove.'+_swipe_namespace);
                     _static.$document.off('touchend.'+_swipe_namespace);
                     _static.$document.off('mousemove.'+_swipe_namespace);
                     _static.$document.off('mouseup.'+_swipe_namespace);
-                    $image.data('movement',(move_x-start_x)+$image.data('movement'));
+
+                    var movement = (move_x-start_x)+$image.data('movement');
+                    $image.data('movement',movement);
 
                     if (captured) {
                         event.stopImmediatePropagation();
@@ -1902,6 +1910,35 @@
 
                     popbox.elements.$popbox_popup.find('.popbox-swipe-shield').remove();
 
+                    // animate
+                    if (move_velocities.length) {
+                        var distance = 0,
+                            start_time = 0,
+                            end_time = move_velocities[move_velocities.length-1].time,
+                            direction = 0;
+                        for (var j=move_velocities.length-1; j>=0; j--) {
+                            if (!direction) {
+                                if (move_velocities[j].distance > 0) direction = 1;
+                                else if (move_velocities[j].distance < 0) direction = -1;
+                            } else if ((direction === 1 && move_velocities[j].distance <= 0) || (direction === -1 && move_velocities[j].distance >= 0)) {
+                                start_time = move_velocities[j].time;
+                                break;
+                            }
+                            distance += move_velocities[j].distance;
+                            start_time = move_velocities[j].time;
+                        }
+                        if (start_time > 0 && start_time !== end_time) {
+                            var speed = distance / (end_time-start_time),
+                                residual_time_warp = 300;
+                            $image.css('transition','ease-in '+residual_time_warp+'ms transform');
+                            if (_static._support.transform3d) {
+                                $image.css('transform','translate3d('+(movement+(speed*residual_time_warp))+'px,0px,0px');
+                            } else {
+                                $image.css('transform','translate('+(movement+(speed*residual_time_warp))+'px,0px');
+                            }
+                        }
+                    }
+
                     return !captured;
                 };
 
@@ -1910,12 +1947,12 @@
             });
             popbox.elements.$popbox.off('touchstart.'+_swipe_namespace).on('touchstart.'+_swipe_namespace, '.popbox-popup', function(e){
                 disable_mouse = true;
-                if (start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch')) {
+                if (start(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e)) {
                     _static.$document.off('touchmove.'+_swipe_namespace).on('touchmove.'+_swipe_namespace, function(e){
-                        move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e,'touch');
+                        move(e.originalEvent.touches[0].pageX,e.originalEvent.touches[0].pageY,e);
                     });
                     _static.$document.off('touchend.'+_swipe_namespace).on('touchend.'+_swipe_namespace, function(e){
-                        return end(e,'touch');
+                        return end(e);
                     });
                 } else {
                     disable_mouse = false;
@@ -1923,13 +1960,13 @@
             });
             popbox.elements.$popbox.off('mousedown.'+_swipe_namespace).on('mousedown.'+_swipe_namespace, '.popbox-popup', function(e){
                 if (!disable_mouse && e.which === 1) {
-                    if (start(e.pageX,e.pageY,e,'mouse')) {
+                    if (start(e.pageX,e.pageY,e)) {
                         _static.$document.off('mousemove.'+_swipe_namespace).on('mousemove.'+_swipe_namespace, function(e){
-                            move(e.pageX,e.pageY,e,'mouse');
+                            move(e.pageX,e.pageY,e);
                         });
                         _static.$document.off('mouseup.'+_swipe_namespace).on('mouseup.'+_swipe_namespace, function(e){
                             if (e.which === 1) {
-                                return end(e,'mouse');
+                                return end(e);
                             }
                         });
                     }
@@ -2206,7 +2243,7 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.1.0';
+    $.Popbox.prototype.plugins.gallery = '1.1.1';
 
 })(jQuery,window);
 (function($,window){
