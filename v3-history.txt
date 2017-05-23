@@ -52,6 +52,9 @@ unfinished
 - Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
 
 ||||| GALLERY |||||
+=== 1.1.2 ===
+- Added events gallery_change and and gallery_after_change.
+
 === 1.1.1 ===
 - Changed swiping animation.
 - Removed redundant code from swiping.

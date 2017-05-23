@@ -2107,9 +2107,11 @@
     gallery.prototype.goTo = function(new_item_index){
         var popbox = this.popbox;
 
-        new_item_index = (_static.isNumber(new_item_index)) ? new_item_index : popbox.properties.gallery.current_index;
-
         if (popbox.properties.gallery.items.length > 0) {
+
+            self.trigger('gallery_change');
+
+            new_item_index = (_static.isNumber(new_item_index)) ? new_item_index : popbox.properties.gallery.current_index;
 
             if (new_item_index > popbox.properties.gallery.items.length-1) {
                 new_item_index = 0;
@@ -2123,6 +2125,8 @@
             popbox.update({
                 content:'<div class="popbox-gallery-container" style="overflow:hidden;"><div class="popbox-gallery-image"><img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" /></div></div>'
             },true);
+
+            self.trigger('gallery_after_change');
         }
     };
     gallery.prototype.next = function(){
@@ -2243,7 +2247,7 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.1.1';
+    $.Popbox.prototype.plugins.gallery = '1.1.2';
 
 })(jQuery,window);
 (function($,window){
