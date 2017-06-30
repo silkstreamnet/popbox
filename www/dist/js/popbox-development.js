@@ -829,7 +829,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.8';
+    Popbox.prototype.version = '3.0.9';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -981,7 +981,7 @@
 
         // events
         var _close_namespace = _static._event_namespace+'Close';
-        self.elements.$popbox.off('click.'+_close_namespace).on('click.'+_close_namespace,'.popbox-close',function(e){
+        self.elements.$popbox.off('click.'+_close_namespace).on('click.'+_close_namespace,'.popbox-close,.close-popbox',function(e){
             e.preventDefault();
             self.close();
         });

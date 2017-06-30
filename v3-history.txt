@@ -1,5 +1,8 @@
 ##### CORE #####
 
+=== 3.0.9 ===
+- Added the ability to add elements to the content with the "close-popbox" class to close the popbox.
+
 === 3.0.8 ===
 - Added some recommended coercion checks.
 - Added mode class support (gallery).
