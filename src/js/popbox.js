@@ -829,7 +829,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.9';
+    Popbox.prototype.version = '3.0.10a';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1464,8 +1464,8 @@
         var self = this;
         if (self.isCreated()) {
             if (self.isLoading()){
-                //TODO might need to add something to add the ready function to transition complete if already animating then the else would be for not animating and just run ready.
-                if (!self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
+                //TODO need to add the ability to take off transition events from transitioned elements
+                if (_static.isFunction(ready)) ready();
                 return;
             }
             if (self.isOpen()) {
@@ -1516,7 +1516,7 @@
         var self = this;
         if (self.isCreated()) {
             if (!self.isLoading()){
-                if (!self.elements.$popbox_popup.hasClass('popbox-animating') && !self.elements.$popbox_loading.hasClass('popbox-animating') && !self.elements.$popbox_wrapper.hasClass('popbox-animating') && _static.isFunction(ready)) ready();
+                if (_static.isFunction(ready)) ready();
                 return;
             }
 
