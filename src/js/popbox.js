@@ -1130,8 +1130,10 @@
                 'box-sizing':'content-box'
             });
 
-            // is_loading should be false unless someone has manually set it
-            if (!self.properties.is_loading) {
+            // is_loading should be false unless manually set it
+            if (self.properties.is_loading) {
+                self.showLoading();
+            } else {
                 self.showContent();
             }
 
@@ -1153,18 +1155,25 @@
                 }
             );
 
+            self.properties.is_open = true;
+
             if (self.elements.$popbox_popup.hasClass('popbox-animating')) {
                 self.properties.disable_background_click = true;
                 self.properties.disable_background_click_timer = setTimeout(function(){
                     self.properties.disable_background_click = false;
                     self.properties.disable_background_click_timer = false;
+                    self._private.triggerHook('ready');
+                    self.trigger('ready');
                 },self._private.getAnimationSpeed('open')+200);
             }
 
-            self.properties.is_open = true;
-
             self._private.triggerHook('after_open');
             self.trigger('after_open');
+
+            if (!self.elements.$popbox_popup.hasClass('popbox-animating')) {
+                self._private.triggerHook('ready');
+                self.trigger('ready');
+            }
         }
     };
 
@@ -1463,12 +1472,13 @@
     Popbox.prototype.showLoading = function(ready){
         var self = this;
         if (self.isCreated()) {
-            if (self.isLoading()){
-                //TODO need to add the ability to take off transition events from transitioned elements
-                if (_static.isFunction(ready)) ready();
-                return;
-            }
             if (self.isOpen()) {
+                if (self.isLoading()){
+                    //TODO need to add the ability to take off transition events from transitioned elements
+                    if (_static.isFunction(ready)) ready();
+                    return;
+                }
+
                 _static.clearTransition(self.elements.$popbox_loading);
                 _static.clearTransition(self.elements.$popbox_wrapper);
                 _static.transition(
@@ -1508,19 +1518,21 @@
 
                 if (_static.isFunction(ready)) ready();
             }
-            self.properties.is_loading = true;
+        } else {
+            if (_static.isFunction(ready)) ready();
         }
+        self.properties.is_loading = true;
     };
 
     Popbox.prototype.showContent = function(ready){
         var self = this;
         if (self.isCreated()) {
-            if (!self.isLoading()){
-                if (_static.isFunction(ready)) ready();
-                return;
-            }
-
             if (self.isOpen()) {
+                if (!self.isLoading()){
+                    if (_static.isFunction(ready)) ready();
+                    return;
+                }
+
                 _static.clearTransition(self.elements.$popbox_loading);
                 _static.clearTransition(self.elements.$popbox_wrapper);
                 _static.transition(
@@ -1560,8 +1572,10 @@
 
                 if (_static.isFunction(ready)) ready();
             }
-            self.properties.is_loading = false;
+        } else {
+            if (_static.isFunction(ready)) ready();
         }
+        self.properties.is_loading = false;
     };
 
     Popbox.prototype.isLoading = function(){
