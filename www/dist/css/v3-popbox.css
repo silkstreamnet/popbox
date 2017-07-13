@@ -85,10 +85,6 @@
     font-size:1em;
 }
 
-.popbox .popbox-content {
-    padding:15px;
-}
-
 .popbox-aspect-fit .popbox-content {
     padding:0;
 }
