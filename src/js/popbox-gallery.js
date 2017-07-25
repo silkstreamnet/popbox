@@ -1,5 +1,5 @@
 (function($,window){
-    (function(){var minimum_required_popbox_version = '3.0.8'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
+    (function () {var minimum_required_popbox_version = '3.0.10'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
 
     var _private = function(){},
         _static = $.Popbox.prototype._static,
@@ -350,8 +350,8 @@
     _static.addHook('after_initialize',function(new_settings){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
-            if (new_settings && !_static.isSet(new_settings.aspect_fit)) {
-                popbox.settings.aspect_fit = true;
+            if (new_settings && !_static.isSet(new_settings.fit)) {
+                popbox.settings.fit = true;
             }
             self.refreshItems();
         }
@@ -393,8 +393,8 @@
                 content:popbox.settings.gallery.error
             },false);
 
-            if (popbox.properties.image_cache[image_cache_src]) {
-                delete popbox.properties.image_cache[image_cache_src];
+            if (popbox.properties.cache.images[image_cache_src]) {
+                delete popbox.properties.cache.images[image_cache_src];
             }
         }
     });
@@ -449,6 +449,6 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.1.2';
+    $.Popbox.prototype.plugins.gallery = '1.1.3';
 
 })(jQuery,window);

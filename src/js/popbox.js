@@ -460,13 +460,16 @@
             is_changing_state:false,
             disable_background_click:false,
             disable_background_click_timer:false,
-            image_cache:{},
-            interface_image_cache_pending:0,
-            content_image_cache_pending:0,
             last_html_overflow:false,
             last_html_margin_right:false,
             instance_id:self.properties.instance_id,
-            events:self.properties.events
+            events:self.properties.events,
+            cache:{
+                images:{},
+                interface_images_pending:0,
+                content_images_pending:0,
+                window_width:-1
+            }
         };
         self.elements = {
             $popbox:null,
@@ -623,8 +626,8 @@
 
         if (self.isCreated()) {
 
-            self.properties.content_image_cache_pending = 0;
-            self.properties.interface_image_cache_pending = 0;
+            self.properties.cache.content_images_pending = 0;
+            self.properties.cache.interface_images_pending = 0;
 
             var $images = self.elements.$popbox.find('img');
 
@@ -635,8 +638,8 @@
                 if (image.src) {
                     var image_ready = ((image.complete && _static.isNumber(image.naturalWidth,false)) || image.readyState === 4 || image.readyState === 'complete');
                     //var image_ready = (image.complete || image.readyState === 4 || image.readyState === 'complete');
-                    if (!image_ready && !self.properties.image_cache[image.src]) {
-                        self.properties.image_cache[image.src] = {
+                    if (!image_ready && !self.properties.cache.images[image.src]) {
+                        self.properties.cache.images[image.src] = {
                             origin:image,
                             $origin:$image,
                             proxy:false,
@@ -649,50 +652,50 @@
 
             var proxy_image_event = function(type){
                 if (type === 'content') {
-                    self.properties.content_image_cache_pending--;
-                    if (self.properties.content_image_cache_pending <= 0) {
-                        self.properties.content_image_cache_pending = 0;
+                    self.properties.cache.content_images_pending--;
+                    if (self.properties.cache.content_images_pending <= 0) {
+                        self.properties.cache.content_images_pending = 0;
                         if (self.isChangingState() && self.elements.$popbox_popup.hasClass('popbox-animating')) _static.transitionAddCallback(self.elements.$popbox_popup,function(){self.adjust(true);});
                         else self.adjust(true);
                     }
                 }
                 else {
-                    self.properties.interface_image_cache_pending--;
-                    if (self.properties.interface_image_cache_pending <= 0) {
-                        self.properties.interface_image_cache_pending = 0;
+                    self.properties.cache.interface_images_pending--;
+                    if (self.properties.cache.interface_images_pending <= 0) {
+                        self.properties.cache.interface_images_pending = 0;
                         //if (self.isLoading()) self.adjust(true);
                     }
                 }
             };
 
-            for (var image_cache_src in self.properties.image_cache) {
-                if (self.properties.image_cache.hasOwnProperty(image_cache_src)) {
-                    if (!self.properties.image_cache[image_cache_src].proxy) {
+            for (var image_cache_src in self.properties.cache.images) {
+                if (self.properties.cache.images.hasOwnProperty(image_cache_src)) {
+                    if (!self.properties.cache.images[image_cache_src].proxy) {
                         (function(image_cache_src){
                             var proxy_image = new Image();
 
-                            if (self.properties.image_cache[image_cache_src].type === 'content') {
-                                self.properties.content_image_cache_pending++;
+                            if (self.properties.cache.images[image_cache_src].type === 'content') {
+                                self.properties.cache.content_images_pending++;
                             }
                             else {
-                                self.properties.interface_image_cache_pending++;
+                                self.properties.cache.interface_images_pending++;
                             }
 
-                            self.properties.image_cache[image_cache_src].proxy = proxy_image;
+                            self.properties.cache.images[image_cache_src].proxy = proxy_image;
 
                             proxy_image.onload = function(){
-                                if (!self.properties.image_cache[image_cache_src].loaded) {
-                                    self.properties.image_cache[image_cache_src].loaded = true;
-                                    proxy_image_event(self.properties.image_cache[image_cache_src].type);
+                                if (!self.properties.cache.images[image_cache_src].loaded) {
+                                    self.properties.cache.images[image_cache_src].loaded = true;
+                                    proxy_image_event(self.properties.cache.images[image_cache_src].type);
                                     self._private.triggerHook('image_load',[image_cache_src]);
                                     self.trigger('image_load',false,[image_cache_src]);
                                 }
                             };
 
                             proxy_image.onerror = function(){
-                                if (!self.properties.image_cache[image_cache_src].loaded) {
-                                    self.properties.image_cache[image_cache_src].loaded = true;
-                                    proxy_image_event(self.properties.image_cache[image_cache_src].type);
+                                if (!self.properties.cache.images[image_cache_src].loaded) {
+                                    self.properties.cache.images[image_cache_src].loaded = true;
+                                    proxy_image_event(self.properties.cache.images[image_cache_src].type);
                                     self._private.triggerHook('image_error',[image_cache_src]);
                                     self.trigger('image_error',false,[image_cache_src]);
                                 }
@@ -702,23 +705,63 @@
 
                         })(image_cache_src);
                     }
-                    else if (!self.properties.image_cache[image_cache_src].loaded) {
-                        if (self.properties.image_cache[image_cache_src].type === 'content') {
-                            self.properties.content_image_cache_pending++;
+                    else if (!self.properties.cache.images[image_cache_src].loaded) {
+                        if (self.properties.cache.images[image_cache_src].type === 'content') {
+                            self.properties.cache.content_images_pending++;
                         }
                         else {
-                            self.properties.interface_image_cache_pending++;
+                            self.properties.cache.interface_images_pending++;
                         }
                     }
                 }
             }
 
-            if (self.properties.content_image_cache_pending === 0 && self.properties.interface_image_cache_pending === 0) {
+            if (self.properties.cache.content_images_pending === 0 && self.properties.cache.interface_images_pending === 0) {
                 return true;
             }
         }
 
         return false;
+    };
+
+    _private.prototype.applySettings = function(){
+        var self = this.self;
+
+        var window_width = _static.$window.width(),
+            responsive_width_keys = [],
+            new_settings;
+
+        if (window_width !== self.properties.cache.window_width) {
+            new_settings = $.extend(true, {}, self.base_settings);
+
+            if (typeof self.base_settings.responsive === "object") {
+                for (var responsive_key in self.base_settings.responsive) {
+                    if (self.base_settings.responsive.hasOwnProperty(responsive_key)) {
+                        responsive_width_keys.push(responsive_key);
+                    }
+                }
+            }
+
+            if (responsive_width_keys.length) {
+                responsive_width_keys.sort(function (a, b) {
+                    return a - b
+                });
+
+                for (var i = responsive_width_keys.length; i >= 0; i--) {
+                    if (window_width > parseInt(responsive_width_keys[i], 10)) {
+                        $.extend(true, new_settings, self.base_settings.responsive[responsive_width_keys[i]]);
+                        break;
+                    }
+                }
+
+                self.settings = new_settings;
+                self._private.applyDomSettings();
+            } else {
+                self.settings = new_settings;
+            }
+
+            self.properties.cache.window_width = window_width;
+        }
     };
 
     _private.prototype.applyDomSettings = function(){
@@ -747,7 +790,7 @@
                 self.elements.$popbox.addClass(self.settings.add_class);
             }
 
-            if (self.settings.aspect_fit) self.elements.$popbox.addClass('popbox-aspect-fit');
+            if (self.settings.fit) self.elements.$popbox.addClass('popbox-aspect-fit');
             else self.elements.$popbox.removeClass('popbox-aspect-fit');
 
             // checks
@@ -808,16 +851,20 @@
 
         self._private.triggerHook('initialize',[settings]);
 
-        self.settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
+        self.base_settings = $.extend(true,{},self.default_settings,_static.param(settings,{}));
+        //self.settings = {};
 
         //defaults for pass through values
         self.properties = {
             instance_id:_static._next_instance_id,
-            events:{}
+            events:{},
+            cache:{}
         };
         self.elements = {
             $popbox_overlay:null
         };
+
+        self._private.applySettings();
 
         self._private.reset();
 
@@ -829,7 +876,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.10a';
+    Popbox.prototype.version = '3.0.10';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -864,8 +911,7 @@
         content_additional_offset:false, // number in pixels, string for jquery selector, array of strings for multiple jquery selectors to check
         absolute:'mobile',
         add_class:'', // supports multiple space separated classes
-        aspect_fit:false, // recommended for images and iframes - not for content
-        aspect_fit_round:false, // recommended for iframes
+        fit:false, // false|true|'round' recommended for images and iframes - not for content
         cache:false,
         wait_for_images:true,
         width_margin:0.1,
@@ -875,7 +921,8 @@
         open:false,
         after_open:false,
         close:false,
-        after_close:false
+        after_close:false,
+        responsive: {}
     };
     Popbox.prototype._static = _static;
     Popbox.prototype.animations = {
@@ -1056,7 +1103,8 @@
 
         animate_adjust = _static.param(animate_adjust,true);
 
-        $.extend(true,self.settings,_static.param(settings,{}));
+        $.extend(true,self.base_settings,_static.param(settings,{}));
+        self._private.applySettings();
 
         if (self.isCreated()) {
             if (self.isOpen()) {
@@ -1285,8 +1333,8 @@
                     'position':'relative',
                     'top':'0px',
                     'left':'0px',
-                    'width':(self.settings.aspect_fit) ? '99999px' : max_popbox_width+'px',
-                    'height':(self.settings.aspect_fit) ? '99999px' : '1px',
+                    'width':(self.settings.fit) ? '99999px' : max_popbox_width+'px',
+                    'height':(self.settings.fit) ? '99999px' : '1px',
                     'overflow':'hidden',
                     'box-sizing':'content-box'
                 });
@@ -1344,7 +1392,7 @@
                     });
                 };
 
-                if (self.settings.aspect_fit) { // ASPECT_FIT for iframes and images
+                if (self.settings.fit) { // fit for iframes and images
                     if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
                         var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
                             new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
@@ -1358,7 +1406,7 @@
                         }
 
                         // for iframes
-                        if (self.settings.aspect_fit_round) {
+                        if (self.settings.fit === 'round') {
                             new_popbox_width = Math.round(new_popbox_width);
                             new_popbox_height = Math.round(new_popbox_height);
                         }
@@ -1453,7 +1501,7 @@
 
             self._private.checkImagesLoaded();
 
-            if (self.settings.wait_for_images && self.properties.content_image_cache_pending > 0) {
+            if (self.settings.wait_for_images && self.properties.cache.content_images_pending > 0) {
                 self.showLoading(function(){
                     if (!animate) adjust_elements(animate,false);
                 });
@@ -1665,8 +1713,11 @@
         if (_static._instances.length > 0) {
             for (var i in _static._instances) {
                 if (_static._instances.hasOwnProperty(i)) {
-                    if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
-                        _static._instances[i].adjust(false);
+                    if (_static._instances[i] instanceof Popbox) {
+                        _static._instances[i]._private.applySettings();
+                        if (_static._instances[i].isOpen()) {
+                            _static._instances[i].adjust(false);
+                        }
                     }
                 }
             }

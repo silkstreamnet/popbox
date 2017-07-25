@@ -1,5 +1,14 @@
 ##### CORE #####
 
+=== 3.0.10 ===
+- Removed aspect_fit_round.
+- Renamed aspect_fit to fit.
+- Fit supports 'round',true,false.
+- Moved properties image cache variables to properties.cache.
+- Added responsive setting. Ability to override base settings using minimum window width keys.
+- All plugins updated with fixed version checker.
+- Updated gallery and selector functionality to support new fit setting.
+
 === 3.0.9 ===
 - Added the ability to add elements to the content with the "close-popbox" class to close the popbox.
 

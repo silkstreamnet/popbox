@@ -1,12 +1,5 @@
 (function($){
-
-    var minimum_required_popbox_version = '3.0.0'.split('.');
-    var popbox_version = (typeof $.Popbox === "undefined") ? false : $.Popbox.prototype.version.split('.');
-
-    if (!popbox_version || parseInt(popbox_version[0],10) < 3) {
-        console.log("Error: Popbox "+minimum_required_popbox_version+"+ required.");
-        return;
-    }
+    (function () {var minimum_required_popbox_version = '3.0.0'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
 
     var extend_animations = {
         'slide_up':{
@@ -101,6 +94,6 @@
     };
 
     $.extend(true,$.Popbox.prototype.animations,extend_animations);
-    $.Popbox.prototype.plugins.animations = '1.0.0';
+    $.Popbox.prototype.plugins.animations = '1.0.1';
 
 })(jQuery);

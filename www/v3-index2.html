@@ -20,6 +20,7 @@
 </head>
 <body>
 <a href="#" class="popbox-test-gallery">Open Popbox</a><br>
+<a href="#" class="popbox-test-responsive">Open Responsive Popbox</a>
 Possible classes for popbox-ajax.js<br>
 popbox-form<br>
 popbox-link<br>
@@ -51,12 +52,25 @@ popbox-link<br>
             mode:'gallery',
             loading_text:''
         });
-
         popbox_test_gallery.gallery.addItem('dist/images/bg.jpg');
         popbox_test_gallery.gallery.addItems(['dist/images/test-image.jpg','dist/images/test-image-2.jpg']);
-
-        $('.popbox-test-gallery').on('click',function() {
+        $('.popbox-test-gallery').on('click',function(e) {
+            e.preventDefault();
             popbox_test_gallery.open();
+        });
+
+        var popbox_test_responsive = new $.Popbox({
+            content:'<iframe src="https://www.silkstream.net" width="400" height="400" frameborder="0"></iframe>',
+            fit:'round',
+            responsive:{
+                800:{
+                    content:'<iframe src="https://www.silkstream.net" width="800" height="400" frameborder="0"></iframe>'
+                }
+            }
+        });
+        $('.popbox-test-responsive').on('click',function(e) {
+            e.preventDefault();
+            popbox_test_responsive.open();
         });
     })();
 

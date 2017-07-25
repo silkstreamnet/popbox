@@ -1,5 +1,5 @@
 (function($,window){
-    (function(){var minimum_required_popbox_version = '3.0.0'.split('.');for (var pvi= 0,pvl = $.Popbox.prototype.version.split('.').length; pvi<pvl; pvi++) if ($.Popbox.prototype.version.split('.')[pvi] < minimum_required_popbox_version[pvi]) {console.log("Error: Popbox "+minimum_required_popbox_version.join('.')+"+ required.");return;}})();
+    (function () {var minimum_required_popbox_version = '3.0.10'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
 
     var _static = $.Popbox.prototype._static;
 
@@ -86,13 +86,11 @@
                                                 case 'youtube':
                                                     var append_params = (matchresult[2]) ? '?'+matchresult[2] : '';
                                                     auto_settings.content = '<iframe width="1280" height="720" src="//www.youtube.com/embed/'+matchresult[1]+append_params+'" frameborder="0" allowfullscreen></iframe>';
-                                                    auto_settings.aspect_fit = true;
-                                                    auto_settings.aspect_fit_round = true;
+                                                    auto_settings.fit = 'round';
                                                     break;
                                                 case 'vimeo':
                                                     auto_settings.content = '<iframe width="1280" height="720" src="//player.vimeo.com/video/'+matchresult[1]+'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
-                                                    auto_settings.aspect_fit = true;
-                                                    auto_settings.aspect_fit_round = true;
+                                                    auto_settings.fit = 'round';
                                                     break;
                                                 case 'image':
                                                     auto_settings.content = '<img src="'+matchresult[0]+'" alt="" />';
@@ -125,6 +123,6 @@
 
     $('.open-popbox').Popbox();
 
-    $.Popbox.prototype.plugins.selector = '1.0.1';
+    $.Popbox.prototype.plugins.selector = '1.0.2';
 
 })(jQuery,window);
