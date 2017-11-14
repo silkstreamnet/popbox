@@ -64,6 +64,10 @@ unfinished
 - Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
 
 ||||| GALLERY |||||
+=== 1.1.3 ===
+- Changed aspect_fit settings to fit.
+- Raised core version requirement to 3.0.10
+
 === 1.1.2 ===
 - Added events gallery_change and and gallery_after_change.
 
@@ -90,6 +94,10 @@ unfinished
 - API included for controlling the gallery.
 
 ||||| SELECTOR |||||
+=== 1.0.2 ===
+- Changed aspect_fit and aspect_fit_round settings to fit.
+- Raised core version requirement to 3.0.10
+
 === 1.0.1 ===
 - Added aspect_fit_round support.
 - Raised core version requirement to 3.0.7
