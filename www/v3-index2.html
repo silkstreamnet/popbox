@@ -19,8 +19,9 @@
     <link href="dist/css/v3-popbox.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
-<a href="#" class="popbox-test-gallery">Open Popbox</a><br>
-<a href="#" class="popbox-test-responsive">Open Responsive Popbox</a>
+<a href="#" class="popbox-test-gallery">Gallery</a><br>
+<a href="#" class="popbox-test-responsive">Responsive</a><br>
+<a href="dist/images/test-image.jpg" class="open-popbox">Popbox Selector Image</a><br>
 Possible classes for popbox-ajax.js<br>
 popbox-form<br>
 popbox-link<br>
@@ -48,9 +49,17 @@ popbox-link<br>
 
     (function(){
 
+        $.Popbox.prototype.default_settings.loading_text = '';
+
         var popbox_test_gallery = new $.Popbox({
             mode:'gallery',
-            loading_text:''
+            loading_text:'',
+            gallery:{
+                swipeable:true
+            }
+        });
+        popbox_test_gallery.on('gallery_after_change',function(){
+            //console.log("test");
         });
         popbox_test_gallery.gallery.addItem('dist/images/bg.jpg');
         popbox_test_gallery.gallery.addItems(['dist/images/test-image.jpg','dist/images/test-image-2.jpg']);

@@ -729,11 +729,9 @@
 
         var window_width = _static.$window.width(),
             responsive_width_keys = [],
-            new_settings;
-
-        if (window_width !== self.properties.cache.window_width) {
             new_settings = $.extend(true, {}, self.base_settings);
 
+        if (window_width !== self.properties.cache.window_width) {
             if (typeof self.base_settings.responsive === "object") {
                 for (var responsive_key in self.base_settings.responsive) {
                     if (self.base_settings.responsive.hasOwnProperty(responsive_key)) {
@@ -761,6 +759,8 @@
             }
 
             self.properties.cache.window_width = window_width;
+        } else {
+            self.settings = new_settings;
         }
     };
 
@@ -790,8 +790,8 @@
                 self.elements.$popbox.addClass(self.settings.add_class);
             }
 
-            if (self.settings.fit) self.elements.$popbox.addClass('popbox-aspect-fit');
-            else self.elements.$popbox.removeClass('popbox-aspect-fit');
+            if (self.settings.fit) self.elements.$popbox.addClass('popbox-fit');
+            else self.elements.$popbox.removeClass('popbox-fit');
 
             // checks
             if (self.settings.close_text === false) self.elements.$popbox_close.css('display','none');
@@ -876,7 +876,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.10';
+    Popbox.prototype.version = '3.0.11';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1022,7 +1022,7 @@
         self.elements.$popbox_close = $('<a/>',{
             'class':'popbox-close',
             'href':'javascript:void(0);'
-        }).appendTo(self.elements.$popbox_container);
+        }).appendTo(self.elements.$popbox_popup);
 
         self._private.applyDomSettings();
 
@@ -1293,6 +1293,9 @@
                 animate = _static.param(animate,false);
                 show_content = _static.param(show_content,false);
 
+                self._private.triggerHook('adjust');
+                self.trigger('adjust');
+
                 var window_width = self.elements.$popbox_empty.width(), //_static.$window.width(),
                     window_height = _static.$window.height(),
                     popbox_width_padding = _static.elementPaddingWidth(self.elements.$popbox_popup),
@@ -1477,6 +1480,8 @@
                         function(){
                             cleanup();
                             if (show_content) self.showContent();
+                            self._private.triggerHook('after_adjust');
+                            self.trigger('after_adjust');
                         },
                         'adjust'
                     );
@@ -1495,6 +1500,11 @@
                     self.elements.$popbox_empty.css({
                         'height':Math.floor(new_popbox_height+popbox_height_padding+(new_popbox_top*2)-1)+'px'
                     });
+
+                    if (show_content) self.showContent();
+
+                    self._private.triggerHook('after_adjust');
+                    self.trigger('after_adjust');
                 }
             };
 
@@ -1863,6 +1873,7 @@
             gallery:{ // mode must be set to gallery for this to be used
                 selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
                 clickable:true, // whether to apply a click/touch to selector items
+                swipeable:true,
                 error:'<div class="popbox-gallery-error">There was an error loading the image.</div>',
                 next:'<span>&#x25B6;</span>',
                 prev:'<span>&#x25C0;</span>',
@@ -1877,7 +1888,7 @@
     _private.prototype.attachSwipeEvents = function() {
         var self = this.self, popbox = this.self.popbox;
 
-        if (popbox.elements.$popbox) {
+        if (popbox.elements.$popbox && popbox.settings.gallery.swipeable) {
             // include movement vertically in case we need to escape for vertical scrolling
 
             var _swipe_namespace = _static._gallery_event_namespace+'Swipe',
@@ -1969,7 +1980,7 @@
                     popbox.elements.$popbox_popup.find('.popbox-swipe-shield').remove();
 
                     // animate
-                    if (move_velocities.length) {
+                    if (captured && move_velocities.length) {
                         var distance = 0,
                             start_time = 0,
                             end_time = move_velocities[move_velocities.length-1].time,
@@ -1995,6 +2006,8 @@
                                 $image.css('transform','translate('+(movement+(speed*residual_time_warp))+'px,0px');
                             }
                         }
+                    } else {
+                        $image.css('transform','translate3d(0px,0px,0px');
                     }
 
                     return !captured;
@@ -2040,6 +2053,19 @@
         }
     };
 
+    _private.prototype.detachSwipeEvents = function() {
+        var self = this.self, popbox = this.self.popbox;
+
+        if (popbox.elements.$popbox) {
+            var _swipe_namespace = _static._gallery_event_namespace+'Swipe';
+
+            popbox.elements.$popbox.off('dragstart.'+_swipe_namespace);
+            popbox.elements.$popbox.off('touchstart.'+_swipe_namespace);
+            popbox.elements.$popbox.off('mousedown.'+_swipe_namespace);
+            popbox.elements.$popbox.off('click.'+_swipe_namespace);
+        }
+    };
+
     _private.prototype.attachNavEvents = function() {
         var self = this.self, popbox = this.self.popbox;
 
@@ -2060,14 +2086,14 @@
         }
     };
 
-    var gallery = function(popbox){
+    var PopboxGallery = function(popbox){
         var self = this;
         self.popbox = popbox;
         self._private = new _private();
         self._private.self = self;
     };
 
-    gallery.prototype.refreshItems = function(){
+    PopboxGallery.prototype.refreshItems = function(){
         var self = this, popbox = this.popbox;
 
         // get image file links
@@ -2132,37 +2158,39 @@
             }
         }
     };
-    gallery.prototype.addItem = function(item) {
+    PopboxGallery.prototype.addItem = function(item) {
         var self = this;
         self.addItems([item]);
     };
-    gallery.prototype.removeItem = function(item) {
+    PopboxGallery.prototype.removeItem = function(item) {
         var self = this;
         self.removeItems([item]);
     };
-    gallery.prototype.addItems = function(items) {
+    PopboxGallery.prototype.addItems = function(items) {
         var popbox = this.popbox;
         if (items) {
-            if (!_static.isArray(popbox.settings.gallery.items)) popbox.settings.gallery.items = [];
+            if (!_static.isArray(popbox.base_settings.gallery.items)) popbox.base_settings.gallery.items = [];
             if (!_static.isArray(items)) items = [items];
             for (var i=0; i<items.length; i++) {
-                popbox.settings.gallery.items.push(items[i]);
+                popbox.base_settings.gallery.items.push(items[i]);
             }
+            popbox._private.applySettings();
         }
     };
-    gallery.prototype.removeItems = function(items) {
+    PopboxGallery.prototype.removeItems = function(items) {
         var popbox = this.popbox;
-        if (items && _static.isArray(popbox.settings.gallery.items)) {
+        if (items && _static.isArray(popbox.base_settings.gallery.items)) {
             if (!_static.isArray(items)) items = [items];
             for (var i=0; i<items.length; i++) {
-                var item_index = _static.indexOf(items[i],popbox.settings.gallery.items);
+                var item_index = _static.indexOf(items[i],popbox.base_settings.gallery.items);
                 if (item_index >= 0) {
-                    popbox.settings.gallery.items.splice(item_index,1);
+                    popbox.base_settings.gallery.items.splice(item_index,1);
                 }
             }
+            popbox._private.applySettings();
         }
     };
-    gallery.prototype.goTo = function(new_item_index){
+    PopboxGallery.prototype.goTo = function(new_item_index){
         var popbox = this.popbox;
 
         if (popbox.properties.gallery.items.length > 0) {
@@ -2184,30 +2212,34 @@
                 content:'<div class="popbox-gallery-container" style="overflow:hidden;"><div class="popbox-gallery-image"><img src="'+popbox.properties.gallery.items[popbox.properties.gallery.current_index]+'" /></div></div>'
             },true);
 
-            popbox.trigger('gallery_after_change');
+            popbox.on('adjust.gallery_after_change',function(){
+                popbox.off('adjust.gallery_after_change');
+                popbox.trigger('gallery_after_change');
+            });
         }
     };
-    gallery.prototype.next = function(){
+    PopboxGallery.prototype.next = function(){
         var self = this, popbox = this.popbox;
         self.goTo(popbox.properties.gallery.current_index+1);
     };
-    gallery.prototype.prev = function(){
+    PopboxGallery.prototype.prev = function(){
         var self = this, popbox = this.popbox;
         self.goTo(popbox.properties.gallery.current_index-1);
     };
 
-    $.Popbox.prototype.gallery = gallery;
+    $.Popbox.prototype.gallery = PopboxGallery;
 
     _static.addHook('initialize',function(){
         var popbox = this;
-        popbox.gallery = new gallery(popbox);
+        popbox.gallery = new PopboxGallery(popbox);
     });
 
     _static.addHook('after_initialize',function(new_settings){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
             if (new_settings && !_static.isSet(new_settings.fit)) {
-                popbox.settings.fit = true;
+                popbox.base_settings.fit = true;
+                popbox._private.applySettings();
             }
             self.refreshItems();
         }
@@ -2276,7 +2308,6 @@
 
         if (popbox.settings.mode === 'gallery') {
             popbox.elements.$popbox.addClass('popbox-gallery');
-
             if (popbox.properties.gallery.items.length > 1) {
                 // put the next and previous buttons in the popbox
                 if (!popbox.elements.$popbox_gallery_next) {
@@ -2305,7 +2336,7 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.1.3';
+    $.Popbox.prototype.plugins.gallery = '1.1.4';
 
 })(jQuery,window);
 (function($,window){
@@ -2404,6 +2435,7 @@
                                                     break;
                                                 case 'image':
                                                     auto_settings.content = '<img src="'+matchresult[0]+'" alt="" />';
+                                                    auto_settings.fit = true; // gallery mode might not be available
                                                     auto_settings.mode = 'gallery';
                                                     break;
                                             }
@@ -2433,6 +2465,6 @@
 
     $('.open-popbox').Popbox();
 
-    $.Popbox.prototype.plugins.selector = '1.0.2';
+    $.Popbox.prototype.plugins.selector = '1.0.3';
 
 })(jQuery,window);

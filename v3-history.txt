@@ -1,5 +1,7 @@
 ##### CORE #####
 
+=== 3.0.11 ===
+
 === 3.0.10 ===
 - Removed aspect_fit_round.
 - Renamed aspect_fit to fit.
@@ -64,6 +66,9 @@ unfinished
 - Added slide_up, slide_down, float_up, float_down, zoom, fold animations.
 
 ||||| GALLERY |||||
+=== 1.1.4 ===
+- gallery_after_change event now runs after adjust (required to make sure the items used were from the new slide)
+
 === 1.1.3 ===
 - Changed aspect_fit settings to fit.
 - Raised core version requirement to 3.0.10
@@ -94,6 +99,9 @@ unfinished
 - API included for controlling the gallery.
 
 ||||| SELECTOR |||||
+=== 1.0.3 ===
+- Added fit property setting to images, gallery mode isn't always available.
+
 === 1.0.2 ===
 - Changed aspect_fit and aspect_fit_round settings to fit.
 - Raised core version requirement to 3.0.10

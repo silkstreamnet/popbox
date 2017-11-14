@@ -1,6 +1,6 @@
 /*
  * 	Core Popbox CSS File
- *	v3.0.6
+ *	v3.0.11
  */
 
 
@@ -10,7 +10,7 @@
     max-width:100%;
 }
 
-.popbox-aspect-fit img, .popbox-aspect-fit iframe, .popbox-aspect-fit object, .popbox-aspect-fit embed {
+.popbox-fit img, .popbox-fit iframe, .popbox-fit object, .popbox-fit embed {
     max-height:100%;
     display:block;
     margin:0;
@@ -85,7 +85,7 @@
     font-size:1em;
 }
 
-.popbox-aspect-fit .popbox-content {
+.popbox-fit .popbox-content {
     padding:0;
 }
 
@@ -96,31 +96,34 @@
     position:absolute;
     top:0;
     bottom:0;
-    width:50%;
+    width:2em;
     color:#000;
     background:url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) repeat;
 }
 
 .popbox-gallery-next span, .popbox-gallery-prev span {
-    position:absolute;
-    top:0;
-    bottom:0;
-    margin: auto 5%;
-    padding:0;
-    height:32px;
-    width:32px;
-    line-height:32px;
-    background:#fff;
-    border-radius:50%;
-    text-align:center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: auto;
+    height: 32px;
+    width: 32px;
+    line-height: 32px;
+    background: #fff;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 0.6em;
 }
 
-.popbox-gallery-next, .popbox-gallery-next span {
-    right:0;
+.popbox-gallery-next {
+    left:100%;
 }
 
-.popbox-gallery-prev, .popbox-gallery-prev span {
-    left:0;
+.popbox-gallery-prev {
+    right:100%;
 }
 
 .popbox-gallery-error {
