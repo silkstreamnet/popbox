@@ -1,6 +1,10 @@
 ##### CORE #####
 
 === 3.0.11 ===
+- Fixed issues which were brought in by responsive settings.
+- Renamed popbox-aspect-fit css class to popbox-fit.
+- Moved popbox-close element from popbox-container to popbox-popup.
+- Added popbox.on('adjust') and popbox.on('after_adjust') events.
 
 === 3.0.10 ===
 - Removed aspect_fit_round.
@@ -68,6 +72,8 @@ unfinished
 ||||| GALLERY |||||
 === 1.1.4 ===
 - gallery_after_change event now runs after adjust (required to make sure the items used were from the new slide)
+- Added swipeable setting (default true, set to false to disable swiping navigation)
+- Fixed an issue where the sliding animation would occur when swiping vertically.
 
 === 1.1.3 ===
 - Changed aspect_fit settings to fit.
