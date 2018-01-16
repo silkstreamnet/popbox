@@ -1,10 +1,8 @@
 VERSION 3 PLANS
 To do
-- Add gallery extension support. Horizontal swipe support.
 - Add native url content handling (ajax) extension support.
 - Add smooth popbox switching. (if one popbox is opened when another is already opened)
 - Make sure different containers other than body work. Currently only supports body.
-- Need ability to pre-adjust, edit html real-time, then finish adjust. (pre-adjust hides the content and finish adjust brings it back in)
 
 Done
 - Change function definition convention for private functions to var function plus camelCase.
@@ -18,5 +16,10 @@ Done
 - Add extension support to the plugin. Separate gallery functionality and extensive future animations to their own extension scripts.
 - Add animation extension support.
 - Add addEventListener method to popbox class. (need to store events in their own area, use the change to transition events as example)
+- Add gallery extension support. Horizontal swipe support.
+- Need ability to pre-adjust, edit html real-time, then finish adjust. (pre-adjust hides the content and finish adjust brings it back in)
 
 Dropped
+
+Known Issues
+- 16/08/2018 # The gallery sometimes occasionally fails to calculate a width and height for the popbox when sliding between images.

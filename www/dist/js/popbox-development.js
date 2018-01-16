@@ -513,6 +513,7 @@
 
         self.elements.$popbox_overlay.html(self.settings.overlay_text);
 
+        // you shouldn't be able to use this unless there is a problem. the empty for each popbox is used first.
         self.elements.$popbox_overlay.off('click.popbox_overlay_close').on('click.popbox_overlay_close',function(e){
             e.preventDefault();
             for (var i in _static._instances) {
@@ -522,7 +523,7 @@
                     }
                 }
             }
-            self._private.closeOverlay();
+            self._private.closeOverlay(true);
         });
     };
 
@@ -559,10 +560,23 @@
         }
     };
 
-    _private.prototype.closeOverlay = function(){
+    _private.prototype.closeOverlay = function(force){
         var self = this.self;
-
+        // run this function after marking popboxes as closed, it checks to see if there are any popboxes open, use force to bypass it
         if (self.elements.$popbox_overlay) {
+
+            if (!force) {
+                var any_open_popbox = false;
+                for (var i in _static._instances) {
+                    if (_static._instances.hasOwnProperty(i)) {
+                        if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
+                            any_open_popbox = true;
+                            break;
+                        }
+                    }
+                }
+                if (any_open_popbox) return;
+            }
 
             if (self.elements.$popbox_overlay.data('is_open') === true) {
                 _static.clearTransition(self.elements.$popbox_overlay);
@@ -876,7 +890,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.11';
+    Popbox.prototype.version = '3.0.12';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1150,6 +1164,7 @@
                     if (self.properties.last_html_overflow === false) {
                         self.properties.last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
                     }
+                    var fix_scroll_top = _static.$window.scrollTop(); // chrome visual disturbance bug
                     _static.$html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
                     var new_body_width = _static.$body.width();
                     if (self.settings.hide_page_scroll_space) {
@@ -1160,6 +1175,7 @@
                             _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
                         }
                     }
+                    _static.$window.scrollTop(fix_scroll_top);
                 }
             }
 
@@ -1278,8 +1294,9 @@
                     self.trigger('after_close');
                 }
             );
+
+            self._private.closeOverlay();
         }
-        self._private.closeOverlay();
     };
 
     Popbox.prototype.adjust = function(animate){
