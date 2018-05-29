@@ -1,5 +1,8 @@
 ##### CORE #####
 
+=== 3.0.13 ===
+- Fixed using showLoading before open to show the loading screen first.
+
 === 3.0.12 ===
 - When more than one popbox are shown at once, the overlay will not close after one popbox is closed.
 - Fixed Chrome jumping scroll issue with percentage based content.

@@ -890,7 +890,7 @@
         self.trigger('after_initialize',false,[settings]);
     };
 
-    Popbox.prototype.version = '3.0.12';
+    Popbox.prototype.version = '3.0.13';
     Popbox.prototype.plugins = {};
     Popbox.prototype.default_settings = {
         width:false, // number = pixels to set, anything else is ignored
@@ -1534,7 +1534,7 @@
                 });
             }
             else if (!animate) {
-                adjust_elements(false,true);
+                adjust_elements(false,self.properties.is_open);
             }
             else {
                 self.showLoading(function(){
