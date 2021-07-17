@@ -1,3 +1,4 @@
+import $ from "jquery"
 
 export const addSelectorPlugin = function(Popbox){
     const _static = Popbox.prototype._static;

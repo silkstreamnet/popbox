@@ -79,7 +79,7 @@ _private.prototype.createOverlay = function(){
         e.preventDefault();
         for (var i in _static._instances) {
             if (_static._instances.hasOwnProperty(i)) {
-                if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
+                if (_static._instances[i] instanceof self.constructor && _static._instances[i].isOpen()) {
                     _static._instances[i].close();
                 }
             }
@@ -130,7 +130,7 @@ _private.prototype.closeOverlay = function(force){
             var any_open_popbox = false;
             for (var i in _static._instances) {
                 if (_static._instances.hasOwnProperty(i)) {
-                    if (_static._instances[i] instanceof Popbox && _static._instances[i].isOpen()) {
+                    if (_static._instances[i] instanceof self.constructor && _static._instances[i].isOpen()) {
                         any_open_popbox = true;
                         break;
                     }

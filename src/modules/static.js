@@ -58,6 +58,18 @@ export const _static = {
     _test_div:document.createElement('div')
 };
 
+function getVendorPropertyName(prop) {
+    if (prop in _static._test_div.style) return prop;
+
+    var prefixes = ['Moz', 'Webkit', 'O', 'ms'];
+    var prop_ = prop.charAt(0).toUpperCase() + prop.substr(1);
+
+    for (var i=0; i<prefixes.length; ++i) {
+        var vendorProp = prefixes[i] + prop_;
+        if (vendorProp in _static._test_div.style) { return vendorProp; }
+    }
+}
+
 _static._support.transition         = getVendorPropertyName('transition');
 _static._support.transform          = getVendorPropertyName('transform');
 _static._support.transform_origin   = getVendorPropertyName('transformOrigin');

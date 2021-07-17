@@ -1,13 +1,14 @@
-import Popbox from "../src/popbox"
+import $ from "jquery"
+import Popbox from "../src/popbox-full"
 
-var popbox1 = new $.Popbox({
+var popbox1 = new Popbox({
     max_width:800,
     content:'<p>test masses of content</p>',
     title:'chicken',
     animation:'slide_up',
     animation_speed:1000,
     cache:true,
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />'
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
 $('.click-me-1').on('click',function(e){
@@ -28,13 +29,13 @@ $('.click-me-1').on('click',function(e){
     },3000);
 });
 
-var popbox2 = new $.Popbox({
+var popbox2 = new Popbox({
     max_width:800,
-    content:'<p>test masses of content</p><img src="dist/images/test-image-2.jpg" />',
+    content:'<p>test masses of content</p><img src="assets/img/test-image-2.jpg" />',
     title:'test 2',
     animation:'zoom',
     max_height:true,
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />'
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
 $('.click-me-2').on('click',function(e){
@@ -42,7 +43,7 @@ $('.click-me-2').on('click',function(e){
     popbox2.open();
 });
 
-var popbox3 = new $.Popbox({
+var popbox3 = new Popbox({
     max_width:700,
     //max_height:true,
     aspect_fit:true,
@@ -51,19 +52,19 @@ var popbox3 = new $.Popbox({
     cache:true,
     min_width:100,
     min_height:100,
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />'
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
 $('.click-me-3').on('click',function(e){
     e.preventDefault();
     popbox3.update({
-        content:'<img src="dist/images/test-image.jpg" />'
+        content:'<img src="assets/img/test-image-1.jpg" />'
     });
     popbox3.open();
 });
 
-var popbox4 = new $.Popbox({
-    content:'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p><img src="dist/images/test-image-2.jpg" /></p>',
+var popbox4 = new Popbox({
+    content:'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p><img src="assets/img/test-image-2.jpg" /></p>',
     //max_height:true,
     loading_text:'',
     absolute:true
@@ -76,7 +77,7 @@ $('.click-me-4').on('click',function(e){
 
 var long_text = '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p> <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas aliquet elit eu felis mattis venenatis. Nullam euismod nulla ac quam sodales dapibus. Aenean id nisi eu nunc consectetur adipiscing. Etiam a arcu in purus ultrices adipiscing id ut diam. Nullam dignissim tristique neque, eget ornare erat pharetra quis.</p>';
 
-var popbox5 = new $.Popbox({
+var popbox5 = new Popbox({
     max_width:800,
     content:long_text,
     title:'chicken',
@@ -84,7 +85,7 @@ var popbox5 = new $.Popbox({
     animation_speed:500,
     overlay_animation_speed:500,
     cache:false,
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />'
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
 popbox5.on('on_open',function(){
@@ -104,11 +105,11 @@ $('.click-me-5').on('click',function(e){
     },2000);
 });
 
-var popbox6 = new $.Popbox({
+var popbox6 = new Popbox({
     content:'<iframe src="//player.vimeo.com/video/99528701" width="840" height="470" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>',
     animation:'zoom',
     aspect_fit:true,
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />'
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
 $('.click-me-6').on('click',function(e){
@@ -122,7 +123,7 @@ $('.click-me-7').Popbox({
     animation_speed:500
 });
 
-var popbox_gallery1 = new $.Popbox({
+var popbox_gallery1 = new Popbox({
     mode:'gallery',
     loading_text:'',
     gallery:{
@@ -135,8 +136,8 @@ $('.click-me-gallery-1').on('click',function(e){
     //popbox_gallery1.open();
 });
 
-var popbox_delayed_loading = new $.Popbox({
-    loading_text:'<img src="dist/images/loading.gif" width="32" height="32" alt="" />',
+var popbox_delayed_loading = new Popbox({
+    loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />',
     content:'preload'
 });
 
@@ -156,7 +157,7 @@ $('.delayed-loading').on('click',function(e){
     popbox_delayed_loading.open();
 });
 
-var popbox_insertcoin_test = new $.Popbox({
+var popbox_insertcoin_test = new Popbox({
     loading_text:'',
     content:$('.content-insertcoin-test').html()
 });
@@ -166,7 +167,7 @@ $('.click-me-insertcoin-test').on('click',function(e){
     popbox_insertcoin_test.open();
 });
 
-var popbox_breakage = new $.Popbox({
+var popbox_breakage = new Popbox({
     mode:'gallery',
     gallery:{
         selector:'.break-img'

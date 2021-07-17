@@ -1,3 +1,4 @@
+import {_static} from "../modules/static";
 
 export const _default_settings = {
     width:false, // number = pixels to set, anything else is ignored

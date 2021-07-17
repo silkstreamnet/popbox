@@ -1,3 +1,4 @@
+import $ from "jquery"
 
 export const addGalleryPlugin = function(Popbox){
     const _static = Popbox.prototype._static
