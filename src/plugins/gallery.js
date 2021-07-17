@@ -1,23 +1,24 @@
-(function($,window){
-    (function () {var minimum_required_popbox_version = '3.0.10'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
 
-    var _private = function(){},
-        _static = $.Popbox.prototype._static,
-        extend_default_settings = {
-            gallery:{ // mode must be set to gallery for this to be used
-                selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
-                clickable:true, // whether to apply a click/touch to selector items
-                swipeable:true,
-                error:'<div class="popbox-gallery-error">There was an error loading the image.</div>',
-                next:'<span>&#x25B6;</span>',
-                prev:'<span>&#x25C0;</span>',
-                items:[] // array of image urls
-            }
-        };
+export const addGalleryPlugin = function(Popbox){
+    const _static = Popbox.prototype._static
+    const extend_default_settings = {
+        gallery:{ // mode must be set to gallery for this to be used
+            selector:'', // selector to get images, either is a link to an image or the image or all images or links found inside
+            clickable:true, // whether to apply a click/touch to selector items
+            swipeable:true,
+            error:'<div class="popbox-gallery-error">There was an error loading the image.</div>',
+            next:'<span>&#x25B6;</span>',
+            prev:'<span>&#x25C0;</span>',
+            items:[] // array of image urls
+        }
+    }
+
+    const _private = function(){}
+
 
     _static._gallery_event_namespace = 'PopboxGallery';
 
-    $.extend(true,$.Popbox.prototype.default_settings,extend_default_settings);
+    $.extend(true,Popbox.prototype.default_settings,extend_default_settings);
 
     _private.prototype.attachSwipeEvents = function() {
         var self = this.self, popbox = this.self.popbox;
@@ -361,14 +362,14 @@
         self.goTo(popbox.properties.gallery.current_index-1);
     };
 
-    $.Popbox.prototype.gallery = PopboxGallery;
+    Popbox.prototype.gallery = PopboxGallery;
 
-    _static.addHook('initialize',function(){
+    Popbox.prototype.addHook('initialize',function(){
         var popbox = this;
         popbox.gallery = new PopboxGallery(popbox);
     });
 
-    _static.addHook('after_initialize',function(new_settings){
+    Popbox.prototype.addHook('after_initialize',function(new_settings){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
             if (new_settings && !_static.isSet(new_settings.fit)) {
@@ -379,7 +380,7 @@
         }
     });
 
-    _static.addHook('after_reset',function(){
+    Popbox.prototype.addHook('after_reset',function(){
         var popbox = this;
         popbox.properties.gallery = {
             items:[],
@@ -387,7 +388,7 @@
         };
     });
 
-    _static.addHook('after_create',function(){
+    Popbox.prototype.addHook('after_create',function(){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
             self._private.attachSwipeEvents(); // must go first
@@ -395,7 +396,7 @@
         }
     });
 
-    _static.addHook('open',function(){
+    Popbox.prototype.addHook('open',function(){
         var self = this.gallery, popbox = this;
         if (popbox.settings.mode === 'gallery') {
             self.refreshItems();
@@ -408,7 +409,7 @@
         }
     });
 
-    _static.addHook('image_error',function(image_cache_src){
+    Popbox.prototype.addHook('image_error',function(image_cache_src){
         var popbox = this;
         if (popbox.settings.mode === 'gallery') {
             popbox.update({
@@ -421,7 +422,7 @@
         }
     });
 
-    _static.addHook('after_update',function(){
+    Popbox.prototype.addHook('after_update',function(){
         var self = this.gallery, popbox = this;
 
         if (!popbox.isOpen()) {
@@ -435,7 +436,7 @@
         }
     });
 
-    _static.addHook('after_update_dom',function(){
+    Popbox.prototype.addHook('after_update_dom',function(){
         var popbox = this;
 
         var show_btns = false;
@@ -470,6 +471,6 @@
         }
     });
 
-    $.Popbox.prototype.plugins.gallery = '1.1.4';
+    Popbox.prototype.plugins.gallery = '1.2.0';
 
-})(jQuery,window);
+};

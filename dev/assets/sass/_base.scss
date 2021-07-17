@@ -5,9 +5,27 @@
 }
 
 html {overflow-x:hidden; height:100%;}
-body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0; background: #383d44;}
+body {font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:10px 0; padding:0;}
 a {}
 p {font-size:100%; margin:0 0 10px 0;}
-img {max-width:100%; height:auto;}
+.testa {width:200px; height:200px; transform:scale(0.5);}
+.testb {width:100px; height:100px; position:fixed;}
 
-.hide {display:none;}
+.popbox-contain .grid {
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row wrap;
+    margin: 0 -.5em;
+}
+.popbox-contain .col-2_sm-12 {
+    flex: 0 0 auto;
+    max-width: 16.66667%;
+    box-sizing: border-box;
+    padding: 0 .5em 1em;
+}
+.popbox-contain .col-5_sm-12 {
+    flex: 0 0 auto;
+    max-width: 41.66667%;
+    box-sizing: border-box;
+    padding: 0 .5em 1em;
+}

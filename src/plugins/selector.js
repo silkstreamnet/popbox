@@ -1,11 +1,10 @@
-(function($,window){
-    (function () {var minimum_required_popbox_version = '3.0.10'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
 
-    var _static = $.Popbox.prototype._static;
+export const addSelectorPlugin = function(Popbox){
+    const _static = Popbox.prototype._static;
 
     _static.applyDataToSettings = function($object,settings,defaults,stage) {
         settings = _static.param(settings,{});
-        defaults = _static.param(defaults,$.Popbox.prototype.default_settings);
+        defaults = _static.param(defaults,Popbox.prototype.default_settings);
         stage = _static.param(stage,'');
 
         for (var property in defaults) {
@@ -33,7 +32,7 @@
         return settings;
     };
 
-    $.Popbox.prototype.default_settings.auto_setup = true;
+    Popbox.prototype.default_settings.auto_setup = true;
 
     $.fn.Popbox = function(settings) {
         settings = _static.param(settings,{});
@@ -44,7 +43,7 @@
 
                 $element.off('click.popbox_open').on('click.popbox_open',function(e){
                     e.preventDefault();
-                    var _popbox, new_settings = $.extend(true,{},$.Popbox.prototype.default_settings,settings);
+                    var _popbox, new_settings = $.extend(true,{},Popbox.prototype.default_settings,settings);
                     _static.applyDataToSettings($element,new_settings);
 
                     var href = new_settings.href || $element.attr('href'),
@@ -109,8 +108,8 @@
                             }
                     }
 
-                    if (auto_run) _popbox = new $.Popbox(auto_settings);
-                    else _popbox = new $.Popbox(new_settings);
+                    if (auto_run) _popbox = new Popbox(auto_settings);
+                    else _popbox = new Popbox(new_settings);
 
                     _popbox.open();
 
@@ -124,6 +123,5 @@
 
     $('.open-popbox').Popbox();
 
-    $.Popbox.prototype.plugins.selector = '1.0.3';
-
-})(jQuery,window);
+    Popbox.prototype.plugins.selector = '1.1.0';
+};

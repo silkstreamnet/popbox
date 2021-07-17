@@ -1,7 +1,7 @@
-(function($){
-    (function () {var minimum_required_popbox_version = '3.0.0'.split('.');for (var pvi = 0, pvl = $.Popbox.prototype.version.split('.'); pvi < pvl.length; pvi++) {if ((+pvl[pvi]) < (+minimum_required_popbox_version[pvi])) {console.log("Error: Popbox " + minimum_required_popbox_version.join('.') + "+ required.");}}})();
+import $ from "jquery"
 
-    var extend_animations = {
+export const addAnimationsPlugin = function(Popbox){
+    const extend_animations = {
         'slide_up':{
             'open':[{
                 'transform':'translateY(2000px)'
@@ -93,7 +93,6 @@
         }
     };
 
-    $.extend(true,$.Popbox.prototype.animations,extend_animations);
-    $.Popbox.prototype.plugins.animations = '1.0.1';
-
-})(jQuery);
+    $.extend(true,Popbox.prototype.animations,extend_animations);
+    Popbox.prototype.plugins.animations = '1.1.0';
+};
