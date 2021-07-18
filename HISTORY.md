@@ -1,5 +1,9 @@
 # Popbox
 
+### 3.1.0
+- Updated build to use Webpack.
+- No intended new features or functionality changes.
+
 ### 3.0.13
 - Fixed using showLoading before open to show the loading screen first.
 

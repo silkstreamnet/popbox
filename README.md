@@ -1,4 +1,4 @@
 # Popbox 3
 
-## Requirements
+## Dependencies
 - jQuery 1.7+
