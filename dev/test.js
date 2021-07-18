@@ -1,5 +1,10 @@
 import $ from "jquery"
 import Popbox from "../src/popbox-full"
+import "./assets/sass/_base.scss"
+import "../src/assets/sass/popbox.scss"
+import "../src/assets/sass/popbox-gallery.scss"
+import "../src/assets/sass/themes/popbox-basic-theme/popbox-basic-theme.scss"
+import "./assets/sass/_custom-popbox.scss"
 
 var popbox1 = new Popbox({
     max_width:800,
@@ -108,7 +113,7 @@ $('.click-me-5').on('click',function(e){
 var popbox6 = new Popbox({
     content:'<iframe src="//player.vimeo.com/video/99528701" width="840" height="470" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>',
     animation:'zoom',
-    aspect_fit:true,
+    fit:true,
     loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 

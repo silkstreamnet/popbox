@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WebpackRemoveEmptyScriptsPlugin = require('./node_scripts/webpack-remove-empty-scripts/index.js')
 
@@ -46,6 +47,26 @@ module.exports = {
                         "sass-loader",
                     ],
             },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                include:[
+                    path.resolve(__dirname,'src/assets/sass/themes/popbox-basic-theme/assets')
+                ],
+                loader: 'file-loader',
+                options: {
+                    name: 'themes/popbox-basic-theme/assets/[name].[ext]',
+                },
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                include:[
+                    path.resolve(__dirname,'dev/assets/img')
+                ],
+                loader: 'file-loader',
+                options: {
+                    name: 'assets/img/[name].[ext]',
+                },
+            }
         ],
     },
 };

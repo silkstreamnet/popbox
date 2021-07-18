@@ -8,7 +8,12 @@ const minimize = process.argv.indexOf('minimize') >= 0;
 module.exports = merge(base, {
     mode: 'production',
     entry: {
-        "popbox": ['./src/popbox.js','./src/sass/popbox.scss']
+        "popbox": ['./src/popbox.js','./src/assets/sass/popbox.scss'],
+        "popbox-animations": ['./src/popbox-animations.js'],
+        "popbox-gallery": ['./src/popbox-gallery.js','./src/assets/sass/popbox-gallery.scss'],
+        "popbox-selector": ['./src/popbox-selector.js'],
+        "popbox-full": ['./src/popbox-full.js'],
+        "themes/popbox-basic-theme/popbox-basic-theme":['./src/assets/sass/themes/popbox-basic-theme/popbox-basic-theme.scss']
     },
     externals:{
         jquery: "jQuery"
@@ -37,5 +42,5 @@ module.exports = merge(base, {
                 },
             }),
         ],
-    },
+    }
 });
