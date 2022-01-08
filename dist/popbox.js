@@ -1498,14 +1498,28 @@ core_core.prototype.adjust = function (animate) {
       if (self.settings.fit) {
         // fit for iframes and images
         if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-          var max_ratio = (max_popbox_height - content_height_padding) / (max_popbox_width - content_width_padding),
-              new_ratio = (new_popbox_height - content_height_padding) / (new_popbox_width - content_width_padding);
+          var image_height = 0;
+          var image_width = 0;
+          self.elements.$popbox_content.find('img').each(function () {
+            var $img = external_jQuery_default()(this);
+            image_width += _static.getTrueWidth($img);
+            image_height += _static.getTrueHeight($img);
+          });
+          var text_height = new_popbox_height - image_height;
+          var width_offset = content_width_padding;
+          var height_offset = text_height - content_height_padding;
+          var max_mod_width = max_popbox_width - width_offset;
+          var max_mod_height = max_popbox_height - height_offset;
+          var new_mod_width = new_popbox_width - width_offset;
+          var new_mod_height = new_popbox_height - height_offset;
+          var max_ratio = max_mod_height / max_mod_width,
+              new_ratio = new_mod_height / new_mod_width;
 
           if (new_ratio > max_ratio) {
-            new_popbox_width = (new_popbox_width - content_width_padding) * ((max_popbox_height - content_height_padding) / (new_popbox_height - content_height_padding)) + content_width_padding;
+            new_popbox_width = new_mod_width * (max_mod_height / new_mod_height) + width_offset;
             new_popbox_height = max_popbox_height;
           } else {
-            new_popbox_height = (new_popbox_height - content_height_padding) * ((max_popbox_width - content_width_padding) / (new_popbox_width - content_width_padding)) + content_height_padding;
+            new_popbox_height = new_mod_height * (max_mod_width / new_mod_width) + height_offset;
             new_popbox_width = max_popbox_width;
           } // for iframes
 

@@ -36,10 +36,11 @@ $('.click-me-1').on('click',function(e){
 
 var popbox2 = new Popbox({
     max_width:800,
-    content:'<p>test masses of content</p><img src="assets/img/test-image-2.jpg" />',
-    title:'test 2',
+    content:'<p>test masses of content</p><p>Next content</p><img src="assets/img/test-image-2.jpg" width="653" height="803" />',
+    //title:'test 2',
     animation:'zoom',
-    max_height:true,
+    //max_height:true,
+    fit:true,
     loading_text:'<img src="assets/img/loading.gif" width="32" height="32" alt="" />'
 });
 
@@ -51,7 +52,7 @@ $('.click-me-2').on('click',function(e){
 var popbox3 = new Popbox({
     max_width:700,
     //max_height:true,
-    aspect_fit:true,
+    fit:true,
     content:'<p>test more content</p>',
     animation:'zoom',
     cache:true,

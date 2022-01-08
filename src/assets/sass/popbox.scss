@@ -5,6 +5,10 @@
 }
 
 .popbox-fit {
+    img {
+        height:auto;
+    }
+
     img, iframe, object, embed {
         max-height:100%;
         display:block;
