@@ -136,7 +136,7 @@ var animations_addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = '1.1.0';
+  Popbox.prototype.plugins.animations = true;
 };
 ;// CONCATENATED MODULE: ./src/popbox-animations.js
 
