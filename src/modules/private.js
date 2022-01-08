@@ -212,8 +212,7 @@ _private.prototype.checkImagesLoaded = function(){
 
             if (image.src) {
                 var image_ready = ((image.complete && _static.isNumber(image.naturalWidth,false)) || image.readyState === 4 || image.readyState === 'complete');
-                //var image_ready = (image.complete || image.readyState === 4 || image.readyState === 'complete');
-                if (!image_ready && !self.properties.cache.images[image.src]) {
+                if (!image_ready) {
                     self.properties.cache.images[image.src] = {
                         origin:image,
                         $origin:$image,
