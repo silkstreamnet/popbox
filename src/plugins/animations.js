@@ -94,5 +94,5 @@ export const addAnimationsPlugin = function(Popbox){
     };
 
     $.extend(true,Popbox.prototype.animations,extend_animations);
-    Popbox.prototype.plugins.animations = '1.1.0';
+    Popbox.prototype.plugins.animations = __VERSION__;
 };

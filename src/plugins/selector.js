@@ -124,5 +124,5 @@ export const addSelectorPlugin = function(Popbox){
 
     $('.open-popbox').Popbox();
 
-    Popbox.prototype.plugins.selector = '1.1.0';
+    Popbox.prototype.plugins.selector = __VERSION__;
 };

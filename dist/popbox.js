@@ -727,9 +727,9 @@ _private.prototype.checkImagesLoaded = function () {
           $image = external_jQuery_default()(this);
 
       if (image.src) {
-        var image_ready = image.complete && _static.isNumber(image.naturalWidth, false) || image.readyState === 4 || image.readyState === 'complete'; //var image_ready = (image.complete || image.readyState === 4 || image.readyState === 'complete');
+        var image_ready = image.complete && _static.isNumber(image.naturalWidth, false) || image.readyState === 4 || image.readyState === 'complete';
 
-        if (!image_ready && !self.properties.cache.images[image.src]) {
+        if (!image_ready) {
           self.properties.cache.images[image.src] = {
             origin: image,
             $origin: $image,
@@ -1025,7 +1025,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.0";
+core_core.prototype.version = "3.1.1";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
