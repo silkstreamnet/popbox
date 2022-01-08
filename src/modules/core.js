@@ -470,6 +470,8 @@ _core.prototype.adjust = function(animate){
                 'box-sizing':'content-box'
             });
 
+            self.elements.$popbox_content.find('img').eq(0).css('width', '');
+
             // use true width to get overhang (stops text wrapping)
             new_popbox_width = Math.ceil(_static.getTrueWidth(self.elements.$popbox_container)*100)/100;
             new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
@@ -514,7 +516,7 @@ _core.prototype.adjust = function(animate){
 
             if (self.settings.fit) { // fit for iframes and images
                 if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-                    var has_text = false;
+                    var text_height = 0;
 
                     var fitResize = function() {
                         var image_height = 0;
@@ -527,11 +529,7 @@ _core.prototype.adjust = function(animate){
                             }
                         });
                         var text_width = new_popbox_width - image_width;
-                        var text_height = new_popbox_height - image_height;
-
-                        if (text_height > 0) {
-                            has_text = true;
-                        }
+                        text_height = new_popbox_height - image_height;
 
                         var width_offset = text_width + content_width_padding;
                         var height_offset = text_height + content_height_padding;
@@ -554,7 +552,7 @@ _core.prototype.adjust = function(animate){
 
                     fitResize();
 
-                    if (has_text) {
+                    if (text_height > 0) {
                         self.elements.$popbox_container.css({
                             'width':new_popbox_width+'px',
                             //'height':new_popbox_height+'px',
@@ -563,6 +561,19 @@ _core.prototype.adjust = function(animate){
                         new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
 
                         fitResize();
+
+                        self.elements.$popbox_container.css({
+                            'width':new_popbox_width+'px',
+                            //'height':new_popbox_height+'px',
+                        });
+
+                        console.log(Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100);
+                        console.log(new_popbox_height);
+
+
+                        if (Math.round(Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100) > Math.round(new_popbox_height+0.5)) {
+                            self.elements.$popbox_content.find('img').eq(0).css('width', '50%');
+                        }
                     }
 
                     // for iframes
