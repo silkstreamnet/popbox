@@ -1,5 +1,9 @@
 # Popbox
 
+### 3.1.1
+- Removed version numbers from plugins.
+- Fixed issue where popbox fails to calculate the dimensions of an image.
+
 ### 3.1.0
 - Updated build to use Webpack.
 - No intended new features or functionality changes.

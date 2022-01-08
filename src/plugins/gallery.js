@@ -472,6 +472,6 @@ export const addGalleryPlugin = function(Popbox){
         }
     });
 
-    Popbox.prototype.plugins.gallery = true;
+    Popbox.prototype.plugins.gallery = __VERSION__;
 
 };
