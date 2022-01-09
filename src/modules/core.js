@@ -470,6 +470,26 @@ _core.prototype.adjust = function(animate){
                 'box-sizing':'content-box'
             });
 
+            var $f_img = self.elements.$popbox_content.find('.popbox-fit-image');
+
+            if (!$f_img.length) {
+                $f_img = false;
+
+                if (!self.elements.$popbox_content.find('.popbox-fit-ignore-images').length) {
+                    self.elements.$popbox_content.find('img').each(function(){
+                        var $img = $(this);
+                        if (!$img.hasClass('popbox-fit-ignore-image') && !_static.isAbsolutePositioned($img,self.elements.$popbox_content)) {
+                            $f_img = $img;
+                            return false;
+                        }
+                    });
+                }
+            }
+
+            if ($f_img) {
+                $f_img.css('width', '');
+            }
+
             // use true width to get overhang (stops text wrapping)
             new_popbox_width = Math.ceil(_static.getTrueWidth(self.elements.$popbox_container)*100)/100;
             new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
@@ -513,17 +533,150 @@ _core.prototype.adjust = function(animate){
             };
 
             if (self.settings.fit) { // fit for iframes and images
-                if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-                    var max_ratio = (max_popbox_height-content_height_padding)/(max_popbox_width-content_width_padding),
-                        new_ratio = (new_popbox_height-content_height_padding)/(new_popbox_width-content_width_padding);
-                    if (new_ratio > max_ratio) {
-                        new_popbox_width = ((new_popbox_width-content_width_padding) * ((max_popbox_height-content_height_padding) / (new_popbox_height-content_height_padding)))+content_width_padding;
-                        new_popbox_height = max_popbox_height;
+                var text_height = 0;
+
+                var fitResize = function() {
+                    var image_height = new_popbox_height;
+                    if ($f_img) {
+                        image_height = _static.getTrueHeight($f_img);
                     }
-                    else {
-                        new_popbox_height = ((new_popbox_height-content_height_padding) * ((max_popbox_width-content_width_padding) / (new_popbox_width-content_width_padding)))+content_height_padding;
+                    text_height = new_popbox_height - image_height;
+
+                    if (new_popbox_width <= max_popbox_width && new_popbox_height <= max_popbox_height) {
+                        return;
+                    }
+
+                    var width_offset = content_width_padding;
+                    var height_offset = text_height + content_height_padding;
+
+                    var max_mod_width = max_popbox_width - width_offset;
+                    if (max_mod_width < 1) max_mod_width = 1;
+                    var max_mod_height = max_popbox_height - height_offset;
+                    if (max_mod_height < 1) max_mod_height = 1;
+
+                    var new_mod_width = new_popbox_width - width_offset;
+                    if (new_mod_width < 1) new_mod_width = 1;
+                    var new_mod_height = new_popbox_height - height_offset;
+                    if (new_mod_height < 1) new_mod_height = 1;
+
+                    var max_ratio = max_mod_height / max_mod_width,
+                        new_ratio = new_mod_height / new_mod_width;
+                    if (new_ratio > max_ratio) {
+                        new_popbox_width = (new_mod_width * (max_mod_height / new_mod_height)) + width_offset;
+                        new_popbox_height = max_popbox_height;
+                    } else {
+                        new_popbox_height = ((new_mod_height) * (max_mod_width / new_mod_width)) + height_offset;
                         new_popbox_width = max_popbox_width;
                     }
+                };
+
+                var fitTextResize = function() {
+                    var iteration = 0,
+                        switch_effort = false,
+                        container_height,
+                        overlap_height,
+                        current_image_height,
+                        next_image_width,
+                        stepped_popbox_width,
+                        last_changed_iteration,
+                        last_changed_img_height = 0,
+                        last_changed_width = 0,
+                        last_changed_height = 0;
+
+                    while (text_height > 0 && iteration < 10) {
+                        iteration++;
+
+                        container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
+                        // if the size has not changed, don't retry
+                        if (switch_effort && Math.round(container_height) <= Math.round(new_popbox_height+1) && $f_img.height() / new_popbox_height > 0.5) {
+                            // increase the image height if possible
+                            overlap_height = new_popbox_height - container_height;
+
+                            current_image_height = $f_img.height();
+                            if (current_image_height < 1) current_image_height = 1;
+
+                            next_image_width = ($f_img.width() * ((current_image_height + overlap_height) / current_image_height));
+                            if (next_image_width < 1) next_image_width = 1;
+
+                            $f_img.css('width', next_image_width + 'px');
+
+                            break;
+                        } else {
+                            //
+                            if ($f_img) {
+                                $f_img.css('width', '');
+
+                                if (iteration === 1) {
+                                    new_popbox_width = $f_img.width() + content_width_padding;
+                                }
+                            }
+
+                            self.elements.$popbox_container.css({
+                                'width':new_popbox_width+'px',
+                            });
+                        }
+
+                        container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
+
+                        if (Math.round(container_height) <= Math.round(new_popbox_height+1)) {
+                            // text and image fits in space
+                            break;
+                        } else {
+                            if (switch_effort || new_popbox_width < 2 || ($f_img && $f_img.height() / new_popbox_height < 0.6)) {
+
+                                // try to shrink the image instead
+                                overlap_height = container_height - new_popbox_height;
+
+                                current_image_height = $f_img.height();
+                                if (current_image_height < 1) current_image_height = 1;
+
+                                next_image_width = ($f_img.width() * ((current_image_height - overlap_height) / current_image_height));
+                                if (next_image_width < 1) next_image_width = 1;
+
+                                $f_img.css('width', next_image_width + 'px');
+
+                                stepped_popbox_width = max_popbox_width - (max_popbox_width * ((10 - iteration) / 10));
+
+                                self.elements.$popbox_container.css({
+                                    'width': stepped_popbox_width + 'px',
+                                });
+                                new_popbox_width = stepped_popbox_width;
+
+                                switch_effort = true;
+
+                                var new_image_height = $f_img.height();
+
+                                if (last_changed_img_height !== new_image_height) {
+                                    last_changed_iteration = iteration;
+                                    last_changed_img_height = new_image_height;
+                                    last_changed_height = new_popbox_height;
+                                    last_changed_width = new_popbox_width;
+                                }
+
+                                if (iteration === 10 && last_changed_iteration < 10) {
+                                    new_popbox_width = last_changed_width;
+                                    new_popbox_height = last_changed_height;
+                                    break;
+                                }
+                            } else if (new_popbox_width < 0) {
+                                // something has probably gone wrong
+                                break;
+                            } else {
+                                new_popbox_height = container_height;
+                            }
+
+                            fitResize();
+                        }
+                    }
+                };
+
+                fitResize();
+
+                if (text_height > 0) {
+                    fitTextResize();
+                }
+
+                if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
 
                     // for iframes
                     if (self.settings.fit === 'round') {

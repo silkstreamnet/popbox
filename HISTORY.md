@@ -1,5 +1,9 @@
 # Popbox
 
+### 3.1.2
+- Added support for text/caption under images when fit setting is true or 'round'.
+- Added new class detection inside popbox-content to disable automatic caption sizing. Classes are: "popbox-fit-image", "popbox-fit-ignore-image", "popbox-fit-ignore-images".
+
 ### 3.1.1
 - Removed version numbers from plugins.
 - Fixed issue where popbox fails to calculate the dimensions of an image.

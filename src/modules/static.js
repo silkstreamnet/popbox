@@ -414,6 +414,26 @@ _static.getTrueHeight = function($object) {
     return ($object && $object.length) ? $object.get(0).getBoundingClientRect().bottom-$object.get(0).getBoundingClientRect().top : 0; // support for IE8
     //return ($object && $object.length) ? $object.get(0).getBoundingClientRect().height : 0;
 };
+_static.isAbsolutePositioned = function($element,$relativeToElement) {
+
+    if (['absolute','fixed'].indexOf(window.getComputedStyle($element.get(0)).position) >= 0) {
+        return true;
+    }
+
+    var $parent = $element;
+
+    do {
+        $parent = $parent.parent();
+
+        if (!$parent || !$parent.length || ($relativeToElement && $relativeToElement.length && $parent.get(0) === $relativeToElement.get(0))) {
+            return false;
+        }
+
+        if (['absolute','fixed'].indexOf(window.getComputedStyle($parent.get(0)).position) >= 0) {
+            return true;
+        }
+    } while (true);
+}
 _static.offTouchClick = function($object) {
     if ($object.length) {
         $object.off('.Popbox_touch_click');

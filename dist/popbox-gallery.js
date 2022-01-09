@@ -533,7 +533,7 @@ var gallery_addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.1";
+  Popbox.prototype.plugins.gallery = "3.1.2";
 };
 ;// CONCATENATED MODULE: ./src/popbox-gallery.js
 
