@@ -517,21 +517,24 @@ _core.prototype.adjust = function(animate){
             if (self.settings.fit) { // fit for iframes and images
                 if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
                     var text_height = 0;
+                    var $f_img = false;
+
+                    self.elements.$popbox_content.find('img').each(function(){
+                        var $img = $(this);
+                        if (!_static.isAbsolutePositioned($img,self.elements.$popbox_content)) {
+                            $f_img = $img;
+                            return false;
+                        }
+                    });
 
                     var fitResize = function() {
-                        var image_height = 0;
-                        var image_width = 0;
-                        self.elements.$popbox_content.find('img').each(function(){
-                            var $img = $(this);
-                            if (!_static.isAbsolutePositioned($img,self.elements.$popbox_content)) {
-                                image_width += _static.getTrueWidth($img);
-                                image_height += _static.getTrueHeight($img);
-                            }
-                        });
-                        var text_width = new_popbox_width - image_width;
+                        var image_height = new_popbox_height;
+                        if ($f_img) {
+                            image_height = _static.getTrueHeight($f_img);
+                        }
                         text_height = new_popbox_height - image_height;
 
-                        var width_offset = text_width + content_width_padding;
+                        var width_offset = content_width_padding;
                         var height_offset = text_height + content_height_padding;
 
                         var max_mod_width = max_popbox_width - width_offset;
@@ -542,6 +545,10 @@ _core.prototype.adjust = function(animate){
                         var max_ratio = max_mod_height / max_mod_width,
                             new_ratio = new_mod_height / new_mod_width;
                         if (new_ratio > max_ratio) {
+                            console.log("T");
+                            console.log(max_popbox_height);
+                            console.log(height_offset);
+                            //console.log("("+new_mod_width+" * ("+max_mod_height+" / "+new_mod_height+")) + "+width_offset);
                             new_popbox_width = (new_mod_width * (max_mod_height / new_mod_height)) + width_offset;
                             new_popbox_height = max_popbox_height;
                         } else {
@@ -552,27 +559,52 @@ _core.prototype.adjust = function(animate){
 
                     fitResize();
 
-                    if (text_height > 0) {
+                    var base_new_popbox_width = new_popbox_width;
+
+                    var iterations = 0;
+
+                    var switch_effort = false;
+
+                    while (iterations < 10 && text_height > 0) {
+                        iterations++;
+
+                        if ($f_img) {
+                            $f_img.css('width', '');
+                        }
+
                         self.elements.$popbox_container.css({
                             'width':new_popbox_width+'px',
-                            //'height':new_popbox_height+'px',
                         });
 
-                        new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
+                        var container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100;
 
-                        fitResize();
-
-                        self.elements.$popbox_container.css({
-                            'width':new_popbox_width+'px',
-                            //'height':new_popbox_height+'px',
-                        });
-
-                        console.log(Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100);
+                        console.log("iteration "+iterations);
+                        console.log(new_popbox_width);
+                        console.log(container_height);
                         console.log(new_popbox_height);
 
+                        if (Math.round(container_height) <= Math.round(new_popbox_height+1)) {
+                            break;
+                        } else {
+                            //if (iterations >= 5) {
+                            if (switch_effort || ($f_img && $f_img.height() / new_popbox_height < 0.6)) {
+                                var overlap_height = container_height - new_popbox_height;
+                                var current_image_height = $f_img.height();
 
-                        if (Math.round(Math.ceil(_static.getTrueHeight(self.elements.$popbox_container)*100)/100) > Math.round(new_popbox_height+0.5)) {
-                            self.elements.$popbox_content.find('img').eq(0).css('width', '50%');
+                                $f_img.css('width', ($f_img.width() * ((current_image_height - overlap_height) / current_image_height)) + 'px');
+
+                                self.elements.$popbox_container.css({
+                                    'width': max_popbox_width + 'px',
+                                });
+                                new_popbox_width = max_popbox_width;
+
+                                switch_effort = true;
+                            } else if (new_popbox_width < 0) {
+                                break;
+                            } else {
+                                new_popbox_height = container_height;
+                            }
+                            fitResize();
                         }
                     }
 

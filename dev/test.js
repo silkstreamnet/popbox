@@ -36,7 +36,7 @@ $('.click-me-1').on('click',function(e){
 
 var popbox2 = new Popbox({
     max_width:800,
-    content:'<img src="assets/img/test-image-2.jpg" width="653" height="803" /><p>test masses of content</p><p>Next content</p>',
+    content:'<img src="assets/img/test-image-2.jpg" width="653" height="803" /><p style="font-size:12px; margin-top:12px;">test masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need</p><p style="font-size:12px">Next content</p>',
     //title:'test 2',
     animation:'zoom',
     //max_height:true,
