@@ -35,8 +35,9 @@ $('.click-me-1').on('click',function(e){
 });
 
 var popbox2 = new Popbox({
+    add_class: 'popbox-phat-fit',
     //max_width:800,
-    content:'<img src="assets/img/test-image-2.jpg" width="653" height="803" /><div style="font-size:12px; padding: 12px 12px 0 12px;"><p>test masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need</p><p>Next content</p></div>',
+    content:'<img src="assets/img/test-image-2.jpg" width="653" height="803" /><div style="font-size:12px; padding: 16px 0 0 0;"><p>test masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need masses of content with more content than you might need</p><p>Next content</p></div>',
     //title:'test 2',
     animation:'zoom',
     //max_height:true,
