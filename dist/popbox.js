@@ -1045,7 +1045,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.1";
+core_core.prototype.version = "3.1.2";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1474,7 +1474,27 @@ core_core.prototype.adjust = function (animate) {
         'max-width': '100%',
         'box-sizing': 'content-box'
       });
-      self.elements.$popbox_content.find('img').eq(0).css('width', ''); // use true width to get overhang (stops text wrapping)
+      var $f_img = self.elements.$popbox_content.find('.popbox-fit-image');
+
+      if (!$f_img.length) {
+        $f_img = false;
+
+        if (!self.elements.$popbox_content.find('.popbox-fit-ignore-images').length) {
+          self.elements.$popbox_content.find('img').each(function () {
+            var $img = external_jQuery_default()(this);
+
+            if (!$img.hasClass('popbox-fit-ignore-image') && !_static.isAbsolutePositioned($img, self.elements.$popbox_content)) {
+              $f_img = $img;
+              return false;
+            }
+          });
+        }
+      }
+
+      if ($f_img) {
+        $f_img.css('width', '');
+      } // use true width to get overhang (stops text wrapping)
+
 
       new_popbox_width = Math.ceil(_static.getTrueWidth(self.elements.$popbox_container) * 100) / 100;
       new_popbox_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100;
@@ -1519,22 +1539,6 @@ core_core.prototype.adjust = function (animate) {
       if (self.settings.fit) {
         // fit for iframes and images
         var text_height = 0;
-        var $f_img = self.elements.$popbox_content.find('img.popbox-fit-image');
-
-        if (!$f_img.length) {
-          $f_img = false;
-
-          if (!self.elements.$popbox_content.find('.popbox-fit-ignore-images').length) {
-            self.elements.$popbox_content.find('img').each(function () {
-              var $img = external_jQuery_default()(this);
-
-              if (!$img.hasClass('popbox-fit-ignore-image') && !_static.isAbsolutePositioned($img, self.elements.$popbox_content)) {
-                $f_img = $img;
-                return false;
-              }
-            });
-          }
-        }
 
         var fitResize = function fitResize() {
           var image_height = new_popbox_height;
@@ -1572,17 +1576,21 @@ core_core.prototype.adjust = function (animate) {
         };
 
         var fitTextResize = function fitTextResize() {
-          var iterations = 0,
+          var iteration = 0,
               switch_effort = false,
               container_height,
               overlap_height,
               current_image_height,
               next_image_width,
-              stepped_popbox_width;
+              stepped_popbox_width,
+              last_changed_iteration,
+              last_changed_img_height = 0,
+              last_changed_width = 0,
+              last_changed_height = 0;
 
-          while (text_height > 0 && iterations < 10) {
-            iterations++;
-            container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100;
+          while (text_height > 0 && iteration < 10) {
+            iteration++;
+            container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100; // if the size has not changed, don't retry
 
             if (switch_effort && Math.round(container_height) <= Math.round(new_popbox_height + 1) && $f_img.height() / new_popbox_height > 0.5) {
               // increase the image height if possible
@@ -1598,7 +1606,7 @@ core_core.prototype.adjust = function (animate) {
               if ($f_img) {
                 $f_img.css('width', '');
 
-                if (iterations === 1) {
+                if (iteration === 1) {
                   new_popbox_width = $f_img.width() + content_width_padding;
                 }
               }
@@ -1622,14 +1630,26 @@ core_core.prototype.adjust = function (animate) {
                 next_image_width = $f_img.width() * ((current_image_height - overlap_height) / current_image_height);
                 if (next_image_width < 1) next_image_width = 1;
                 $f_img.css('width', next_image_width + 'px');
-                stepped_popbox_width = max_popbox_width - max_popbox_width * ((10 - (iterations - 1)) / 10);
-                stepped_popbox_width += content_width_padding;
-                if (stepped_popbox_width < 1) stepped_popbox_width = 1;
+                stepped_popbox_width = max_popbox_width - max_popbox_width * ((10 - iteration) / 10);
                 self.elements.$popbox_container.css({
                   'width': stepped_popbox_width + 'px'
                 });
                 new_popbox_width = stepped_popbox_width;
                 switch_effort = true;
+                var new_image_height = $f_img.height();
+
+                if (last_changed_img_height !== new_image_height) {
+                  last_changed_iteration = iteration;
+                  last_changed_img_height = new_image_height;
+                  last_changed_height = new_popbox_height;
+                  last_changed_width = new_popbox_width;
+                }
+
+                if (iteration === 10 && last_changed_iteration < 10) {
+                  new_popbox_width = last_changed_width;
+                  new_popbox_height = last_changed_height;
+                  break;
+                }
               } else if (new_popbox_width < 0) {
                 // something has probably gone wrong
                 break;
