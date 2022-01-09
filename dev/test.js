@@ -180,4 +180,6 @@ var popbox_breakage = new Popbox({
     }
 });
 
-popbox_breakage.open();
+setTimeout(function(){
+    popbox_breakage.open();
+},500);

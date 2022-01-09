@@ -538,9 +538,13 @@ _core.prototype.adjust = function(animate){
                         var height_offset = text_height + content_height_padding;
 
                         var max_mod_width = max_popbox_width - width_offset;
+                        if (max_mod_width < 1) max_mod_width = 1;
                         var max_mod_height = max_popbox_height - height_offset;
+                        if (max_mod_height < 1) max_mod_height = 1;
                         var new_mod_width = new_popbox_width - width_offset;
+                        if (new_mod_width < 1) new_mod_width = 1;
                         var new_mod_height = new_popbox_height - height_offset;
+                        if (new_mod_height < 1) new_mod_height = 1;
 
                         var max_ratio = max_mod_height / max_mod_width,
                             new_ratio = new_mod_height / new_mod_width;
@@ -548,7 +552,7 @@ _core.prototype.adjust = function(animate){
                             console.log("T");
                             console.log(max_popbox_height);
                             console.log(height_offset);
-                            //console.log("("+new_mod_width+" * ("+max_mod_height+" / "+new_mod_height+")) + "+width_offset);
+                            console.log("("+new_mod_width+" * ("+max_mod_height+" / "+new_mod_height+")) + "+width_offset);
                             new_popbox_width = (new_mod_width * (max_mod_height / new_mod_height)) + width_offset;
                             new_popbox_height = max_popbox_height;
                         } else {
@@ -587,7 +591,7 @@ _core.prototype.adjust = function(animate){
                             break;
                         } else {
                             //if (iterations >= 5) {
-                            if (switch_effort || ($f_img && $f_img.height() / new_popbox_height < 0.6)) {
+                            if (switch_effort || new_popbox_width < 1 || ($f_img && $f_img.height() / new_popbox_height < 0.6)) {
                                 var overlap_height = container_height - new_popbox_height;
                                 var current_image_height = $f_img.height();
 
