@@ -1599,7 +1599,7 @@ core_core.prototype.adjust = function (animate) {
                 $f_img.css('width', '');
 
                 if (iterations === 1) {
-                  new_popbox_width = $f_img.width();
+                  new_popbox_width = $f_img.width() + content_width_padding;
                 }
               }
 
@@ -1614,7 +1614,7 @@ core_core.prototype.adjust = function (animate) {
               // text and image fits in space
               break;
             } else {
-              if (switch_effort || new_popbox_width < 1 || $f_img && $f_img.height() / new_popbox_height < 0.6) {
+              if (switch_effort || new_popbox_width < 2 || $f_img && $f_img.height() / new_popbox_height < 0.6) {
                 // try to shrink the image instead
                 overlap_height = container_height - new_popbox_height;
                 current_image_height = $f_img.height();
@@ -1623,6 +1623,8 @@ core_core.prototype.adjust = function (animate) {
                 if (next_image_width < 1) next_image_width = 1;
                 $f_img.css('width', next_image_width + 'px');
                 stepped_popbox_width = max_popbox_width - max_popbox_width * ((10 - (iterations - 1)) / 10);
+                stepped_popbox_width += content_width_padding;
+                if (stepped_popbox_width < 1) stepped_popbox_width = 1;
                 self.elements.$popbox_container.css({
                   'width': stepped_popbox_width + 'px'
                 });
