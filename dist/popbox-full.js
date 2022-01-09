@@ -1516,67 +1516,74 @@ core_core.prototype.adjust = function (animate) {
 
       if (self.settings.fit) {
         // fit for iframes and images
-        if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-          var text_height = 0;
-          var $f_img = self.elements.$popbox_content.find('img.popbox-fit-image');
+        var text_height = 0;
+        var $f_img = self.elements.$popbox_content.find('img.popbox-fit-image');
 
-          if (!$f_img.length) {
-            $f_img = false;
+        if (!$f_img.length) {
+          $f_img = false;
 
-            if (!self.elements.$popbox_content.find('.popbox-fit-ignore-images').length) {
-              self.elements.$popbox_content.find('img').each(function () {
-                var $img = external_jQuery_default()(this);
+          if (!self.elements.$popbox_content.find('.popbox-fit-ignore-images').length) {
+            self.elements.$popbox_content.find('img').each(function () {
+              var $img = external_jQuery_default()(this);
 
-                if (!$img.hasClass('popbox-fit-ignore-image') && !_static.isAbsolutePositioned($img, self.elements.$popbox_content)) {
-                  $f_img = $img;
-                  return false;
-                }
-              });
-            }
+              if (!$img.hasClass('popbox-fit-ignore-image') && !_static.isAbsolutePositioned($img, self.elements.$popbox_content)) {
+                $f_img = $img;
+                return false;
+              }
+            });
+          }
+        }
+
+        var fitResize = function fitResize() {
+          var image_height = new_popbox_height;
+
+          if ($f_img) {
+            image_height = _static.getTrueHeight($f_img);
           }
 
-          var fitResize = function fitResize() {
-            var image_height = new_popbox_height;
+          text_height = new_popbox_height - image_height;
 
-            if ($f_img) {
-              image_height = _static.getTrueHeight($f_img);
-            }
+          if (new_popbox_width <= max_popbox_width && new_popbox_height <= max_popbox_height) {
+            return;
+          }
 
-            text_height = new_popbox_height - image_height;
-            var width_offset = content_width_padding;
-            var height_offset = text_height + content_height_padding;
-            var max_mod_width = max_popbox_width - width_offset;
-            if (max_mod_width < 1) max_mod_width = 1;
-            var max_mod_height = max_popbox_height - height_offset;
-            if (max_mod_height < 1) max_mod_height = 1;
-            var new_mod_width = new_popbox_width - width_offset;
-            if (new_mod_width < 1) new_mod_width = 1;
-            var new_mod_height = new_popbox_height - height_offset;
-            if (new_mod_height < 1) new_mod_height = 1;
-            var max_ratio = max_mod_height / max_mod_width,
-                new_ratio = new_mod_height / new_mod_width;
+          var width_offset = content_width_padding;
+          var height_offset = text_height + content_height_padding;
+          var max_mod_width = max_popbox_width - width_offset;
+          if (max_mod_width < 1) max_mod_width = 1;
+          var max_mod_height = max_popbox_height - height_offset;
+          if (max_mod_height < 1) max_mod_height = 1;
+          var new_mod_width = new_popbox_width - width_offset;
+          if (new_mod_width < 1) new_mod_width = 1;
+          var new_mod_height = new_popbox_height - height_offset;
+          if (new_mod_height < 1) new_mod_height = 1;
+          var max_ratio = max_mod_height / max_mod_width,
+              new_ratio = new_mod_height / new_mod_width;
 
-            if (new_ratio > max_ratio) {
-              new_popbox_width = new_mod_width * (max_mod_height / new_mod_height) + width_offset;
-              new_popbox_height = max_popbox_height;
-            } else {
-              new_popbox_height = new_mod_height * (max_mod_width / new_mod_width) + height_offset;
-              new_popbox_width = max_popbox_width;
-            }
-          };
+          if (new_ratio > max_ratio) {
+            new_popbox_width = new_mod_width * (max_mod_height / new_mod_height) + width_offset;
+            new_popbox_height = max_popbox_height;
+          } else {
+            new_popbox_height = new_mod_height * (max_mod_width / new_mod_width) + height_offset;
+            new_popbox_width = max_popbox_width;
+          }
+        };
 
-          fitResize(); // todo the below code needs to be tidied up.
+        var fitTextResize = function fitTextResize() {
+          var iterations = 0,
+              switch_effort = false,
+              container_height,
+              overlap_height,
+              current_image_height,
+              next_image_width,
+              stepped_popbox_width;
 
-          var iterations = 0;
-          var switch_effort = false;
-
-          while (iterations < 10 && text_height > 0) {
+          while (text_height > 0 && iterations < 10) {
             iterations++;
-            var container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100;
-            var overlap_height, current_image_height, next_image_width;
+            container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100;
 
             if (switch_effort && Math.round(container_height) <= Math.round(new_popbox_height + 1) && $f_img.height() / new_popbox_height > 0.5) {
-              // push the image back out
+              // increase the image height if possible
               overlap_height = new_popbox_height - container_height;
               current_image_height = $f_img.height();
               if (current_image_height < 1) current_image_height = 1;
@@ -1585,8 +1592,13 @@ core_core.prototype.adjust = function (animate) {
               $f_img.css('width', next_image_width + 'px');
               break;
             } else {
+              //
               if ($f_img) {
                 $f_img.css('width', '');
+
+                if (iterations === 1) {
+                  new_popbox_width = $f_img.width();
+                }
               }
 
               self.elements.$popbox_container.css({
@@ -1597,22 +1609,25 @@ core_core.prototype.adjust = function (animate) {
             container_height = Math.ceil(_static.getTrueHeight(self.elements.$popbox_container) * 100) / 100;
 
             if (Math.round(container_height) <= Math.round(new_popbox_height + 1)) {
+              // text and image fits in space
               break;
             } else {
               if (switch_effort || new_popbox_width < 1 || $f_img && $f_img.height() / new_popbox_height < 0.6) {
+                // try to shrink the image instead
                 overlap_height = container_height - new_popbox_height;
                 current_image_height = $f_img.height();
                 if (current_image_height < 1) current_image_height = 1;
                 next_image_width = $f_img.width() * ((current_image_height - overlap_height) / current_image_height);
                 if (next_image_width < 1) next_image_width = 1;
                 $f_img.css('width', next_image_width + 'px');
-                var stepped_popbox_width = max_popbox_width - max_popbox_width * ((10 - (iterations - 1)) / 10);
+                stepped_popbox_width = max_popbox_width - max_popbox_width * ((10 - (iterations - 1)) / 10);
                 self.elements.$popbox_container.css({
                   'width': stepped_popbox_width + 'px'
                 });
                 new_popbox_width = stepped_popbox_width;
                 switch_effort = true;
               } else if (new_popbox_width < 0) {
+                // something has probably gone wrong
                 break;
               } else {
                 new_popbox_height = container_height;
@@ -1620,9 +1635,17 @@ core_core.prototype.adjust = function (animate) {
 
               fitResize();
             }
-          } // for iframes
+          }
+        };
 
+        fitResize();
 
+        if (text_height > 0) {
+          fitTextResize();
+        }
+
+        if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
+          // for iframes
           if (self.settings.fit === 'round') {
             new_popbox_width = Math.round(new_popbox_width);
             new_popbox_height = Math.round(new_popbox_height);
