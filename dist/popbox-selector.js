@@ -162,7 +162,7 @@ var selector_addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.2";
+  Popbox.prototype.plugins.selector = "3.1.3";
 };
 ;// CONCATENATED MODULE: ./src/popbox-selector.js
 
