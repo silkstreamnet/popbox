@@ -1,5 +1,8 @@
 # Popbox
 
+### 3.1.3
+- Fixed issue with popbox-content height not being set.
+
 ### 3.1.2
 - Added support for text/caption under images when fit setting is true or 'round'.
 - Added new class detection inside popbox-content to disable automatic caption sizing. Classes are: "popbox-fit-image", "popbox-fit-ignore-image", "popbox-fit-ignore-images".

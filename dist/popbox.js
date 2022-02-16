@@ -1045,7 +1045,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.2";
+core_core.prototype.version = "3.1.3";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1668,15 +1668,12 @@ core_core.prototype.adjust = function (animate) {
           fitTextResize();
         }
 
-        if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-          // for iframes
-          if (self.settings.fit === 'round') {
-            new_popbox_width = Math.round(new_popbox_width);
-            new_popbox_height = Math.round(new_popbox_height);
-          }
-
-          set_content_height(false);
+        if (self.settings.fit === 'round') {
+          new_popbox_width = Math.round(new_popbox_width);
+          new_popbox_height = Math.round(new_popbox_height);
         }
+
+        set_content_height(false);
       } else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height, true)) && new_popbox_height > max_popbox_height) {
         // apply inner overflow scroll
         new_popbox_height = max_popbox_height;

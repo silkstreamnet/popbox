@@ -676,16 +676,12 @@ _core.prototype.adjust = function(animate){
                     fitTextResize();
                 }
 
-                if (new_popbox_width > max_popbox_width || new_popbox_height > max_popbox_height) {
-
-                    // for iframes
-                    if (self.settings.fit === 'round') {
-                        new_popbox_width = Math.round(new_popbox_width);
-                        new_popbox_height = Math.round(new_popbox_height);
-                    }
-
-                    set_content_height(false);
+                if (self.settings.fit === 'round') {
+                    new_popbox_width = Math.round(new_popbox_width);
+                    new_popbox_height = Math.round(new_popbox_height);
                 }
+
+                set_content_height(false);
             }
             else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
                 // apply inner overflow scroll
