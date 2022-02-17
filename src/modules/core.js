@@ -681,6 +681,14 @@ _core.prototype.adjust = function(animate){
                     new_popbox_height = Math.round(new_popbox_height);
                 }
 
+                if (new_popbox_width < self.settings.min_width) {
+                    new_popbox_width = self.settings.min_width;
+                }
+
+                if (new_popbox_height < self.settings.min_height) {
+                    new_popbox_height = self.settings.min_height;
+                }
+
                 set_content_height(false);
             }
             else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height,true)) && new_popbox_height > max_popbox_height) {
