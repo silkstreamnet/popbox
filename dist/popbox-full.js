@@ -883,7 +883,11 @@ _private.prototype.applyDomSettings = function () {
 
     self.trigger('update_dom');
     self.elements.$popbox.attr('class', '').addClass('popbox');
-    self.elements.$popbox_loading.html(self.settings.loading_text);
+
+    if (self.settings.loading_text !== self.elements.$popbox_loading.html()) {
+      self.elements.$popbox_loading.html(self.settings.loading_text);
+    }
+
     self.elements.$popbox_close.html(self.settings.close_text);
     self.elements.$popbox_overlay.html(self.settings.overlay_text);
     self.elements.$popbox_title.html(self.settings.title);
@@ -1043,7 +1047,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.3";
+core_core.prototype.version = "3.1.4";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1671,6 +1675,17 @@ core_core.prototype.adjust = function (animate) {
           new_popbox_height = Math.round(new_popbox_height);
         }
 
+        var loading_width = _static.getTrueWidth(self.elements.$popbox_loading),
+            loading_height = _static.getTrueHeight(self.elements.$popbox_loading);
+
+        if (new_popbox_width < loading_width) {
+          new_popbox_width = loading_width;
+        }
+
+        if (new_popbox_height < loading_height) {
+          new_popbox_height = loading_height;
+        }
+
         set_content_height(false);
       } else if ((self.settings.max_height === true || _static.isNumber(self.settings.max_height, true)) && new_popbox_height > max_popbox_height) {
         // apply inner overflow scroll
@@ -2061,7 +2076,7 @@ var addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = "3.1.3";
+  Popbox.prototype.plugins.animations = "3.1.4";
 };
 ;// CONCATENATED MODULE: ./src/plugins/selector.js
 function selector_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { selector_typeof = function _typeof(obj) { return typeof obj; }; } else { selector_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return selector_typeof(obj); }
@@ -2184,7 +2199,7 @@ var addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.3";
+  Popbox.prototype.plugins.selector = "3.1.4";
 };
 ;// CONCATENATED MODULE: ./src/plugins/gallery.js
 
@@ -2676,7 +2691,7 @@ var addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.3";
+  Popbox.prototype.plugins.gallery = "3.1.4";
 };
 ;// CONCATENATED MODULE: ./src/popbox-full.js
 

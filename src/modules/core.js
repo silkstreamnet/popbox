@@ -681,12 +681,15 @@ _core.prototype.adjust = function(animate){
                     new_popbox_height = Math.round(new_popbox_height);
                 }
 
-                if (new_popbox_width < self.settings.min_width) {
-                    new_popbox_width = self.settings.min_width;
+                var loading_width = (_static.getTrueWidth(self.elements.$popbox_loading)),
+                    loading_height = (_static.getTrueHeight(self.elements.$popbox_loading));
+
+                if (new_popbox_width < loading_width) {
+                    new_popbox_width = loading_width;
                 }
 
-                if (new_popbox_height < self.settings.min_height) {
-                    new_popbox_height = self.settings.min_height;
+                if (new_popbox_height < loading_height) {
+                    new_popbox_height = loading_height;
                 }
 
                 set_content_height(false);

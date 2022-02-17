@@ -347,7 +347,9 @@ _private.prototype.applyDomSettings = function(){
 
         self.elements.$popbox.attr('class','').addClass('popbox');
 
-        self.elements.$popbox_loading.html(self.settings.loading_text);
+        if (self.settings.loading_text !== self.elements.$popbox_loading.html()) {
+            self.elements.$popbox_loading.html(self.settings.loading_text);
+        }
         self.elements.$popbox_close.html(self.settings.close_text);
         self.elements.$popbox_overlay.html(self.settings.overlay_text);
         self.elements.$popbox_title.html(self.settings.title);
