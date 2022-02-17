@@ -1,5 +1,9 @@
 # Popbox
 
+### 3.1.4
+- Added min width and min height enforcement to fit loading_text.
+- Fix animation flicker when resetting loading_text.
+
 ### 3.1.3
 - Fixed issue with popbox-content height not being set.
 

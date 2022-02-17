@@ -885,7 +885,11 @@ _private.prototype.applyDomSettings = function () {
 
     self.trigger('update_dom');
     self.elements.$popbox.attr('class', '').addClass('popbox');
-    self.elements.$popbox_loading.html(self.settings.loading_text);
+
+    if (self.settings.loading_text !== self.elements.$popbox_loading.html()) {
+      self.elements.$popbox_loading.html(self.settings.loading_text);
+    }
+
     self.elements.$popbox_close.html(self.settings.close_text);
     self.elements.$popbox_overlay.html(self.settings.overlay_text);
     self.elements.$popbox_title.html(self.settings.title);
@@ -1045,7 +1049,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.3";
+core_core.prototype.version = "3.1.4";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1671,6 +1675,17 @@ core_core.prototype.adjust = function (animate) {
         if (self.settings.fit === 'round') {
           new_popbox_width = Math.round(new_popbox_width);
           new_popbox_height = Math.round(new_popbox_height);
+        }
+
+        var loading_width = _static.getTrueWidth(self.elements.$popbox_loading),
+            loading_height = _static.getTrueHeight(self.elements.$popbox_loading);
+
+        if (new_popbox_width < loading_width) {
+          new_popbox_width = loading_width;
+        }
+
+        if (new_popbox_height < loading_height) {
+          new_popbox_height = loading_height;
         }
 
         set_content_height(false);
