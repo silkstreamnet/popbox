@@ -181,6 +181,6 @@ var popbox_breakage = new Popbox({
     }
 });
 
-setTimeout(function(){
-    popbox_breakage.open();
-},500);
+// setTimeout(function(){
+//     popbox_breakage.open();
+// },500);
