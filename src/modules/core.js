@@ -602,12 +602,15 @@ _core.prototype.adjust = function(animate){
 
                             break;
                         } else {
-                            //
                             if ($f_img) {
                                 $f_img.css('width', '');
 
                                 if (iteration === 1) {
                                     new_popbox_width = $f_img.width() + content_width_padding;
+                                    // image might not be ready, set min width
+                                    if (new_popbox_width < min_popbox_width) {
+                                        new_popbox_width = min_popbox_width;
+                                    }
                                 }
                             }
 

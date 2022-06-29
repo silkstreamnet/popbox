@@ -174,6 +174,27 @@ $('.click-me-insertcoin-test').on('click',function(e){
     popbox_insertcoin_test.open();
 });
 
+var popbox_show_loading = new Popbox({
+    content:'<p>Hi</p>'
+});
+
+$('.show-loading').on('click',function(e) {
+    e.preventDefault();
+    popbox_show_loading.showLoading();
+    popbox_show_loading.open();
+});
+
+var popbox_show_loading_fit = new Popbox({
+    content:'<p>Hi</p>',
+    fit:true,
+});
+
+$('.show-loading-fit').on('click',function(e) {
+    e.preventDefault();
+    popbox_show_loading_fit.showLoading();
+    popbox_show_loading_fit.open();
+});
+
 var popbox_breakage = new Popbox({
     mode:'gallery',
     gallery:{
