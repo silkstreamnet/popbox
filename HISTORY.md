@@ -1,5 +1,9 @@
 # Popbox
 
+### 3.1.5
+- Updated popbox-fit styling to fix Safari bug where popbox fails to calculate image dimensions.
+- Fixed setting a minimum width when loading a gallery image.
+
 ### 3.1.4
 - Added min width and min height enforcement to fit loading_text.
 - Fix animation flicker when resetting loading_text.

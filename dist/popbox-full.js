@@ -1047,7 +1047,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.4";
+core_core.prototype.version = "3.1.5";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1604,12 +1604,15 @@ core_core.prototype.adjust = function (animate) {
               $f_img.css('width', next_image_width + 'px');
               break;
             } else {
-              //
               if ($f_img) {
                 $f_img.css('width', '');
 
                 if (iteration === 1) {
-                  new_popbox_width = $f_img.width() + content_width_padding;
+                  new_popbox_width = $f_img.width() + content_width_padding; // image might not be ready, set min width
+
+                  if (new_popbox_width < min_popbox_width) {
+                    new_popbox_width = min_popbox_width;
+                  }
                 }
               }
 
@@ -2076,7 +2079,7 @@ var addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = "3.1.4";
+  Popbox.prototype.plugins.animations = "3.1.5";
 };
 ;// CONCATENATED MODULE: ./src/plugins/selector.js
 function selector_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { selector_typeof = function _typeof(obj) { return typeof obj; }; } else { selector_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return selector_typeof(obj); }
@@ -2199,7 +2202,7 @@ var addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.4";
+  Popbox.prototype.plugins.selector = "3.1.5";
 };
 ;// CONCATENATED MODULE: ./src/plugins/gallery.js
 
@@ -2691,7 +2694,7 @@ var addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.4";
+  Popbox.prototype.plugins.gallery = "3.1.5";
 };
 ;// CONCATENATED MODULE: ./src/popbox-full.js
 
