@@ -1049,7 +1049,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.4";
+core_core.prototype.version = "3.1.5";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1606,12 +1606,15 @@ core_core.prototype.adjust = function (animate) {
               $f_img.css('width', next_image_width + 'px');
               break;
             } else {
-              //
               if ($f_img) {
                 $f_img.css('width', '');
 
                 if (iteration === 1) {
-                  new_popbox_width = $f_img.width() + content_width_padding;
+                  new_popbox_width = $f_img.width() + content_width_padding; // image might not be ready, set min width
+
+                  if (new_popbox_width < min_popbox_width) {
+                    new_popbox_width = min_popbox_width;
+                  }
                 }
               }
 
