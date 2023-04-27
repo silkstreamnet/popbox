@@ -202,6 +202,19 @@ var popbox_breakage = new Popbox({
     }
 });
 
+$('.test-double-up-btn').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1'
+    });
+    p1.open();
+
+    var p2 = new Popbox({
+        content:'Test Popbox 2'
+    });
+    p2.open();
+});
+
 // setTimeout(function(){
 //     popbox_breakage.open();
 // },500);
