@@ -1,5 +1,8 @@
 # Popbox
 
+### 3.1.6
+- Updated hide page scroll to work statically in case there are multiple instances of popbox open at one time. This can happen when closing and opening two different popboxes at the same time.
+
 ### 3.1.5
 - Updated popbox-fit styling to fix Safari bug where popbox fails to calculate image dimensions.
 - Fixed setting a minimum width when loading a gallery image.

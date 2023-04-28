@@ -202,6 +202,61 @@ var popbox_breakage = new Popbox({
     }
 });
 
+$('.test-double-up-btn').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1',
+        after_open:function(){
+            p1.close();
+        }
+    });
+    p1.open();
+
+    var p2 = new Popbox({
+        content:'Test Popbox 2'
+    });
+    p2.open();
+});
+
+$('.test-double-up-btn-2').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1',
+        after_open:function(){
+            p1.close();
+
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                var p2 = new Popbox({
+                    content:'Test Popbox 2'
+                });
+                p2.open();
+            },10);
+        }
+    });
+    p1.open();
+});
+
+$('.test-double-up-btn-3').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1',
+        after_open:function(){
+            p1.close();
+
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                var p2 = new Popbox({
+                    content:'Test Popbox 2',
+                    absolute:true,
+                });
+                p2.open();
+            },10);
+        }
+    });
+    p1.open();
+});
+
 // setTimeout(function(){
 //     popbox_breakage.open();
 // },500);

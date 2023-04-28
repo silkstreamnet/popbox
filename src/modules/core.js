@@ -260,22 +260,7 @@ _core.prototype.open = function(){
         else {
             // html body scrollbar
             if (self.settings.hide_page_scroll) {
-                var old_body_width = _static.$body.width();
-                if (self.properties.last_html_overflow === false) {
-                    self.properties.last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
-                }
-                var fix_scroll_top = _static.$window.scrollTop(); // chrome visual disturbance bug
-                _static.$html.addClass('popbox-hide-page-scroll').css('overflow','hidden');
-                var new_body_width = _static.$body.width();
-                if (self.settings.hide_page_scroll_space) {
-                    if (self.properties.last_html_margin_right === false) {
-                        self.properties.last_html_margin_right = _static.getInlineStyle(_static.$html,'margin-right');
-                    }
-                    if (new_body_width > old_body_width) {
-                        _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
-                    }
-                }
-                _static.$window.scrollTop(fix_scroll_top);
+                _static.addHidePageScroll(self.settings.hide_page_scroll_space);
             }
         }
 
@@ -371,11 +356,7 @@ _core.prototype.close = function(destroy){
                     'display':'none'
                 });
 
-                if (self.properties.last_html_overflow !== false) _static.$html.css('overflow',self.properties.last_html_overflow);
-                if (self.properties.last_html_margin_right !== false) _static.$html.css('margin-right',self.properties.last_html_margin_right);
-                self.properties.last_html_overflow = false;
-                self.properties.last_html_margin_right = false;
-                _static.$html.removeClass('popbox-hide-page-scroll');
+                _static.removeHidePageScroll();
 
                 if (destroy || !self.settings.cache) {
                     self.destroy();

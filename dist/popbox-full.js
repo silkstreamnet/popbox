@@ -102,7 +102,9 @@ var _static = {
     'WebkitTransition': 'webkitTransitionEnd',
     'msTransition': 'MSTransitionEnd'
   },
-  _test_div: document.createElement('div')
+  _test_div: document.createElement('div'),
+  _last_html_overflow: false,
+  _last_html_margin_right: false
 };
 
 function getVendorPropertyName(prop) {
@@ -534,6 +536,90 @@ _static.onTouchClick = function ($object, selector, handler, prevent_default) {
     });
   }
 };
+
+_static.isAnyInstanceOpen = function () {
+  var any_open_popbox = false;
+
+  for (var i in _static._instances) {
+    if (_static._instances.hasOwnProperty(i)) {
+      var v = _static._instances[i];
+
+      if (v && v.isOpen && v.isOpen()) {
+        any_open_popbox = true;
+        break;
+      }
+    }
+  }
+
+  return any_open_popbox;
+};
+
+_static.addHidePageScroll = function (hide_scroll_space) {
+  if (_static.$html.hasClass('popbox-hide-page-scroll')) {
+    return;
+  }
+
+  var old_body_width = _static.$body.width();
+
+  if (_static._last_html_overflow === false) {
+    _static._last_html_overflow = _static.getInlineStyle(_static.$html, 'overflow');
+  }
+
+  var fix_scroll_top = _static.$window.scrollTop(); // chrome visual disturbance bug
+
+
+  _static.$html.css('overflow', 'hidden');
+
+  var new_body_width = _static.$body.width();
+
+  if (hide_scroll_space) {
+    if (_static._last_html_margin_right === false) {
+      _static._last_html_margin_right = _static.getInlineStyle(_static.$html, 'margin-right');
+    }
+
+    if (new_body_width > old_body_width) {
+      _static.$html.css('margin-right', new_body_width - old_body_width + 'px');
+    }
+  }
+
+  _static.$window.scrollTop(fix_scroll_top);
+
+  _static.$html.addClass('popbox-hide-page-scroll');
+};
+
+_static.removeHidePageScroll = function () {
+  if (!_static.$html.hasClass('popbox-hide-page-scroll')) {
+    return;
+  }
+
+  var any_open_popbox_hide_page_scroll = false,
+      any_open_popbox_hide_page_margin = false;
+
+  for (var i in _static._instances) {
+    if (_static._instances.hasOwnProperty(i)) {
+      var v = _static._instances[i];
+
+      if (v && v.isOpen && v.isOpen() && v.elements.$popbox.css('position') !== 'absolute') {
+        any_open_popbox_hide_page_scroll = v.settings.hide_page_scroll;
+        any_open_popbox_hide_page_margin = v.settings.hide_page_scroll_space;
+      }
+    }
+  }
+
+  if (!any_open_popbox_hide_page_scroll) {
+    if (_static._last_html_overflow !== false) _static.$html.css('overflow', _static._last_html_overflow);
+    _static._last_html_overflow = false;
+  }
+
+  if (!any_open_popbox_hide_page_margin) {
+    if (_static._last_html_margin_right !== false) _static.$html.css('margin-right', _static._last_html_margin_right);
+    _static._last_html_margin_right = false;
+  }
+
+  if (!any_open_popbox_hide_page_scroll) {
+    _static.$html.removeClass('popbox-hide-page-scroll');
+  }
+};
 ;// CONCATENATED MODULE: ./src/modules/private.js
 function private_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { private_typeof = function _typeof(obj) { return typeof obj; }; } else { private_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return private_typeof(obj); }
 
@@ -664,19 +750,8 @@ _private.prototype.closeOverlay = function (force) {
   var self = this.self; // run this function after marking popboxes as closed, it checks to see if there are any popboxes open, use force to bypass it
 
   if (self.elements.$popbox_overlay) {
-    if (!force) {
-      var any_open_popbox = false;
-
-      for (var i in _static._instances) {
-        if (_static._instances.hasOwnProperty(i)) {
-          if (_static._instances[i] instanceof self.constructor && _static._instances[i].isOpen()) {
-            any_open_popbox = true;
-            break;
-          }
-        }
-      }
-
-      if (any_open_popbox) return;
+    if (!force && _static.isAnyInstanceOpen()) {
+      return;
     }
 
     if (self.elements.$popbox_overlay.data('is_open') === true) {
@@ -1047,7 +1122,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.5";
+core_core.prototype.version = "3.1.6";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1261,30 +1336,7 @@ core_core.prototype.open = function () {
     } else {
       // html body scrollbar
       if (self.settings.hide_page_scroll) {
-        var old_body_width = _static.$body.width();
-
-        if (self.properties.last_html_overflow === false) {
-          self.properties.last_html_overflow = _static.getInlineStyle(_static.$html, 'overflow');
-        }
-
-        var fix_scroll_top = _static.$window.scrollTop(); // chrome visual disturbance bug
-
-
-        _static.$html.addClass('popbox-hide-page-scroll').css('overflow', 'hidden');
-
-        var new_body_width = _static.$body.width();
-
-        if (self.settings.hide_page_scroll_space) {
-          if (self.properties.last_html_margin_right === false) {
-            self.properties.last_html_margin_right = _static.getInlineStyle(_static.$html, 'margin-right');
-          }
-
-          if (new_body_width > old_body_width) {
-            _static.$html.css('margin-right', new_body_width - old_body_width + 'px');
-          }
-        }
-
-        _static.$window.scrollTop(fix_scroll_top);
+        _static.addHidePageScroll(self.settings.hide_page_scroll_space);
       }
     } // show elements
 
@@ -1374,12 +1426,8 @@ core_core.prototype.close = function (destroy) {
       self.elements.$popbox.css({
         'display': 'none'
       });
-      if (self.properties.last_html_overflow !== false) _static.$html.css('overflow', self.properties.last_html_overflow);
-      if (self.properties.last_html_margin_right !== false) _static.$html.css('margin-right', self.properties.last_html_margin_right);
-      self.properties.last_html_overflow = false;
-      self.properties.last_html_margin_right = false;
 
-      _static.$html.removeClass('popbox-hide-page-scroll');
+      _static.removeHidePageScroll();
 
       if (destroy || !self.settings.cache) {
         self.destroy();
@@ -2079,7 +2127,7 @@ var addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = "3.1.5";
+  Popbox.prototype.plugins.animations = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/plugins/selector.js
 function selector_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { selector_typeof = function _typeof(obj) { return typeof obj; }; } else { selector_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return selector_typeof(obj); }
@@ -2202,7 +2250,7 @@ var addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.5";
+  Popbox.prototype.plugins.selector = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/plugins/gallery.js
 
@@ -2694,7 +2742,7 @@ var addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.5";
+  Popbox.prototype.plugins.gallery = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/popbox-full.js
 
