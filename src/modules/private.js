@@ -126,17 +126,8 @@ _private.prototype.closeOverlay = function(force){
     // run this function after marking popboxes as closed, it checks to see if there are any popboxes open, use force to bypass it
     if (self.elements.$popbox_overlay) {
 
-        if (!force) {
-            var any_open_popbox = false;
-            for (var i in _static._instances) {
-                if (_static._instances.hasOwnProperty(i)) {
-                    if (_static._instances[i] instanceof self.constructor && _static._instances[i].isOpen()) {
-                        any_open_popbox = true;
-                        break;
-                    }
-                }
-            }
-            if (any_open_popbox) return;
+        if (!force && _static.isAnyInstanceOpen()) {
+            return;
         }
 
         if (self.elements.$popbox_overlay.data('is_open') === true) {

@@ -55,7 +55,10 @@ export const _static = {
         'WebkitTransition': 'webkitTransitionEnd',
         'msTransition':     'MSTransitionEnd'
     },
-    _test_div:document.createElement('div')
+    _test_div:document.createElement('div'),
+
+    _last_html_overflow:false,
+    _last_html_margin_right:false,
 };
 
 function getVendorPropertyName(prop) {
@@ -459,5 +462,73 @@ _static.onTouchClick = function($object,selector,handler,prevent_default){
                 });
             }
         });
+    }
+};
+_static.isAnyInstanceOpen = function() {
+    var any_open_popbox = false;
+    for (var i in _static._instances) {
+        if (_static._instances.hasOwnProperty(i)) {
+            var v = _static._instances[i];
+            if (v && v.isOpen && v.isOpen()) {
+                any_open_popbox = true;
+                break;
+            }
+        }
+    }
+    return any_open_popbox;
+};
+_static.addHidePageScroll = function(hide_scroll_space){
+    if (_static.$html.hasClass('popbox-hide-page-scroll')) {
+        return;
+    }
+
+    var old_body_width = _static.$body.width();
+    if (_static._last_html_overflow === false) {
+        _static._last_html_overflow = _static.getInlineStyle(_static.$html,'overflow');
+    }
+    var fix_scroll_top = _static.$window.scrollTop(); // chrome visual disturbance bug
+    _static.$html.css('overflow','hidden');
+    var new_body_width = _static.$body.width();
+    if (hide_scroll_space) {
+        if (_static._last_html_margin_right === false) {
+            _static._last_html_margin_right = _static.getInlineStyle(_static.$html,'margin-right');
+        }
+        if (new_body_width > old_body_width) {
+            _static.$html.css('margin-right',(new_body_width-old_body_width)+'px');
+        }
+    }
+    _static.$window.scrollTop(fix_scroll_top);
+
+    _static.$html.addClass('popbox-hide-page-scroll');
+};
+_static.removeHidePageScroll = function(){
+    if (!_static.$html.hasClass('popbox-hide-page-scroll')) {
+        return;
+    }
+
+    var any_open_popbox_hide_page_scroll = false,
+        any_open_popbox_hide_page_margin = false;
+    for (var i in _static._instances) {
+        if (_static._instances.hasOwnProperty(i)) {
+            var v = _static._instances[i];
+            if (v && v.isOpen && v.isOpen() && v.elements.$popbox.css('position') !== 'absolute') {
+                any_open_popbox_hide_page_scroll = v.settings.hide_page_scroll;
+                any_open_popbox_hide_page_margin = v.settings.hide_page_scroll_space;
+            }
+        }
+    }
+
+    if (!any_open_popbox_hide_page_scroll) {
+        if (_static._last_html_overflow !== false) _static.$html.css('overflow',_static._last_html_overflow);
+        _static._last_html_overflow = false;
+    }
+
+    if (!any_open_popbox_hide_page_margin) {
+        if (_static._last_html_margin_right !== false) _static.$html.css('margin-right',_static._last_html_margin_right);
+        _static._last_html_margin_right = false;
+    }
+
+    if (!any_open_popbox_hide_page_scroll) {
+        _static.$html.removeClass('popbox-hide-page-scroll');
     }
 };
