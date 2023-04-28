@@ -1122,7 +1122,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.5";
+core_core.prototype.version = "3.1.6";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -2127,7 +2127,7 @@ var addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = "3.1.5";
+  Popbox.prototype.plugins.animations = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/plugins/selector.js
 function selector_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { selector_typeof = function _typeof(obj) { return typeof obj; }; } else { selector_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return selector_typeof(obj); }
@@ -2250,7 +2250,7 @@ var addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.5";
+  Popbox.prototype.plugins.selector = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/plugins/gallery.js
 
@@ -2742,7 +2742,7 @@ var addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.5";
+  Popbox.prototype.plugins.gallery = "3.1.6";
 };
 ;// CONCATENATED MODULE: ./src/popbox-full.js
 
