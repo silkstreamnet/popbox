@@ -205,7 +205,10 @@ var popbox_breakage = new Popbox({
 $('.test-double-up-btn').on('click',function(e){
     e.preventDefault();
     var p1 = new Popbox({
-        content:'Test Popbox 1'
+        content:'Test Popbox 1',
+        after_open:function(){
+            p1.close();
+        }
     });
     p1.open();
 
