@@ -218,6 +218,25 @@ $('.test-double-up-btn').on('click',function(e){
     p2.open();
 });
 
+$('.test-double-up-btn-2').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1',
+        after_open:function(){
+            p1.close();
+
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                var p2 = new Popbox({
+                    content:'Test Popbox 2'
+                });
+                p2.open();
+            },10);
+        }
+    });
+    p1.open();
+});
+
 // setTimeout(function(){
 //     popbox_breakage.open();
 // },500);
