@@ -187,6 +187,7 @@ _core.prototype.create = function(){
     _static._instances[self.properties.instance_id] = self;
     _static._instances.length++;
 
+    self._private.createMutationObserver();
     self._private.triggerHook('after_create');
 };
 
@@ -195,6 +196,7 @@ _core.prototype.destroy = function(){
 
     if (self.elements.$popbox) {
 
+        self._private.destroyMutationObserver();
         self._private.triggerHook('destroy');
 
         self.elements.$popbox.remove();

@@ -30,7 +30,8 @@ _private.prototype.reset = function() {
             interface_images_pending:0,
             content_images_pending:0,
             window_width:-1
-        }
+        },
+        mutation_observer:null,
     };
     self.elements = {
         $popbox:null,
@@ -408,4 +409,45 @@ _private.prototype.triggerHook = function(name,params){
             }
         }
     }
+};
+
+_private.prototype.createMutationObserver = function() {
+    var self = this.self;
+
+    if (!self.settings.mutation_observer || !self.isCreated()) {
+        this.destroyMutationObserver();
+        return;
+    }
+
+    if (self.properties.mutation_observer) {
+        this.destroyMutationObserver();
+    }
+
+    var t = false;
+    self.properties.mutation_observer = new MutationObserver(function(){
+        if (t) clearTimeout(t);
+        t = setTimeout(function(){
+            if (self.isOpen() && !self.isLoading()) {
+                self.adjust(false);
+            }
+            t = false;
+        },self.settings.mutation_observer_delay);
+    });
+
+    self.properties.mutation_observer.observe(self.elements.$popbox_content.get(0),{
+        childList:true,
+        subtree:true,
+    });
+};
+
+_private.prototype.destroyMutationObserver = function() {
+    var self = this.self;
+
+    if (!self.properties.mutation_observer) {
+        return;
+    }
+
+    self.properties.mutation_observer.disconnect();
+
+    self.properties.mutation_observer = null;
 };
