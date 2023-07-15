@@ -270,8 +270,29 @@ $('.test-mutation-observer-btn').on('click',function(e){
             // simulate a quick ajax call that opens a popbox on response
             setTimeout(function(){
                 p1.elements.$popbox_content.html('<p>Replaced content.<br>With extra line.</p>')
-            },10);
+            },1200);
         }
     });
+    p1.open();
+});
+
+$('.test-mutation-observer-btn-2').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox Mutation 2',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.update({
+                    content:'<p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p>'
+                });
+                setTimeout(function(){
+                    p1.elements.$popbox_content.html('<p>Replaced content.<br>With extra line.<br>More lines<br>Are here.</p>')
+                },600);
+            },1200);
+        }
+    });
+
     p1.open();
 });
