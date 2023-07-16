@@ -50,5 +50,6 @@ export const _default_settings = {
     mutation_observer_config:{
         childList:true,
         subtree:true,
+        attributes:true,
     }
 };

@@ -296,3 +296,19 @@ $('.test-mutation-observer-btn-2').on('click',function(e){
 
     p1.open();
 });
+
+$('.test-mutation-observer-btn-3').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'<div class="mutation-observer-base-element">Test Popbox Mutation 3 - Attributes</div>',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.elements.$popbox_content.find('.mutation-observer-base-element').addClass('mutation-observer-adjustment');
+            },1200);
+        }
+    });
+
+    p1.open();
+});

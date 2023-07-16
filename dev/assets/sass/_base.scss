@@ -29,3 +29,12 @@ p {font-size:100%; margin:0 0 10px 0;}
     box-sizing: border-box;
     padding: 0 .5em 1em;
 }
+
+.mutation-observer-base-element {
+    height:300px;
+    background:#ccc;
+}
+
+.mutation-observer-adjustment {
+    height:500px;
+}
