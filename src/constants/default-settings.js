@@ -51,5 +51,6 @@ export const _default_settings = {
         childList:true,
         subtree:true,
         attributes:true,
+        characterData:true,
     }
 };

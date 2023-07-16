@@ -289,7 +289,7 @@ $('.test-mutation-observer-btn-2').on('click',function(e){
                 });
                 setTimeout(function(){
                     p1.elements.$popbox_content.html('<p>Replaced content.<br>With extra line.<br>More lines<br>Are here.</p>')
-                },600);
+                },1000);
             },1200);
         }
     });
@@ -306,6 +306,22 @@ $('.test-mutation-observer-btn-3').on('click',function(e){
             // simulate a quick ajax call that opens a popbox on response
             setTimeout(function(){
                 p1.elements.$popbox_content.find('.mutation-observer-base-element').addClass('mutation-observer-adjustment');
+            },1200);
+        }
+    });
+
+    p1.open();
+});
+
+$('.test-mutation-observer-btn-4').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'<div class="mutation-observer-base-element">Test Popbox Mutation 4 - Character</div>',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.elements.$popbox_content.find('.mutation-observer-base-element').text('New text with plenty of content. New text with plenty of content. New text with plenty of content. New text with plenty of content. New text with plenty of content.');
             },1200);
         }
     });

@@ -423,11 +423,38 @@ _private.prototype.createMutationObserver = function() {
         this.destroyMutationObserver();
     }
 
+    var s = {
+        popup:'',
+        content:'',
+    };
+
     var t = false;
-    self.properties.mutation_observer = new MutationObserver(function(){
+    self.properties.mutation_observer = new MutationObserver(function(mutationList){
         if (t) clearTimeout(t);
+
+        if (!self.isOpen()) {
+            t = false;
+            s.popup = '';
+            s.content = '';
+            return;
+        }
+
+        // catch infinite loop with no style changes
+        if (s.popup && s.content
+            && self.elements.$popbox_popup.attr('style') === s.popup
+            && self.elements.$popbox_content.attr('style') === s.content) {
+
+            t = false;
+            s.popup = '';
+            s.content = '';
+            return;
+        }
+
         t = setTimeout(function(){
+            // could check isChangingState() but this might cause problems with updates not refreshing size
             if (self.isOpen() && !self.isLoading()) {
+                s.popup = self.elements.$popbox_popup.attr('style');
+                s.content = self.elements.$popbox_content.attr('style');
                 self.adjust(false);
             }
             t = false;
