@@ -1,5 +1,65 @@
 # Popbox 3
 
+# How to use
+
+Typical use:
+
+```javascript
+var popbox = new $.Popbox({
+    content:'Content for popbox.'
+});
+
+$('.open-popbox').on('click',function() {
+    popbox.open();
+});
+```
+
+## Options
+
+See `src/constants/default-settings.js` for options.
+
+## Events
+
+### open
+
+### after_open
+
+### ready
+
+### update_dom
+
+### after_update_dom
+
+### adjust
+
+### after_adjust
+
+### close
+
+### after_close
+
+### reset
+
+### after_reset
+
+### image_load
+
+### image_error
+
+## Methods
+
+### .update(options:{})
+
+### .adjust(animate:true)
+
+### .on(event_name:'',handler:function(){})
+
+### .off(event_name:'',handler:function(){})
+
+### .trigger(event_name:'',handler:function(){},params:[])
+
+# Development
+
 ## Dependencies
 - jQuery 1.7+
 
