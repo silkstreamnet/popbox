@@ -260,3 +260,71 @@ $('.test-double-up-btn-3').on('click',function(e){
 // setTimeout(function(){
 //     popbox_breakage.open();
 // },500);
+
+$('.test-mutation-observer-btn').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox 1',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.elements.$popbox_content.html('<p>Replaced content.<br>With extra line.</p>')
+            },1200);
+        }
+    });
+    p1.open();
+});
+
+$('.test-mutation-observer-btn-2').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'Test Popbox Mutation 2',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.update({
+                    content:'<p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p><p>Extra content to fill up even more space goes here.</p>'
+                });
+                setTimeout(function(){
+                    p1.elements.$popbox_content.html('<p>Replaced content.<br>With extra line.<br>More lines<br>Are here.</p>')
+                },1000);
+            },1200);
+        }
+    });
+
+    p1.open();
+});
+
+$('.test-mutation-observer-btn-3').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'<div class="mutation-observer-base-element">Test Popbox Mutation 3 - Attributes</div>',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.elements.$popbox_content.find('.mutation-observer-base-element').addClass('mutation-observer-adjustment');
+            },1200);
+        }
+    });
+
+    p1.open();
+});
+
+$('.test-mutation-observer-btn-4').on('click',function(e){
+    e.preventDefault();
+    var p1 = new Popbox({
+        content:'<div class="mutation-observer-base-element">Test Popbox Mutation 4 - Character</div>',
+        mutation_observer:true,
+        after_open:function(){
+            // simulate a quick ajax call that opens a popbox on response
+            setTimeout(function(){
+                p1.elements.$popbox_content.find('.mutation-observer-base-element').text('New text with plenty of content. New text with plenty of content. New text with plenty of content. New text with plenty of content. New text with plenty of content.');
+            },1200);
+        }
+    });
+
+    p1.open();
+});

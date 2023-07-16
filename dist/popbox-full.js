@@ -655,7 +655,8 @@ _private.prototype.reset = function () {
       interface_images_pending: 0,
       content_images_pending: 0,
       window_width: -1
-    }
+    },
+    mutation_observer: null
   };
   self.elements = {
     $popbox: null,
@@ -1027,6 +1028,66 @@ _private.prototype.triggerHook = function (name, params) {
     }
   }
 };
+
+_private.prototype.createMutationObserver = function () {
+  var self = this.self;
+
+  if (!self.settings.mutation_observer || !self.isCreated()) {
+    this.destroyMutationObserver();
+    return;
+  }
+
+  if (self.properties.mutation_observer) {
+    this.destroyMutationObserver();
+  }
+
+  var s = {
+    popup: '',
+    content: ''
+  };
+  var t = false;
+  self.properties.mutation_observer = new MutationObserver(function (mutationList) {
+    if (t) clearTimeout(t);
+
+    if (!self.isOpen()) {
+      t = false;
+      s.popup = '';
+      s.content = '';
+      return;
+    } // catch infinite loop with no style changes
+
+
+    if (s.popup && s.content && self.elements.$popbox_popup.attr('style') === s.popup && self.elements.$popbox_content.attr('style') === s.content) {
+      t = false;
+      s.popup = '';
+      s.content = '';
+      return;
+    }
+
+    t = setTimeout(function () {
+      // could check isChangingState() but this might cause problems with updates not refreshing size
+      if (self.isOpen() && !self.isLoading()) {
+        s.popup = self.elements.$popbox_popup.attr('style');
+        s.content = self.elements.$popbox_content.attr('style');
+        self.adjust(false);
+      }
+
+      t = false;
+    }, self.settings.mutation_observer_delay);
+  });
+  self.properties.mutation_observer.observe(self.elements.$popbox_content.get(0), self.settings.mutation_observer_config);
+};
+
+_private.prototype.destroyMutationObserver = function () {
+  var self = this.self;
+
+  if (!self.properties.mutation_observer) {
+    return;
+  }
+
+  self.properties.mutation_observer.disconnect();
+  self.properties.mutation_observer = null;
+};
 ;// CONCATENATED MODULE: ./src/constants/default-settings.js
 
 var _default_settings = {
@@ -1086,7 +1147,17 @@ var _default_settings = {
   after_open: false,
   close: false,
   after_close: false,
-  responsive: {}
+  responsive: {},
+  mutation_observer: false,
+  // enable real time watching of the DOM inside popbox content
+  mutation_observer_delay: 400,
+  // time in ms between each refresh after changes
+  mutation_observer_config: {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    characterData: true
+  }
 };
 ;// CONCATENATED MODULE: ./src/modules/core.js
 
@@ -1122,7 +1193,7 @@ var core_core = function _core(settings) {
 
   self.trigger('after_initialize', false, [settings]);
 };
-core_core.prototype.version = "3.1.6";
+core_core.prototype.version = "3.1.7";
 core_core.prototype.plugins = {};
 core_core.prototype.default_settings = _default_settings;
 core_core.prototype._static = _static;
@@ -1266,6 +1337,8 @@ core_core.prototype.create = function () {
   _static._instances[self.properties.instance_id] = self;
   _static._instances.length++;
 
+  self._private.createMutationObserver();
+
   self._private.triggerHook('after_create');
 };
 
@@ -1273,6 +1346,8 @@ core_core.prototype.destroy = function () {
   var self = this;
 
   if (self.elements.$popbox) {
+    self._private.destroyMutationObserver();
+
     self._private.triggerHook('destroy');
 
     self.elements.$popbox.remove();
@@ -2127,7 +2202,7 @@ var addAnimationsPlugin = function addAnimationsPlugin(Popbox) {
     }
   };
   external_jQuery_default().extend(true, Popbox.prototype.animations, extend_animations);
-  Popbox.prototype.plugins.animations = "3.1.6";
+  Popbox.prototype.plugins.animations = "3.1.7";
 };
 ;// CONCATENATED MODULE: ./src/plugins/selector.js
 function selector_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { selector_typeof = function _typeof(obj) { return typeof obj; }; } else { selector_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return selector_typeof(obj); }
@@ -2250,7 +2325,7 @@ var addSelectorPlugin = function addSelectorPlugin(Popbox) {
   };
 
   external_jQuery_default()('.open-popbox').Popbox();
-  Popbox.prototype.plugins.selector = "3.1.6";
+  Popbox.prototype.plugins.selector = "3.1.7";
 };
 ;// CONCATENATED MODULE: ./src/plugins/gallery.js
 
@@ -2742,7 +2817,7 @@ var addGalleryPlugin = function addGalleryPlugin(Popbox) {
       popbox.elements.$popbox_gallery_prev = false;
     }
   });
-  Popbox.prototype.plugins.gallery = "3.1.6";
+  Popbox.prototype.plugins.gallery = "3.1.7";
 };
 ;// CONCATENATED MODULE: ./src/popbox-full.js
 

@@ -30,7 +30,8 @@ _private.prototype.reset = function() {
             interface_images_pending:0,
             content_images_pending:0,
             window_width:-1
-        }
+        },
+        mutation_observer:null,
     };
     self.elements = {
         $popbox:null,
@@ -408,4 +409,69 @@ _private.prototype.triggerHook = function(name,params){
             }
         }
     }
+};
+
+_private.prototype.createMutationObserver = function() {
+    var self = this.self;
+
+    if (!self.settings.mutation_observer || !self.isCreated()) {
+        this.destroyMutationObserver();
+        return;
+    }
+
+    if (self.properties.mutation_observer) {
+        this.destroyMutationObserver();
+    }
+
+    var s = {
+        popup:'',
+        content:'',
+    };
+
+    var t = false;
+    self.properties.mutation_observer = new MutationObserver(function(mutationList){
+        if (t) clearTimeout(t);
+
+        if (!self.isOpen()) {
+            t = false;
+            s.popup = '';
+            s.content = '';
+            return;
+        }
+
+        // catch infinite loop with no style changes
+        if (s.popup && s.content
+            && self.elements.$popbox_popup.attr('style') === s.popup
+            && self.elements.$popbox_content.attr('style') === s.content) {
+
+            t = false;
+            s.popup = '';
+            s.content = '';
+            return;
+        }
+
+        t = setTimeout(function(){
+            // could check isChangingState() but this might cause problems with updates not refreshing size
+            if (self.isOpen() && !self.isLoading()) {
+                s.popup = self.elements.$popbox_popup.attr('style');
+                s.content = self.elements.$popbox_content.attr('style');
+                self.adjust(false);
+            }
+            t = false;
+        },self.settings.mutation_observer_delay);
+    });
+
+    self.properties.mutation_observer.observe(self.elements.$popbox_content.get(0),self.settings.mutation_observer_config);
+};
+
+_private.prototype.destroyMutationObserver = function() {
+    var self = this.self;
+
+    if (!self.properties.mutation_observer) {
+        return;
+    }
+
+    self.properties.mutation_observer.disconnect();
+
+    self.properties.mutation_observer = null;
 };
