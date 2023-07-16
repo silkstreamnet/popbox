@@ -47,4 +47,8 @@ export const _default_settings = {
     responsive: {},
     mutation_observer:false, // enable real time watching of the DOM inside popbox content
     mutation_observer_delay:400, // time in ms between each refresh after changes
+    mutation_observer_config:{
+        childList:true,
+        subtree:true,
+    }
 };

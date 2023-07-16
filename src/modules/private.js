@@ -434,10 +434,7 @@ _private.prototype.createMutationObserver = function() {
         },self.settings.mutation_observer_delay);
     });
 
-    self.properties.mutation_observer.observe(self.elements.$popbox_content.get(0),{
-        childList:true,
-        subtree:true,
-    });
+    self.properties.mutation_observer.observe(self.elements.$popbox_content.get(0),self.settings.mutation_observer_config);
 };
 
 _private.prototype.destroyMutationObserver = function() {
